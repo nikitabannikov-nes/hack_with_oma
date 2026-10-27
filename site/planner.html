@@ -1,39 +1,150 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>2D-калькулятор помещения — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610272326"><link rel="stylesheet" href="app.css?v=202610272326"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610272326"></head><body><div id="chrome"></div>
-<div class="wrap">
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>2D-калькулятор помещения — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610280100"><link rel="stylesheet" href="app.css?v=202610280100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610280100"><style>
+/* ---------- Редактор помещений: три колонки — список, холст, инспектор ---------- */
+.pe{--pe-r:18px;--pe-soft:#f2f5f9;--pe-bd:#e3e8ef;padding-bottom:40px}
+.pe .crumbs{margin-top:14px}
+.pe-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin:10px 0 18px;flex-wrap:wrap}
+.pe-ttl{flex:1;min-width:280px}
+.pe-kick{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--blue)}
+.pe-ttl input{display:block;width:100%;max-width:640px;font:inherit;font-size:30px;font-weight:700;line-height:1.2;color:var(--ink);border:1px solid transparent;border-radius:10px;padding:4px 8px;margin:2px 0 4px -9px;background:transparent}
+.pe-ttl input:hover{border-color:var(--pe-bd);background:#fff}
+.pe-ttl input:focus{outline:0;border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px #005ead22}
+.pe-ttl p{margin:0;color:var(--mute);max-width:640px;font-size:14px}
+.pe-sum{display:flex;align-items:center;gap:18px;background:#fff;border-radius:var(--pe-r);padding:14px 16px 14px 22px;box-shadow:0 1px 3px rgba(0,26,52,.08)}
+.pe-price span{display:block;font-size:12px;color:var(--mute)}
+.pe-price b{display:block;font-size:26px;line-height:1.2;font-weight:700;color:var(--ink)}
+.pe-price small{font-size:12px;color:var(--mute)}
+.pe-acts{display:flex;flex-direction:column;gap:6px}.pe-acts .btn{justify-content:center;padding:9px 16px;font-size:14px}
+.pe-ban{position:relative;margin-bottom:16px}
+.pe-ban .tip{background:#fff;border-left:4px solid var(--blue);border-radius:14px;padding:12px 44px 12px 14px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,26,52,.08);align-items:center}
+.pe-ban .tip.ok{border-left-color:var(--ok)}
+.pe-ban .tip img{width:40px;height:40px}
+.pe-ban .tip>div>.mt{display:inline-block;margin:0 0 0 10px;vertical-align:middle}
+.pe-ban>.xbtn{position:absolute;right:12px;top:10px}
+.pe-grid{display:grid;grid-template-columns:220px minmax(0,1fr) 360px;gap:16px;align-items:start}
+/* список помещений */
+.pe-rooms,.pe-insp{position:sticky;top:12px;background:#fff;border-radius:var(--pe-r);box-shadow:0 1px 3px rgba(0,26,52,.08)}
+.pe-rooms{padding:14px 10px}
+.pe-rh{display:flex;justify-content:space-between;align-items:baseline;padding:0 6px 10px;border-bottom:1px solid var(--pe-bd);margin-bottom:8px}
+.pe-rh b{font-size:15px;font-weight:600;color:var(--ink)}.pe-rh span{font-size:12px;color:var(--mute)}
+.pe-rl{display:flex;flex-direction:column;gap:2px;max-height:calc(100vh - 140px);overflow:auto}
+.ri{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:none;border-radius:12px;padding:8px;cursor:pointer;font:inherit;color:var(--ink);position:relative}
+.ri:hover{background:var(--pe-soft)}
+.ri-ic{width:34px;height:34px;flex:none;border-radius:10px;background:var(--pe-soft);display:grid;place-items:center;font-size:17px}
+.ri-t{min-width:0}.ri-t b{display:block;font-size:14px;font-weight:500;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ri-t small{display:block;font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ri.on{background:var(--blue-l)}.ri.on:before{content:"";position:absolute;left:-10px;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--blue)}
+.ri.on .ri-ic{background:#fff;box-shadow:inset 0 0 0 1.5px var(--blue)}.ri.on .ri-t b{color:var(--blue);font-weight:600}
+.ri.err .ri-t small{color:var(--red)}.ri.err .ri-ic{background:#fde6e3}
+.ri-add{margin-top:6px;border:1.5px dashed #c9d3e1;background:none;border-radius:12px;padding:10px;font:inherit;font-size:13px;font-weight:500;color:var(--blue);cursor:pointer}
+.ri-add:hover{border-color:var(--blue);background:var(--blue-l)}
+/* холст */
+.pe .canvas{height:clamp(520px,calc(100vh - 160px),760px);border:0;border-radius:var(--pe-r);box-shadow:0 1px 3px rgba(0,26,52,.08)}
+.pe .ctool{left:14px;top:14px;right:auto;gap:4px;align-items:center;background:#fff;border-radius:14px;padding:4px;box-shadow:0 4px 18px rgba(0,26,52,.14)}
+.pe .ctool button,.pe .zoomer button{display:inline-flex;align-items:center;gap:6px;border:0;box-shadow:none;background:none;height:34px;border-radius:10px;padding:0 10px;font:inherit;font-size:13px;font-weight:500;color:var(--ink);cursor:pointer}
+.pe .ctool button:hover,.pe .zoomer button:hover{background:var(--pe-soft)}
+.pe .ctool button svg,.pe .zoomer button svg{width:17px;height:17px;flex:none}
+.pe .ctool button.on{background:var(--blue-l);color:var(--blue)}
+.pe .ctool .grp{background:var(--pe-soft);border-radius:10px;padding:2px;gap:2px}
+.pe .ctool .grp button,.pe .ctool .grp button:first-child,.pe .ctool .grp button:last-child{border-radius:8px;height:30px}
+.pe .ctool .grp button.on{background:#fff;color:var(--blue);box-shadow:0 1px 3px rgba(0,26,52,.15)}
+.pe .ctool .sep{width:1px;height:22px;background:var(--pe-bd);margin:0 2px}
+.zoomer{position:absolute;right:14px;top:14px;display:flex;flex-direction:column;background:#fff;border-radius:12px;padding:4px;gap:2px;box-shadow:0 4px 18px rgba(0,26,52,.14)}
+.pe .zoomer button{width:34px;padding:0;justify-content:center}
+.pe .drawbar{position:absolute;left:50%;bottom:48px;transform:translateX(-50%);margin:0;background:#fff;border-radius:14px;padding:5px;gap:4px;box-shadow:0 4px 18px rgba(0,26,52,.14)}
+.pe .drawbar button{border:0;height:34px;white-space:nowrap;padding:0 12px;border-radius:10px;font-weight:500;background:none}.pe .drawbar button:hover{background:var(--pe-soft)}
+.pe .drawbar button#bClose{background:var(--g-or);color:#fff}
+.pe .legend{left:14px;bottom:12px;background:rgba(255,255,255,.9);border-radius:10px;padding:6px 10px;box-shadow:0 1px 3px rgba(0,26,52,.08)}
+/* площади под холстом */
+.pe-res{background:#fff;border-radius:var(--pe-r);padding:18px 20px;margin-top:16px;box-shadow:0 1px 3px rgba(0,26,52,.08)}
+.pe-resh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.pe-resh h3{margin:0;font-size:17px;font-weight:600;color:var(--ink)}.pe-resh h3 span{font-weight:400;color:var(--mute);font-size:14px;margin-left:4px}
+.pe .metrics{grid-template-columns:repeat(4,1fr);gap:10px}
+.pe .metrics div{background:var(--pe-soft);border-radius:12px;padding:12px 14px}
+.pe .metrics div.big{background:var(--blue-l)}.pe .metrics div.big b{color:var(--blue)}
+.pe .metrics b{font-size:20px;font-weight:600;color:var(--ink)}
+.pe-foot{margin:12px 0 0}
+/* инспектор */
+.pe-insp{padding:14px 18px 18px;max-height:calc(100vh - 24px);overflow:auto}
+.pe .ptabs{position:sticky;top:-14px;z-index:2;display:grid;grid-template-columns:repeat(4,auto);border:0;background:var(--pe-soft);border-radius:12px;padding:3px;margin:0 0 16px;gap:2px;box-shadow:0 -14px 0 #fff}
+.pe .ptabs button{border:0;margin:0;border-radius:9px;padding:8px 6px;font-size:13px;font-weight:500}
+.pe .ptabs button.on{background:#fff;color:var(--blue);box-shadow:0 1px 3px rgba(0,26,52,.15)}
+.pe-insp h3{font-size:15px;font-weight:600}
+.pe-insp .fld{font-weight:500}
+.pe-insp .fld input,.pe-insp .fld select{border-color:var(--pe-bd);border-radius:10px;padding:9px 11px}
+.pe .tpls{gap:6px}
+.pe .tpls button{border:1.5px solid var(--pe-bd);border-radius:12px;padding:10px 4px 8px;font-weight:500;line-height:15px}
+.pe .tpls button:hover{border-color:#b9cbe3;background:#fafcff}
+.pe .tpls button.on{border-color:var(--blue);background:var(--blue-l);color:var(--blue)}
+.pe .tpls svg{width:40px;height:32px}
+.pe-insp .banner{background:var(--pe-soft);border-radius:12px;font-size:13px;line-height:18px}
+.pe-insp .card{border:1px solid var(--pe-bd);border-radius:12px;box-shadow:none}
+.pe-insp .seg button{border-width:1.5px;font-weight:500}
+.pe-insp details{background:var(--pe-soft);border-radius:12px;padding:10px 12px}
+.pe-insp .wt input,.pe-insp .wt select{border-color:var(--pe-bd);background:#fff}
+.pe-empty{text-align:center;padding:18px 4px 4px}.pe-empty img{width:96px;height:96px;object-fit:contain}.pe-empty h3{margin:8px 0 6px;font-size:17px}.pe-empty p{color:var(--mute);margin:0 0 14px}
+.pe-empty ul{text-align:left;margin:0 0 16px;padding:12px 14px 12px 30px;background:var(--pe-soft);border-radius:12px;font-size:13px;line-height:18px;color:var(--mute)}.pe-empty li{margin:4px 0}.pe-empty li b{color:var(--ink);font-weight:600}
+.pe-del{display:block;width:100%;margin-top:18px;padding:10px;border:0;border-top:1px solid var(--pe-bd);background:none;font:inherit;font-size:13px;color:var(--red);cursor:pointer}
+.pe-del:hover{text-decoration:underline}
+@media(max-width:1200px){.pe-grid{grid-template-columns:200px minmax(0,1fr) 330px}.pe .ctool button{font-size:0;gap:0}.pe .ctool .grp button{padding:0 9px}}
+@media(max-width:1000px){
+ .pe-grid{grid-template-columns:minmax(0,1fr)}
+ .pe-rooms,.pe-insp{position:static;max-height:none}
+ .pe-rooms{padding:10px}.pe-rh{display:none}
+ .pe-rl{flex-direction:row;overflow-x:auto;max-height:none;gap:6px}
+ .ri{width:auto;flex:none;border:1px solid var(--pe-bd)}.ri.on:before{display:none}.ri-add{flex:none;margin:0}
+ .pe .canvas{height:480px}
+ .pe-sum{width:100%}
+}
+@media(max-width:700px){
+ .pe-ttl input{font-size:24px}
+ .pe-sum{flex-direction:column;align-items:stretch;padding:14px 16px}
+ .pe .canvas{height:420px}
+ .pe .ctool{right:62px;flex-wrap:wrap}
+ .pe .ctool button{font-size:0;gap:0}.pe .ctool .sep{display:none}
+ .pe .legend{display:none}
+ .pe .metrics{grid-template-columns:1fr 1fr}
+ .pe .ptabs{grid-template-columns:1fr 1fr}
+}
+</style></head><body><div id="chrome"></div>
+<div class="wrap pe">
  <div class="crumbs"><a href="index.html">Главная</a> / 2D-калькулятор</div>
- <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-end;flex-wrap:wrap">
-  <div><h1>План помещения и расчёт</h1><p class="lead" style="margin-bottom:10px">Выберите форму или нарисуйте контур по точкам. Площади считаются по координатам вершин, а не по ограничивающему прямоугольнику.</p></div>
-  <label class="fld" style="min-width:260px">Проект<input id="pTitle"></label>
- </div>
+ <header class="pe-head">
+  <div class="pe-ttl">
+   <span class="pe-kick">2D-калькулятор · проект</span>
+   <input id="pTitle" aria-label="Название проекта" title="Нажмите, чтобы переименовать проект">
+   <p>Выберите форму или нарисуйте контур по точкам. Площади считаются по координатам вершин, а не по ограничивающему прямоугольнику.</p>
+  </div>
+  <div class="pe-sum" id="sum"></div>
+ </header>
  <div id="ban"></div>
- <div class="rtabs" id="rtabs"></div>
- <div class="pl">
-  <div>
+ <div class="pe-grid">
+  <nav class="pe-rooms"><div class="pe-rh" id="rhead"></div><div class="pe-rl" id="rtabs"></div></nav>
+  <section class="pe-stage">
    <div class="canvas" id="cv">
     <svg id="svg"></svg>
     <div class="ctool">
-     <div class="grp"><button id="mEdit" class="on" title="Двигать вершины, проёмы и вычеты">✋ Редактировать</button><button id="mDraw" title="Нарисовать новый контур по точкам">✏️ Нарисовать</button></div>
-     <div class="grp"><button onclick="zoom(1.2)" title="Увеличить">＋</button><button onclick="zoom(1/1.2)" title="Уменьшить">－</button><button onclick="center()" title="Центрировать план">⌖</button></div>
-     <button id="bSnap" class="on" title="Привязка к сетке 5 см и к осям">Привязка</button><button id="bAll" onclick="fitAll()" title="Показать все помещения">🏠 Весь план</button><button id="bUnder" onclick="showUnder=!showUnder;drawCanvas()" title="Показать фото планировки под планом">📷 Подложка</button>
+     <div class="grp"><button id="mEdit" class="on" title="Двигать вершины, проёмы и вычеты"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l11 5-4.5 1.8L9.7 14.5z"/></svg>Редактировать</button><button id="mDraw" title="Нарисовать новый контур по точкам"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 16.5l1-4 9-9 3 3-9 9z"/><path d="M11.5 5.5l3 3"/></svg>Нарисовать</button></div>
+     <span class="sep"></span>
+     <button id="bSnap" class="on" title="Привязка к сетке 5 см и к осям"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M3 10h14M10 3v14"/></svg>Привязка</button><button id="bAll" onclick="toggleAll()" title="Показать все помещения с отделкой"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L10 3.5l7 6V17H3z"/><path d="M8 17v-5h4v5"/></svg>Весь план</button><button id="bUnder" onclick="showUnder=!showUnder;drawCanvas()" title="Показать фото планировки под планом"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="15" height="12" rx="2"/><path d="M2.5 13l4-4 4 4 2-2 4.5 4"/><circle cx="13.5" cy="8" r="1.3"/></svg>Подложка</button>
     </div>
-
+    <div class="zoomer"><button onclick="zoom(1.2)" title="Увеличить"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M4 10h12"/></svg></button><button onclick="zoom(1/1.2)" title="Уменьшить"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12"/></svg></button><button onclick="center()" title="Центрировать помещение"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="5.5"/><path d="M10 1.5v4M10 14.5v4M1.5 10h4M14.5 10h4"/></svg></button></div>
+    <div class="drawbar"><button id="bDelV" style="display:none">Удалить вершину</button><button id="bUndo" style="display:none">↶ Точка</button><button id="bCancel" style="display:none">Отмена</button><button id="bClose" style="display:none">✔ Замкнуть контур</button></div>
     <div class="legend"><span><i style="background:#0057d6"></i>плитка</span><span><i style="background:#ff9a1a"></i>покраска</span><span><i style="background:#9aa3b5"></i>без отделки</span><span><i style="background:#3aa0e8"></i>окно</span><span>⌒ дверь</span><span><i style="background:repeating-linear-gradient(45deg,#9aa3b5 0 2px,#fff 2px 4px)"></i>вычет</span></div>
-    <div class="hintbar" id="hint"></div>
    </div>
-       <div class="drawbar"><button id="bDelV" style="display:none">🗑 Удалить вершину</button><button id="bClose" style="display:none">✔ Замкнуть контур</button><button id="bUndo" style="display:none">↶ Точка</button><button id="bCancel" style="display:none">✕ Отмена</button></div>
-   <div class="card pad mt2" id="res"></div>
-  </div>
-  <aside class="card pad" style="margin:0" id="panel"></aside>
+   <div class="pe-res" id="res"></div>
+  </section>
+  <aside class="pe-insp" id="panel"></aside>
  </div>
 </div>
 <div class="modal-bg" id="mRoom" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal">
  <button class="x" onclick="$('#mRoom').classList.remove('show')">×</button>
  <h2 style="margin:0 0 12px">Новое помещение</h2>
- <div class="fld">Тип помещения</div><div class="seg mt" id="nrType"></div>
+ <label class="fld">Название<input id="nrName" maxlength="40" placeholder="например, Кабинет или Гардеробная" onkeydown="if(event.key==='Enter')addRoom()"></label>
+ <div class="fld mt2">Тип помещения</div><div class="seg mt" id="nrType"></div>
  <div class="fld mt2">Форма</div><div class="tpls mt" id="nrTpl"></div>
  <button class="btn o wide mt2" onclick="addRoom()">Добавить</button>
 </div></div>
-<script src="oma-catalog.js?v=202610272326"></script><script src="oma-menu.js?v=202610272326"></script><script src="oma-social.js?v=202610272326"></script><script src="data.js?v=202610272326"></script><script src="geom.js?v=202610272326"></script><script src="calc.js?v=202610272326"></script><script src="core.js?v=202610272326"></script><script src="plan.js?v=202610272326"></script><script src="omik.js?v=202610272326"></script><script>
+<script src="oma-catalog.js?v=202610280100"></script><script src="oma-menu.js?v=202610280100"></script><script src="oma-social.js?v=202610280100"></script><script src="data.js?v=202610280100"></script><script src="geom.js?v=202610280100"></script><script src="calc.js?v=202610280100"></script><script src="core.js?v=202610280100"></script><script src="plan.js?v=202610280100"></script><script src="omik.js?v=202610280100"></script><script>
 // ---------- Проект и помещение ----------
 let p=null;
 if(qp('new')){p=addProject(newProject({task:qp('task')||'bath',title:qp('title')||RT[qp('task')||'bath'].name}))}
@@ -44,7 +155,8 @@ if(qp('room')&&p.rooms.some(r=>r.id===qp('room')))p.activeRoom=qp('room');
 window.OMIK_CTX={page:'planner',projectId:p.id};
 chrome('planner');
 const R=()=>room(p);
-let showUnder=true,v=null,mode='edit',selV=null,selWall=null,drawPts=[],cursor=null,snap=true,tab=qp('tab')||'shape',drag=null,lastLog=0;
+// allMode — «Весь план»: все комнаты активны (видны пол и стены); picked — выбранная комната редактируется
+let allMode=qp('from')==='photo',picked=true,showUnder=true,v=null,mode='edit',selV=null,selWall=null,drawPts=[],cursor=null,snap=true,tab=qp('tab')||'shape',drag=null,lastLog=0;
 const svg=$('#svg'),cv=$('#cv');
 const fromPid=qp('pid');
 
@@ -54,7 +166,7 @@ function banner(){
  if(qp('from')==='omik')h+=`<div class="tip"><img src="img/omik-hi.png"><div><b>Омик создал план по вашим размерам.</b> Если комната не прямоугольная, выберите Г- или П-образную форму или нарисуйте контур. Расчёт обновится сам.</div></div>`;
  if(qp('from')==='photo')h+=`<div class="tip ok"><img src="img/omik-happy.png"><div><b>Планировка перенесена: ${p.rooms.length} помещений, ${num(p.rooms.reduce((s,r)=>s+Geom.area(r.pts),0),1)} м².</b> Фото лежит подложкой — сверьте контуры. Другие комнаты показаны серым, клик по ним переключает помещение. Проверьте двери и окна и выберите отделку на вкладке «Отделка».<div class="mt"><a class="btn sm o" href="smeta.html?project=${p.id}">Смета на весь объект →</a></div></div></div>`;
  if(qp('from')==='smeta')h+=`<div class="tip"><img src="img/omik-think.png"><div><b>Измените геометрию — смета пересчитается.</b> Количества, которые вы правили вручную, не перезапишутся: смета покажет расхождение с расчётом.</div></div>`;
- $('#ban').innerHTML=h;
+ $('#ban').innerHTML=h?`<div class="pe-ban">${h}<button class="xbtn" title="Скрыть" onclick="$('#ban').innerHTML=''">×</button></div>`:'';
 }
 $('#pTitle').value=p.title;$('#pTitle').onchange=e=>{p.title=e.target.value.trim()||p.title;save();chrome('planner')};
 
@@ -85,23 +197,62 @@ function snapPt(pt,ref){
 function drawCanvas(){
  const[W,H]=size(),r=R(),val=Geom.validate(r);
  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
- const extra={under:p.underlay&&showUnder?p.underlay:null,ghosts:p.rooms.filter(x=>x.id!==r.id)};
- svg.innerHTML=mode==='draw'?Plan.draw({pts:[],walls:[]},v,{W,H,drawPts,cursor,...extra}):Plan.draw(r,v,{W,H,interactive:true,selV,selWall,valid:val.ok,numbers:true,id:'c',floorMat:floorLook(p,r),...extra});
- $('#bUnder').style.display=p.underlay?'':'none';$('#bUnder').classList.toggle('on',showUnder);$('#bAll').style.display=p.rooms.length>1?'':'none';
- $('#hint').textContent=mode==='draw'?(drawPts.length<3?`Кликайте по сетке, чтобы ставить вершины (${drawPts.length}). Привязка к осям помогает строить прямые углы.`:'Кликните по первой (оранжевой) точке или нажмите «Замкнуть контур».'):selV!=null?`Вершина ${selV+1}: перетащите или удалите. Колесо мыши — масштаб.`:'Тяните вершины и «+» на стенах, перетаскивайте проёмы и вычеты. Фон — сдвиг плана.';
- $('#bDelV').style.display=mode==='edit'&&selV!=null&&r.pts.length>3?'':'none';
+ const edit=picked&&mode==='edit',extra={under:p.underlay&&showUnder?p.underlay:null,ghosts:p.rooms.filter(x=>!edit||x.id!==r.id),full:allMode||!picked,movable:mode==='edit',lookOf:x=>floorLook(p,x)};
+ // без выбора и вне «Весь план» выбранная комната остаётся активной, остальные — серые
+ if(!picked&&!allMode)extra.ghosts=p.rooms.filter(x=>x.id!==r.id),extra.full=false,extra.pre=r;
+ svg.innerHTML=!edit?Plan.draw({pts:[],walls:[]},v,{W,H,drawPts:mode==='draw'?drawPts:null,cursor,...extra})+(extra.pre?Plan.draw({pts:[],walls:[]},v,{W,H,grid:false,scale:false,ghosts:[r],full:true,movable:true,lookOf:extra.lookOf}):''):Plan.draw(r,v,{W,H,interactive:true,selV,selWall,valid:val.ok,numbers:true,id:'c',floorMat:floorLook(p,r),...extra});
+ $('#bUnder').style.display=p.underlay?'':'none';$('#bUnder').classList.toggle('on',showUnder);$('#bAll').style.display=p.rooms.length>1?'':'none';$('#bAll').classList.toggle('on',allMode);
+ $('#bDelV').style.display=edit&&selV!=null&&r.pts.length>3?'':'none';
  ['bClose','bUndo','bCancel'].forEach(id=>$('#'+id).style.display=mode==='draw'?'':'none');
  $('#bClose').disabled=drawPts.length<3;
 }
+// ---------- Перенос помещения целиком ----------
+// Касание по стене — не наложение: общие стены соседних комнат допустимы
+function overlap(A,B){
+ const E=0.01,o=(p,q,r)=>(q[0]-p[0])*(r[1]-p[1])-(q[1]-p[1])*(r[0]-p[0]);
+ const inside=(pt,P)=>Geom.pointInPoly(pt,P)&&P.every((q,i)=>Geom.distToSeg(pt,q,P[(i+1)%P.length])>E);
+ for(let i=0;i<A.length;i++){const a=A[i],b=A[(i+1)%A.length];
+  for(let j=0;j<B.length;j++){const c=B[j],d=B[(j+1)%B.length],d1=o(c,d,a),d2=o(c,d,b),d3=o(a,b,c),d4=o(a,b,d);
+   if((d1>E&&d2<-E||d1<-E&&d2>E)&&(d3>E&&d4<-E||d3<-E&&d4>E))return true}}
+ const probe=P=>[...P,...P.map((q,i)=>{const n=P[(i+1)%P.length];return[(q[0]+n[0])/2,(q[1]+n[1])/2]}),Geom.labelPoint(P)];
+ return probe(A).some(q=>inside(q,B))||probe(B).some(q=>inside(q,A));
+}
+function startMove(w){
+ const r=R(),others=p.rooms.filter(x=>x!==r&&x.pts.length>=3);
+ // комнаты, которые уже пересекались до переноса (неточное распознавание), не блокируют движение
+ drag={k:'room',w0:w,pts0:r.pts.map(q=>[...q]),ex0:r.excl.map(x=>[x.x,x.y]),sh0:[r.shape.ox||0,r.shape.oy||0],others,stuck:new Set(others.filter(x=>overlap(r.pts,x.pts)).map(x=>x.id)),d:[0,0]};
+}
+function moveRoom(w){
+ const r=R();let dx=w[0]-drag.w0[0],dy=w[1]-drag.w0[1];
+ if(snap){dx=Math.round(dx*20)/20;dy=Math.round(dy*20)/20;
+  // магнит к стенам соседних комнат
+  const tol=10/v.s;let bx=null,by=null;
+  drag.others.forEach(x=>x.pts.forEach(q=>drag.pts0.forEach(m=>{const ex=q[0]-(m[0]+dx),ey=q[1]-(m[1]+dy);
+   if(Math.abs(ex)<tol&&(bx==null||Math.abs(ex)<Math.abs(bx)))bx=ex;if(Math.abs(ey)<tol&&(by==null||Math.abs(ey)<Math.abs(by)))by=ey})));
+  if(bx!=null)dx+=bx;if(by!=null)dy+=by}
+ const free=d=>{const pts=drag.pts0.map(q=>[q[0]+d[0],q[1]+d[1]]);return!drag.others.some(x=>!drag.stuck.has(x.id)&&overlap(pts,x.pts))};
+ // упёрлись — скользим вдоль соседа по одной оси
+ let d=[dx,dy];if(!free(d)){drag.hit=true;d=[dx,drag.d[1]];if(!free(d)){d=[drag.d[0],dy];if(!free(d))d=drag.d}}
+ drag.d=d;drag.moved=true;
+ r.pts=drag.pts0.map(q=>[Geom.r2(q[0]+d[0]),Geom.r2(q[1]+d[1])]);
+ r.excl.forEach((x,i)=>{x.x=Geom.r2(drag.ex0[i][0]+d[0]);x.y=Geom.r2(drag.ex0[i][1]+d[1])});
+ if(Geom.TEMPLATES[r.shape.kind]){r.shape.ox=Geom.r2(drag.sh0[0]+d[0]);r.shape.oy=Geom.r2(drag.sh0[1]+d[1])}
+}
+function pick(id){p.activeRoom=id;picked=true;selV=null;selWall=null;save();renderTabs();renderPanel();drawResults()}
+function unpick(){if(!picked)return;picked=false;selV=null;selWall=null;renderAll()}
+function toggleAll(){allMode=!allMode;if(allMode)fitAll();else drawCanvas()}
+
 svg.addEventListener('pointerdown',e=>{
- const r=R(),w=world(e),t=e.target.closest('[data-v],[data-m],[data-x],[data-o],[data-w],[data-g]');
- if(mode==='edit'&&t?.dataset.g){p.activeRoom=t.dataset.g;selV=null;selWall=null;save();renderTabs();renderPanel();drawCanvas();drawResults();return}
+ const r=R(),w=world(e),t=e.target.closest('[data-v],[data-m],[data-x],[data-o],[data-w],[data-b],[data-g]');
  if(mode==='draw'){
   const pt=snapPt(w,[drawPts[drawPts.length-1],drawPts[0]]);
   if(drawPts.length>=3&&Geom.segLen(pt,drawPts[0])*v.s<14){closeDraw();return}
   if(!drawPts.length||Geom.segLen(pt,drawPts[drawPts.length-1])>=Geom.MIN_SEG)drawPts.push(pt);drawCanvas();return;
  }
  svg.setPointerCapture(e.pointerId);
+ // клик по другой комнате выбирает её, и её сразу можно тащить
+ if(t?.dataset.g){pick(t.dataset.g);startMove(w);drawCanvas();return}
+ if(t?.dataset.b!=null){selV=null;selWall=null;startMove(w);drawCanvas();return}
  if(t?.dataset.v!=null){selV=+t.dataset.v;selWall=null;drag={k:'v',i:selV}}
  else if(t?.dataset.m!=null){const i=+t.dataset.m;insertAt(i,+t.dataset.t||0.5);selV=i+1;drag={k:'v',i:i+1}}
  else if(t?.dataset.x!=null){const x=r.excl.find(x=>x.id===t.dataset.x);drag={k:'x',x,dx:w[0]-x.x,dy:w[1]-x.y};tab='open'}
@@ -114,17 +265,24 @@ svg.addEventListener('pointermove',e=>{
  const r=R(),w=world(e);
  if(mode==='draw'){cursor=snapPt(w,[drawPts[drawPts.length-1],drawPts[0]]);drawCanvas();return}
  if(!drag)return;
- if(drag.k==='pan'){v.ox=drag.ox+e.clientX-drag.x;v.oy=drag.oy+e.clientY-drag.y;drawCanvas();return}
+ if(drag.k==='pan'){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>3)drag.panned=true;v.ox=drag.ox+e.clientX-drag.x;v.oy=drag.oy+e.clientY-drag.y;drawCanvas();return}
+ if(drag.k==='room')moveRoom(w);
  if(drag.k==='v'){const n=r.pts.length,i=drag.i;r.pts=Geom.movePoint(r.pts,i,snapPt(w,[r.pts[(i+n-1)%n],r.pts[(i+1)%n]]));toPoly(r);drag.moved=true}
  if(drag.k==='x'){const x=drag.x;x.x=Geom.r2(Math.round((w[0]-drag.dx)*20)/20);x.y=Geom.r2(Math.round((w[1]-drag.dy)*20)/20);drag.moved=true}
  if(drag.k==='o'){const o=drag.o,i=r.walls.findIndex(q=>q.id===o.wallId),A=r.pts[i],B=r.pts[(i+1)%r.pts.length],L=Geom.segLen(A,B);
   const t=((w[0]-A[0])*(B[0]-A[0])+(w[1]-A[1])*(B[1]-A[1]))/L;o.off=Geom.r2(Math.max(0,Math.min(L-o.w,Math.round((t-o.w/2)*20)/20)));drag.moved=true}
  recalc(p);drawCanvas();drawResults();
 });
-svg.addEventListener('pointerup',()=>{if(drag&&drag.moved)commit('Геометрия изменена на плане');else if(drag)renderPanel();drag=null});
+svg.addEventListener('pointerup',()=>{
+ const d=drag;drag=null;if(!d)return;
+ // клик по пустому месту снимает выбор
+ if(d.k==='pan'){if(!d.panned)unpick();return}
+ if(d.k==='room'&&d.hit)toast('Помещения не могут накладываться друг на друга',false);
+ if(d.moved)commit(d.k==='room'?'Помещение перемещено':'Геометрия изменена на плане');else renderPanel();
+});
 svg.addEventListener('pointerleave',()=>{if(mode==='draw'){cursor=null;drawCanvas()}});
 svg.addEventListener('wheel',e=>{e.preventDefault();const b=svg.getBoundingClientRect();zoom(e.deltaY<0?1.12:1/1.12,e.clientX-b.left,e.clientY-b.top)},{passive:false});
-addEventListener('keydown',e=>{if(e.target.closest('input,select,textarea'))return;if((e.key==='Delete'||e.key==='Backspace')&&selV!=null)delV();if(e.key==='Escape'&&mode==='draw')setMode('edit')});
+addEventListener('keydown',e=>{if(e.target.closest('input,select,textarea'))return;if((e.key==='Delete'||e.key==='Backspace')&&selV!=null)delV();if(e.key==='Escape')mode==='draw'?setMode('edit'):unpick()});
 addEventListener('resize',()=>drawCanvas());
 
 function insertAt(i,tt=0.5){
@@ -147,7 +305,7 @@ function delV(){
  r.openings.filter(o=>o.wallId===keep.id).forEach(o=>{o.off=Geom.r2(Math.max(0,Math.min(o.off,Ln-o.w)))});
  selV=null;toPoly(r);commit('Удалена вершина контура');
 }
-function setMode(m){mode=m;drawPts=[];cursor=null;selV=null;$('#mEdit').classList.toggle('on',m==='edit');$('#mDraw').classList.toggle('on',m==='draw');if(m==='draw'){toast('Режим рисования: кликайте по сетке, чтобы поставить вершины')}drawCanvas()}
+function setMode(m){mode=m;if(m==='draw')picked=true;drawPts=[];cursor=null;selV=null;$('#mEdit').classList.toggle('on',m==='edit');$('#mDraw').classList.toggle('on',m==='draw');if(m==='draw'){toast('Режим рисования: кликайте по сетке, чтобы поставить вершины')}drawCanvas()}
 function closeDraw(){
  if(drawPts.length<3)return;
  const r=R(),tmp={...r,pts:drawPts,walls:drawPts.map(()=>({id:'t',finish:'paint'})),openings:[],excl:[]};
@@ -164,10 +322,15 @@ $('#bDelV').onclick=delV;$('#bClose').onclick=closeDraw;$('#bUndo').onclick=()=>
 // ---------- Панель ----------
 const TABS=[['shape','Форма'],['walls','Стены'],['open','Проёмы и вычеты'],['fin','Отделка']];
 function renderTabs(){
- $('#rtabs').innerHTML=p.rooms.map(r=>{const ok=Geom.validate(r).ok;return`<button class="${r.id===p.activeRoom?'on':''} ${ok?'':'err'}" onclick="selRoom('${r.id}')">${RT[r.type]?.icon||''} ${esc(r.name)} · ${ok?num(Geom.area(r.pts),1)+' м²':'ошибка'}</button>`}).join('')+`<button onclick="openAddRoom()">＋ Помещение</button>`;
+ const tot=p.rooms.reduce((s,r)=>s+(Geom.validate(r).ok?Geom.area(r.pts):0),0);
+ $('#rhead').innerHTML=`<b>Помещения</b><span>${p.rooms.length} · ${num(tot,1)} м²</span>`;
+ $('#rtabs').innerHTML=p.rooms.map(r=>{const ok=Geom.validate(r).ok;return`<button class="ri ${picked&&r.id===p.activeRoom?'on':''} ${ok?'':'err'}" onclick="selRoom('${r.id}')"><span class="ri-ic">${RT[r.type]?.icon||'▢'}</span><span class="ri-t"><b>${esc(r.name)}</b><small>${ok?num(Geom.area(r.pts),1)+' м² · '+esc(RT[r.type]?.name||''):'ошибка контура'}</small></span></button>`}).join('')+`<button class="ri-add" onclick="openAddRoom(true)">＋ Добавить помещение</button>`;
 }
-function selRoom(id){p.activeRoom=id;selV=null;selWall=null;save();renderAll();center()}
+function selRoom(id){p.activeRoom=id;picked=true;selV=null;selWall=null;save();renderAll();center()}
 function renderPanel(){
+ if(!picked){$('#panel').innerHTML=`<div class="pe-empty"><img src="img/omik-think.png" alt=""><h3>Помещение не выбрано</h3><p>Нажмите на комнату на плане или в списке слева, чтобы изменить её форму, стены, проёмы и отделку.</p>
+  <ul><li><b>Клик</b> по комнате — выбрать</li><li><b>Перетаскивание</b> комнаты — переместить, соседние комнаты не дадут наложиться</li><li><b>Фон</b> — сдвиг плана, колесо — масштаб</li><li><b>Весь план</b> — показать отделку всех комнат</li></ul>
+  <button class="btn g wide" onclick="openAddRoom(true)">＋ Добавить помещение</button></div>`;return}
  const r=R(),sh=r.shape,tp=Geom.TEMPLATES[sh.kind];
  let h=`<div class="ptabs">${TABS.map(([k,t])=>`<button class="${k===tab?'on':''}" onclick="tab='${k}';renderPanel()">${t}</button>`).join('')}</div>`;
  if(tab==='shape'){
@@ -212,7 +375,7 @@ function renderPanel(){
   <label class="opts2 mt"><label><input type="checkbox" ${(r.wet??Calc.WET.includes(r.type))?'checked':''} onchange="R().wet=this.checked;commit('Изменена гидроизоляция')"><span><b>Влажное помещение</b><small>Добавит гидроизоляцию пола и 20 см стен, ленту в углы</small></span></label></label>
   <p class="note">Отделку отдельных стен задайте на вкладке «Стены»: например, плитка только за ванной, остальное — покраска.</p>`;
  }
- if(p.rooms.length>1)h+=`<button class="btn red sm mt2" onclick="delRoom()">Удалить помещение «${esc(r.name)}»</button>`;
+ if(p.rooms.length>1)h+=`<button class="pe-del" onclick="delRoom()">Удалить помещение «${esc(r.name)}»</button>`;
  $('#panel').innerHTML=h;
 }
 function setType(t){const r=R(),d=RT[t];r.type=t;if(Object.values(RT).some(x=>x.name===r.name))r.name=d.name;r.floor=d.floor;r.ceil=d.ceil;r.walls.forEach(w=>w.finish=d.walls);delete r.wet;commit('Изменён тип помещения');toast(`Отделка по умолчанию для «${d.name}» применена`)}
@@ -246,35 +409,39 @@ function setX(id,k,val){const x=R().excl.find(q=>q.id===id);if(['w','h'].include
 function addX(name,w,h){const r=R(),xs=r.pts.map(q=>q[0]),ys=r.pts.map(q=>q[1]);r.excl.push({id:uid(),name,w,h,x:Geom.r2(Math.min(...xs)+0.05),y:Geom.r2(Math.min(...ys)+0.05)});commit('Добавлена вычитаемая область: '+name)}
 function delRoom(){if(!confirm('Удалить помещение?'))return;p.rooms=p.rooms.filter(r=>r.id!==p.activeRoom);p.activeRoom=p.rooms[0].id;commit('Удалено помещение');center()}
 let nr={type:'living',kind:'rect'};
-function openAddRoom(){
+function openAddRoom(fresh){
+ if(fresh)$('#nrName').value='';$('#nrName').placeholder=`Своё название или «${RT[nr.type].name}»`;
  $('#nrType').innerHTML=Object.entries(RT).map(([k,t])=>`<button class="${nr.type===k?'on':''}" onclick="nr.type='${k}';openAddRoom()">${t.icon} ${t.name}</button>`).join('');
  $('#nrTpl').innerHTML=Object.entries(Geom.TEMPLATES).map(([k,t])=>`<button class="${nr.kind===k?'on':''}" onclick="nr.kind='${k}';openAddRoom()">${Plan.tplIcon(k)}${t.name}</button>`).join('');
- $('#mRoom').classList.add('show');
+ if(!$('#mRoom').classList.contains('show')){$('#mRoom').classList.add('show');setTimeout(()=>$('#nrName').focus(),30)}
 }
-function addRoom(){const r=makeRoom(nr.type,nr.kind);if(p.rooms.some(q=>q.name===r.name)){let k=2;while(p.rooms.some(q=>q.name===r.name+' '+k))k++;r.name+=' '+k}const all=p.rooms.flatMap(q=>q.pts);if(all.length){const dx=Geom.r2(Math.max(...all.map(q=>q[0]))+1-Math.min(...r.pts.map(q=>q[0]))),dy=Geom.r2(Math.min(...all.map(q=>q[1]))-Math.min(...r.pts.map(q=>q[1])));r.pts=r.pts.map(([x,y])=>[Geom.r2(x+dx),Geom.r2(y+dy)]);r.shape={...r.shape,ox:dx,oy:dy}}p.rooms.push(r);p.activeRoom=r.id;$('#mRoom').classList.remove('show');commit('Добавлено помещение: '+r.name);center()}
+function addRoom(){const r=makeRoom(nr.type,nr.kind),own=$('#nrName').value.trim();if(own)r.name=own;if(p.rooms.some(q=>q.name===r.name)){let k=2;while(p.rooms.some(q=>q.name===r.name+' '+k))k++;r.name+=' '+k}const all=p.rooms.flatMap(q=>q.pts);if(all.length){const dx=Geom.r2(Math.max(...all.map(q=>q[0]))+1-Math.min(...r.pts.map(q=>q[0]))),dy=Geom.r2(Math.min(...all.map(q=>q[1]))-Math.min(...r.pts.map(q=>q[1])));r.pts=r.pts.map(([x,y])=>[Geom.r2(x+dx),Geom.r2(y+dy)]);r.shape={...r.shape,ox:dx,oy:dy}}p.rooms.push(r);p.activeRoom=r.id;$('#mRoom').classList.remove('show');commit('Добавлено помещение: '+r.name);center()}
 
 // ---------- Результаты ----------
 function drawResults(){
  const r=R(),val=Geom.validate(r),f=Plan.f2;
  let h='';
- if(!val.ok)h+=`<div class="errs"><b>Расчёт невозможен — исправьте геометрию:</b><ul>${val.errors.map(e=>`<li>${esc(e)}</li>`).join('')}</ul>Смета не будет пересчитана по ошибочному контуру.</div>`;
+ if(!picked){const ms=p.rooms.filter(x=>Geom.validate(x).ok).map(x=>Geom.metrics(x)),S=k=>ms.reduce((s,m)=>s+(k(m)||0),0);
+  h+=`<div class="pe-resh"><h3>Весь объект <span>${p.rooms.length} помещений</span></h3><span class="note">Выберите комнату, чтобы увидеть её площади</span></div>
+  <div class="metrics"><div class="big"><b>${f(S(m=>m.floor))} м²</b><span>Пол</span></div><div><b>${f(S(m=>m.ceil))} м²</b><span>Потолок</span></div><div><b>${f(S(m=>m.wallNet))} м²</b><span>Стены за вычетом проёмов</span></div><div><b>${f(S(m=>m.openings))} м²</b><span>Проёмы</span></div></div>`}
+ else if(!val.ok)h+=`<div class="errs"><b>Расчёт невозможен — исправьте геометрию:</b><ul>${val.errors.map(e=>`<li>${esc(e)}</li>`).join('')}</ul>Смета не будет пересчитана по ошибочному контуру.</div>`;
  else{const m=Geom.metrics(r);
-  h+=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">${esc(r.name)}: площади</h3><span class="note">Формула Гаусса по ${r.pts.length} вершинам</span></div>
-  <div class="metrics mt" style="grid-template-columns:repeat(4,1fr)">
-   <div><b>${f(m.floor)} м²</b><span>Пол${m.excl?` · без вычетов ${f(m.floorNet)} м²`:''}</span></div><div><b>${f(m.ceil)} м²</b><span>Потолок</span></div>
+  h+=`<div class="pe-resh"><h3>${esc(r.name)} <span>площади и поверхности</span></h3><span class="note">Формула Гаусса по ${r.pts.length} вершинам</span></div>
+  <div class="metrics">
+   <div class="big"><b>${f(m.floor)} м²</b><span>Пол${m.excl?` · без вычетов ${f(m.floorNet)} м²`:''}</span></div><div><b>${f(m.ceil)} м²</b><span>Потолок</span></div>
    <div><b>${f(m.perim)} м</b><span>Периметр</span></div><div><b>${f(m.wallNet)} м²</b><span>Стены за вычетом проёмов ${f(m.openings)} м²</span></div>
    <div><b>${f(m.byFinish.tile||0)} м²</b><span>Стены под плитку</span></div><div><b>${f(m.byFinish.paint||0)} м²</b><span>Стены под покраску</span></div>
    <div><b>${r.floor==='none'?'—':f(m.floorNet)+' м²'}</b><span>Пол: ${r.floor==='tile'?'плитка':r.floor==='laminate'?'ламинат':'без отделки'}</span></div><div><b>${r.waste}%</b><span>Запас на подрезку</span></div></div>`;
  }
  const others=p.rooms.filter(x=>x.id!==r.id);
  const pe=p.calc||{},tot=estTotal(p);
- h+=`<div style="display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)">
-  <div><div class="note">Материалы по проекту${others.length?` (${p.rooms.length} помещения)`:''} · ${TIERS[p.tier]}</div><div style="font-size:26px;font-weight:800">${pe.ok?byn(tot):'—'}</div><div class="note">${pe.ok?`${p.est.lines.length} позиций · ${areaSummary(p)}`:'есть ошибки геометрии'}</div></div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn g" href="masters.html?project=${p.id}">👷 Нужен мастер</a><a class="btn o ${pe.ok?'':'dis'}" ${pe.ok?`href="smeta.html?project=${p.id}${fromPid?'&focus='+fromPid:''}"`:'onclick="toast(\'Сначала исправьте геометрию\',false)"'}>Подобрать материалы → смета</a></div></div>
-  <p class="note" style="margin-bottom:0">Проект сохраняется автоматически. Количества считает алгоритм по геометрии и нормам расхода товаров.</p>`;
+ $('#sum').innerHTML=`<div class="pe-price"><span>Материалы${others.length?` · ${p.rooms.length} помещения`:''} · ${TIERS[p.tier]}</span><b>${pe.ok?byn(tot):'—'}</b><small>${pe.ok?`${p.est.lines.length} позиций · ${areaSummary(p)}`:'есть ошибки геометрии'}</small></div>
+  <div class="pe-acts"><a class="btn o ${pe.ok?'':'dis'}" ${pe.ok?`href="smeta.html?project=${p.id}${fromPid?'&focus='+fromPid:''}"`:'onclick="toast(\'Сначала исправьте геометрию\',false)"'}>Подобрать материалы → смета</a><a class="btn g" href="masters.html?project=${p.id}">👷 Нужен мастер</a></div>`;
+ h+=`<p class="note pe-foot">Проект сохраняется автоматически. Количества считает алгоритм по геометрии и нормам расхода товаров.</p>`;
  $('#res').innerHTML=h;
 }
 function renderAll(){renderTabs();renderPanel();drawCanvas();drawResults();chrome('planner')}
 banner();renderTabs();renderPanel();center();drawResults();
-if(qp('from')==='photo')fitAll();
+// после раскладки сетки, иначе ширина холста ещё не итоговая
+if(qp('from')==='photo')requestAnimationFrame(fitAll);
 </script></body></html>

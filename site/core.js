@@ -61,6 +61,12 @@ function addProject(p){load().projects.unshift(p);S.active=p.id;save();return p}
 function getProject(id){return load().projects.find(p=>p.id===id)}
 function activeProject(){const s=load();return getProject(qp('project'))||getProject(s.active)||null}
 function setActive(p){load().active=p.id;persist()}
+// Закрыть текущий проект: он остаётся в «Моих проектах», сайт просто перестаёт работать в его контексте
+function closeProject(){
+ load().active=null;persist();
+ if(/(planner|smeta)\.html/.test(location.pathname)){location='projects.html';return}
+ const u=new URL(location.href);u.searchParams.delete('project');location.replace(u);
+}
 function ensureProject(task='bath',title){let p=activeProject();if(!p){p=addProject(newProject({task,title:title||RT[task].name}))}return p}
 function log(p,text){p.history.push({at:now(),text});p.updated=now()}
 function room(p,id){return p.rooms.find(r=>r.id===(id||p.activeRoom))||p.rooms[0]}
@@ -203,7 +209,7 @@ function chrome(active,o={}){
  </header>
  ${p?`<div class="ctx"><div class="wrap"><span class="ctx-l">Текущий проект:</span><a class="ctx-p" href="projects.html">${RT[p.task]?.icon||'📁'} <b>${esc(p.title)}</b></a>
   <span class="ctx-s">${num(floorArea(p),1)} м² · ${p.est.lines.length} поз. · ${byn(estTotal(p))}</span><span class="sp"></span>
-  <a href="planner.html?project=${p.id}" class="${active==='planner'?'on':''}">📐 План</a><a href="smeta.html?project=${p.id}" class="${active==='smeta'?'on':''}">📋 Смета</a><a href="masters.html?project=${p.id}" class="${active==='masters'?'on':''}">👷 Мастер</a></div></div>`:''}`;
+  <a href="planner.html?project=${p.id}" class="${active==='planner'?'on':''}">📐 План</a><a href="smeta.html?project=${p.id}" class="${active==='smeta'?'on':''}">📋 Смета</a><a href="masters.html?project=${p.id}" class="${active==='masters'?'on':''}">👷 Мастер</a><button class="ctx-x" onclick="closeProject()" title="Закрыть проект" aria-label="Закрыть проект">×</button></div></div>`:''}`;
  if(!$('footer'))document.body.insertAdjacentHTML('beforeend',footerHtml());
  updateBadges();
  if(active!=='omik'&&typeof OmikWidget!=='undefined')OmikWidget.mount();
@@ -309,16 +315,22 @@ function matLook(prod){
  if(!size&&prod.roles.includes('laminate')){const m=n.match(/(\d+)\s*[хx×*]\s*(\d+)\s*[хx×*]\s*(\d+)/);const d=m?[+m[1],+m[2],+m[3]].sort((a,b)=>b-a):null;size=d&&d[1]>=50?[d[0]/1000,d[1]/1000]:[1.2,0.19]}
  return{color,size:size||[0.3,0.3],kind:prod.roles.includes('laminate')||prod.pattern==='wood'?'plank':'tile'};
 }
-// Выпадающий список материала для поверхности помещения; страница определяет onMat(roomId, role, pid)
+// Выбор материала для поверхности помещения: лента мини-карточек (видно 2–3), страница определяет onMat(roomId, role, pid)
 function matPicker(p,r,role){
  const cur=matOf(p,r,role),own=!!(r.mat&&r.mat[role]),def=Calc.pick(role,p.tier,p.pinned);
  const L=PRODUCTS.filter(x=>x.roles.includes(role)).sort((a,b)=>(a.priceM2||a.price)-(b.priceM2||b.price));
  const price=x=>x.priceM2?byn(x.priceM2)+'/м²':byn(x.price);
- return`<div class="matp"><span class="sw" style="${swatchCss(cur)}"></span><select onchange="onMat('${r.id}','${role}',this.value)">
-  <option value="" ${own?'':'selected'}>Как в комплектации: ${esc(def.name.slice(0,48))}</option>
-  ${L.map(x=>`<option value="${x.id}" ${own&&x.id===cur.id?'selected':''}>${esc(x.name.slice(0,60))} — ${price(x)}${x.stm?' · СТМ':''}</option>`).join('')}</select>
-  <a class="btn ghost sm" href="product.html?id=${cur.id}&project=${p.id}" title="Карточка товара">↗</a></div>`;
+ const card=(x,id,on,badge)=>`<button type="button" class="mc ${on?'on':''}" onclick="onMat('${r.id}','${role}','${id}')" title="${esc(x.name)}">
+  <span class="mc-im">${x.img?`<img src="${x.img}" alt="" loading="lazy">`:`<i style="${swatchCss(x)}"></i>`}${badge?`<em>${badge}</em>`:x.stm?'<em class="stm">СТМ</em>':''}</span>
+  <span class="mc-n">${esc(x.name)}</span><span class="mc-p">${price(x)}</span></button>`;
+ return`<div class="matp2"><div class="mc-row" onscroll="mcArrows(this)">${card(def,'',!own,'По комплектации')}${L.map(x=>card(x,x.id,own&&x.id===cur.id)).join('')}</div>
+  <button type="button" class="mc-nav l" onclick="mcScroll(this,-1)" aria-label="Назад">‹</button><button type="button" class="mc-nav r" onclick="mcScroll(this,1)" aria-label="Вперёд">›</button>
+  <a class="mc-link" href="product.html?id=${cur.id}&project=${p.id}">Карточка выбранного товара ↗</a></div>`;
 }
+function mcScroll(b,d){const row=b.parentNode.querySelector('.mc-row');row.scrollBy({left:d*row.clientWidth*.8,behavior:'smooth'})}
+function mcArrows(row){const w=row.parentNode;w.classList.toggle('at-l',row.scrollLeft<4);w.classList.toggle('at-r',row.scrollLeft+row.clientWidth>row.scrollWidth-4)}
+// Новая лента сразу прокручена к выбранному материалу
+new MutationObserver(()=>document.querySelectorAll('.mc-row:not([data-f])').forEach(row=>{row.dataset.f=1;const on=row.querySelector('.mc.on');if(on&&on.offsetLeft+on.offsetWidth>row.clientWidth)row.scrollLeft=on.offsetLeft-row.clientWidth/2+on.offsetWidth/2;mcArrows(row)})).observe(document.documentElement,{childList:true,subtree:true});
 function swatchCss(prod){const l=matLook(prod);if(!l)return'';
  if(prod.roles.some(r=>r.startsWith('paint')))return`background:${l.color}`;
  return l.kind==='plank'?`background:repeating-linear-gradient(90deg,${l.color} 0 70%,#0002 70% 72%,${l.color} 72%),${l.color}`:`background:linear-gradient(#0000 calc(100% - 1px),#fff 0) 0 0/100% 50%,linear-gradient(90deg,#0000 calc(100% - 1px),#fff 0) 0 0/50% 100%,${l.color}`}
