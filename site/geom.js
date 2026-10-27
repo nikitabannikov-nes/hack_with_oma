@@ -93,7 +93,7 @@ function setWallLength(pts,i,len){
  mv.forEach(j=>{out[j]=[r2(out[j][0]+dx),r2(out[j][1]+dy)]});
  return out;
 }
-function insertVertex(pts,i){const n=pts.length,a=pts[i],b=pts[(i+1)%n],out=pts.map(p=>[...p]);out.splice(i+1,0,[r2((a[0]+b[0])/2),r2((a[1]+b[1])/2)]);return out}
+function insertVertex(pts,i,t=0.5){const n=pts.length,a=pts[i],b=pts[(i+1)%n],out=pts.map(p=>[...p]);out.splice(i+1,0,[r2(a[0]+(b[0]-a[0])*t),r2(a[1]+(b[1]-a[1])*t)]);return out}
 function removeVertex(pts,i){if(pts.length<=3)return pts.map(p=>[...p]);const out=pts.map(p=>[...p]);out.splice(i,1);return out}
 function movePoint(pts,i,p){const out=pts.map(q=>[...q]);out[i]=[r2(p[0]),r2(p[1])];return out}
 

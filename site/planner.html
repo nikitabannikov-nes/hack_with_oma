@@ -15,13 +15,12 @@
      <div class="grp"><button id="mEdit" class="on" title="Двигать вершины, проёмы и вычеты">✋ Редактировать</button><button id="mDraw" title="Нарисовать новый контур по точкам">✏️ Нарисовать</button></div>
      <div class="grp"><button onclick="zoom(1.2)" title="Увеличить">＋</button><button onclick="zoom(1/1.2)" title="Уменьшить">－</button><button onclick="center()" title="Центрировать план">⌖</button></div>
      <button id="bSnap" class="on" title="Привязка к сетке 5 см и к осям">Привязка</button><button id="bAll" onclick="fitAll()" title="Показать все помещения">🏠 Весь план</button><button id="bUnder" onclick="showUnder=!showUnder;drawCanvas()" title="Показать фото планировки под планом">📷 Подложка</button>
-     <span class="sp"></span>
-     <button id="bDelV" style="display:none">🗑 Удалить вершину</button>
-     <button id="bClose" style="display:none">✔ Замкнуть контур</button><button id="bUndo" style="display:none">↶ Точка</button><button id="bCancel" style="display:none">✕ Отмена</button>
     </div>
+
     <div class="legend"><span><i style="background:#0057d6"></i>плитка</span><span><i style="background:#ff9a1a"></i>покраска</span><span><i style="background:#9aa3b5"></i>без отделки</span><span><i style="background:#3aa0e8"></i>окно</span><span>⌒ дверь</span><span><i style="background:repeating-linear-gradient(45deg,#9aa3b5 0 2px,#fff 2px 4px)"></i>вычет</span></div>
     <div class="hintbar" id="hint"></div>
    </div>
+       <div class="drawbar"><button id="bDelV" style="display:none">🗑 Удалить вершину</button><button id="bClose" style="display:none">✔ Замкнуть контур</button><button id="bUndo" style="display:none">↶ Точка</button><button id="bCancel" style="display:none">✕ Отмена</button></div>
    <div class="card pad mt2" id="res"></div>
   </div>
   <aside class="card pad" style="margin:0" id="panel"></aside>
@@ -40,6 +39,7 @@ let p=null;
 if(qp('new')){p=addProject(newProject({task:qp('task')||'bath',title:qp('title')||RT[qp('task')||'bath'].name}))}
 else p=activeProject()||addProject(newProject({task:'bath',title:'Ванная'}));
 setActive(p);
+if(qp('new')){const u=new URLSearchParams(location.search);u.delete('new');u.delete('task');u.delete('title');u.set('project',p.id);history.replaceState(null,'','planner.html?'+u)}
 if(qp('room')&&p.rooms.some(r=>r.id===qp('room')))p.activeRoom=qp('room');
 window.OMIK_CTX={page:'planner',projectId:p.id};
 chrome('planner');
@@ -59,14 +59,14 @@ function banner(){
 $('#pTitle').value=p.title;$('#pTitle').onchange=e=>{p.title=e.target.value.trim()||p.title;save();chrome('planner')};
 
 // ---------- Изменения ----------
-function commit(text){
+function commit(text,keepPanel){
  const r=R();
  const before=JSON.stringify(p.est.lines.map(l=>[l.pid,l.qty,l.calcQty]));
  recalc(p);
  const after=JSON.stringify(p.est.lines.map(l=>[l.pid,l.qty,l.calcQty]));
  if(before!==after){p.est.rev++;if(['sent','approved','changes'].includes(p.est.status))p.est.dirty=true}
  if(text&&now()-lastLog>30000){log(p,text);lastLog=now()}
- p.updated=now();save();renderAll();
+ p.updated=now();save();if(keepPanel){renderTabs();drawCanvas();drawResults();chrome('planner')}else renderAll();
 }
 function toPoly(r){if(r.shape.kind!=='poly'){r.shape={kind:'poly',from:r.shape.kind,params:r.shape.params}}}
 
@@ -103,7 +103,7 @@ svg.addEventListener('pointerdown',e=>{
  }
  svg.setPointerCapture(e.pointerId);
  if(t?.dataset.v!=null){selV=+t.dataset.v;selWall=null;drag={k:'v',i:selV}}
- else if(t?.dataset.m!=null){const i=+t.dataset.m;insertAt(i);selV=i+1;drag={k:'v',i:i+1}}
+ else if(t?.dataset.m!=null){const i=+t.dataset.m;insertAt(i,+t.dataset.t||0.5);selV=i+1;drag={k:'v',i:i+1}}
  else if(t?.dataset.x!=null){const x=r.excl.find(x=>x.id===t.dataset.x);drag={k:'x',x,dx:w[0]-x.x,dy:w[1]-x.y};tab='open'}
  else if(t?.dataset.o!=null){drag={k:'o',o:r.openings.find(o=>o.id===t.dataset.o)};tab='open'}
  else if(t?.dataset.w!=null){selWall=+t.dataset.w;selV=null;tab='walls';drag=null;renderAll();return}
@@ -127,18 +127,25 @@ svg.addEventListener('wheel',e=>{e.preventDefault();const b=svg.getBoundingClien
 addEventListener('keydown',e=>{if(e.target.closest('input,select,textarea'))return;if((e.key==='Delete'||e.key==='Backspace')&&selV!=null)delV();if(e.key==='Escape'&&mode==='draw')setMode('edit')});
 addEventListener('resize',()=>drawCanvas());
 
-function insertAt(i){
- const r=R(),A=r.pts[i],B=r.pts[(i+1)%r.pts.length],L1=Geom.segLen(A,B)/2,w=r.walls[i];
- r.pts=Geom.insertVertex(r.pts,i);
+function insertAt(i,tt=0.5){
+ const r=R(),A=r.pts[i],B=r.pts[(i+1)%r.pts.length],L=Geom.segLen(A,B),L1=L*tt,w=r.walls[i];
+ r.pts=Geom.insertVertex(r.pts,i,tt);
  const nw={id:uid(),finish:w.finish,h:w.h};r.walls.splice(i+1,0,nw);
- r.openings.filter(o=>o.wallId===w.id&&o.off>=L1).forEach(o=>{o.wallId=nw.id;o.off=Geom.r2(o.off-L1)});
+ // Проём остаётся целым: переносим его в ту половину, где лежит его середина, и прижимаем внутрь
+ r.openings.filter(o=>o.wallId===w.id).forEach(o=>{
+  if(o.off+o.w/2>=L1){o.wallId=nw.id;o.off=Geom.r2(Math.max(0,Math.min(o.off-L1,L-L1-o.w)))}
+  else o.off=Geom.r2(Math.max(0,Math.min(o.off,L1-o.w)));
+ });
  toPoly(r);
 }
 function delV(){
  const r=R(),i=selV,n=r.pts.length;if(i==null||n<=3)return;
  const prev=(i+n-1)%n,Lp=Geom.segLen(r.pts[prev],r.pts[i]),gone=r.walls[i],keep=r.walls[prev];
  r.openings.filter(o=>o.wallId===gone.id).forEach(o=>{o.wallId=keep.id;o.off=Geom.r2(o.off+Lp)});
- r.walls.splice(i,1);r.pts=Geom.removeVertex(r.pts,i);selV=null;toPoly(r);commit('Удалена вершина контура');
+ r.walls.splice(i,1);r.pts=Geom.removeVertex(r.pts,i);
+ const k=r.walls.indexOf(keep),Ln=Geom.segLen(r.pts[k],r.pts[(k+1)%r.pts.length]);
+ r.openings.filter(o=>o.wallId===keep.id).forEach(o=>{o.off=Geom.r2(Math.max(0,Math.min(o.off,Ln-o.w)))});
+ selV=null;toPoly(r);commit('Удалена вершина контура');
 }
 function setMode(m){mode=m;drawPts=[];cursor=null;selV=null;$('#mEdit').classList.toggle('on',m==='edit');$('#mDraw').classList.toggle('on',m==='draw');if(m==='draw'){toast('Режим рисования: кликайте по сетке, чтобы поставить вершины')}drawCanvas()}
 function closeDraw(){
@@ -169,7 +176,7 @@ function renderPanel(){
    <div class="fld mt2">Форма помещения</div><div class="tpls mt">${Object.entries(Geom.TEMPLATES).map(([k,t])=>`<button class="${sh.kind===k?'on':''}" onclick="setTpl('${k}')">${Plan.tplIcon(k)}${t.name}</button>`).join('')}<button onclick="location='import.html?project=${p.id}'"><svg viewBox="0 0 48 38"><rect x="6" y="6" width="36" height="26" rx="4" fill="#fff1de" stroke="#ff9a1a" stroke-width="2"/><circle cx="24" cy="19" r="7" fill="none" stroke="#ff9a1a" stroke-width="2"/></svg>По фото</button><button class="${sh.kind==='poly'?'on':''}" onclick="setMode('draw')"><svg viewBox="0 0 48 38"><polygon points="6,30 10,6 28,10 42,4 40,32 22,26" fill="#e8f0fd" stroke="#0057d6" stroke-width="2"/></svg>Произвольная</button></div>`;
   if(tp)h+=`<div class="f2 mt2">${tp.params.map(([k,l])=>`<label class="fld">${l}, м<input type="number" step="0.05" min="0.3" max="30" value="${sh.params[k]}" oninput="setParam('${k}',this.value)"></label>`).join('')}</div><p class="note" id="tplErr" style="color:var(--red)"></p>`;
   else h+=`<div class="banner mt2" style="font-size:13px">Свободный многоугольник: ${r.pts.length} вершин. Перетаскивайте вершины, добавляйте точки кнопкой «+» на стене, меняйте длины на вкладке «Стены» или координаты ниже.</div>`;
-  h+=`<label class="fld mt2">Высота потолка, м<input type="number" step="0.05" min="1.8" max="6" value="${r.h}" onchange="R().h=+this.value;commit('Изменена высота потолка')"></label>
+  h+=`<label class="fld mt2">Высота потолка, м<input type="number" step="0.05" min="1.8" max="6" value="${r.h}" onchange="setH(this.value)"></label>
    <details class="mt2" ${sh.kind==='poly'?'open':''}><summary style="cursor:pointer;font-weight:700;font-size:13px">Координаты вершин (точный ввод)</summary>
    <table class="wt mt"><tr><th>№</th><th>X, м</th><th>Y, м</th><th></th></tr>${r.pts.map((q,i)=>`<tr class="${selV===i?'sel':''}"><td>${i+1}</td><td><input type="number" step="0.05" value="${q[0]}" onchange="setXY(${i},0,this.value)"></td><td><input type="number" step="0.05" value="${q[1]}" onchange="setXY(${i},1,this.value)"></td><td>${r.pts.length>3?`<button class="xbtn" title="Удалить вершину" onclick="selV=${i};delV()">×</button>`:''}</td></tr>`).join('')}</table></details>`;
  }
@@ -204,23 +211,30 @@ function renderPanel(){
  $('#panel').innerHTML=h;
 }
 function setType(t){const r=R(),d=RT[t];r.type=t;if(Object.values(RT).some(x=>x.name===r.name))r.name=d.name;r.floor=d.floor;r.ceil=d.ceil;r.walls.forEach(w=>w.finish=d.walls);delete r.wet;commit('Изменён тип помещения');toast(`Отделка по умолчанию для «${d.name}» применена`)}
+// Шаблон строится от левого верхнего угла комнаты, чтобы она не прыгала по плану
+const tplPts=(kind,params,o)=>Geom.fromTemplate(kind,params).map(([x,y])=>[Geom.r2(x+(o.ox||0)),Geom.r2(y+(o.oy||0))]);
+function setH(val){const x=parseFloat(String(val).replace(',','.'));if(!(x>0)){toast('Введите высоту потолка в метрах, например 2,7',false);renderPanel();return}R().h=Geom.r2(x);commit('Изменена высота потолка')}
 function setTpl(k){
  const r=R(),t=Geom.TEMPLATES[k],prev=r.shape;
  const params=prev.kind===k?prev.params:(prev.from===k&&prev.params)||Object.fromEntries(t.params.map(([q,,v])=>[q,v]));
  if(k==='rect'&&prev.kind!=='rect'){const xs=r.pts.map(q=>q[0]),ys=r.pts.map(q=>q[1]);params.L=Geom.r2(Math.max(...xs)-Math.min(...xs));params.W=Geom.r2(Math.max(...ys)-Math.min(...ys))}
- r.shape={kind:k,params:{...params}};r.pts=Geom.fromTemplate(k,r.shape.params);syncWalls(r);selV=null;commit('Выбрана форма: '+t.name);center();
+ const ox=Math.min(...r.pts.map(q=>q[0])),oy=Math.min(...r.pts.map(q=>q[1]));r.shape={kind:k,params:{...params},ox,oy};r.pts=tplPts(k,r.shape.params,r.shape);
+ // проёмы со стен, которых в новой форме нет, переносим на последнюю стену, а не теряем
+ const keepOps=r.openings.map(o=>({o,i:r.walls.findIndex(w=>w.id===o.wallId)}));syncWalls(r);
+ keepOps.forEach(({o,i})=>{if(!r.walls.some(w=>w.id===o.wallId)){const j=Math.min(i,r.walls.length-1),L=Geom.segLen(r.pts[j],r.pts[(j+1)%r.pts.length]);o.wallId=r.walls[j].id;o.off=Geom.r2(Math.max(0,Math.min(o.off,L-o.w)));r.openings.push(o)}});
+ r.openings.forEach(o=>{const j=r.walls.findIndex(w=>w.id===o.wallId),L=Geom.segLen(r.pts[j],r.pts[(j+1)%r.pts.length]);if(o.off+o.w>L)o.off=Geom.r2(Math.max(0,L-o.w))});selV=null;commit('Выбрана форма: '+t.name);center();
 }
 function setParam(k,val){
  const r=R(),t=Geom.TEMPLATES[r.shape.kind],x=parseFloat(val);if(!(x>0))return;
  const np={...r.shape.params,[k]:x},err=t.check&&t.check(np);$('#tplErr').textContent=err||'';if(err)return;
- r.shape.params=np;r.pts=Geom.fromTemplate(r.shape.kind,np);recalc(p);save();drawCanvas();drawResults();renderTabs();clearTimeout(setParam.t);setParam.t=setTimeout(()=>commit('Изменены размеры помещения'),600);
+ r.shape.params=np;r.pts=tplPts(r.shape.kind,np,r.shape);recalc(p);save();drawCanvas();drawResults();renderTabs();clearTimeout(setParam.t);setParam.t=setTimeout(()=>commit('Изменены размеры помещения',true),600);
 }
 function setLen(i,val){const r=R(),x=parseFloat(val);if(!(x>=0.05)){toast('Длина стены должна быть больше 5 см',false);renderPanel();return}r.pts=Geom.setWallLength(r.pts,i,x);toPoly(r);commit(`Стена ${i+1}: длина ${val} м`)}
 function setXY(i,k,val){const r=R(),x=parseFloat(val);if(isNaN(x))return;r.pts[i][k]=Geom.r2(x);toPoly(r);commit('Изменены координаты вершины')}
-function setO(id,k,val){const o=R().openings.find(x=>x.id===id);o[k]=val;commit('Изменён проём')}
+function setO(id,k,val){const o=R().openings.find(x=>x.id===id);if(['w','h'].includes(k)&&!(val>0)||['off','sill'].includes(k)&&!(val>=0)||Number.isNaN(val)){toast('Размер проёма должен быть положительным числом',false);renderPanel();return}o[k]=typeof val==='number'?Geom.r2(val):val;commit('Изменён проём')}
 function addO(kind){const r=R(),L=r.pts.map((q,i)=>Geom.segLen(q,r.pts[(i+1)%r.pts.length])),i=L.indexOf(Math.max(...L)),w=kind==='door'?0.8:Math.min(1.2,L[i]-0.4);
  r.openings.push({id:uid(),kind,wallId:r.walls[i].id,w:Geom.r2(w),h:kind==='door'?2:1.4,off:Geom.r2(Math.max(0,(L[i]-w)/2)),sill:kind==='door'?0:0.85});commit(kind==='door'?'Добавлена дверь':'Добавлено окно')}
-function setX(id,k,val){const x=R().excl.find(q=>q.id===id);x[k]=val;commit('Изменена вычитаемая область')}
+function setX(id,k,val){const x=R().excl.find(q=>q.id===id);if(['w','h'].includes(k)&&!(val>0)||Number.isNaN(val)){toast('Размеры вычета должны быть положительными',false);renderPanel();return}x[k]=typeof val==='number'?Geom.r2(val):val;commit('Изменена вычитаемая область')}
 function addX(name,w,h){const r=R(),xs=r.pts.map(q=>q[0]),ys=r.pts.map(q=>q[1]);r.excl.push({id:uid(),name,w,h,x:Geom.r2(Math.min(...xs)+0.05),y:Geom.r2(Math.min(...ys)+0.05)});commit('Добавлена вычитаемая область: '+name)}
 function delRoom(){if(!confirm('Удалить помещение?'))return;p.rooms=p.rooms.filter(r=>r.id!==p.activeRoom);p.activeRoom=p.rooms[0].id;commit('Удалено помещение');center()}
 let nr={type:'living',kind:'rect'};
@@ -229,7 +243,7 @@ function openAddRoom(){
  $('#nrTpl').innerHTML=Object.entries(Geom.TEMPLATES).map(([k,t])=>`<button class="${nr.kind===k?'on':''}" onclick="nr.kind='${k}';openAddRoom()">${Plan.tplIcon(k)}${t.name}</button>`).join('');
  $('#mRoom').classList.add('show');
 }
-function addRoom(){const r=makeRoom(nr.type,nr.kind);p.rooms.push(r);p.activeRoom=r.id;$('#mRoom').classList.remove('show');commit('Добавлено помещение: '+r.name);center()}
+function addRoom(){const r=makeRoom(nr.type,nr.kind);const all=p.rooms.flatMap(q=>q.pts);if(all.length){const dx=Geom.r2(Math.max(...all.map(q=>q[0]))+1-Math.min(...r.pts.map(q=>q[0]))),dy=Geom.r2(Math.min(...all.map(q=>q[1]))-Math.min(...r.pts.map(q=>q[1])));r.pts=r.pts.map(([x,y])=>[Geom.r2(x+dx),Geom.r2(y+dy)]);r.shape={...r.shape,ox:dx,oy:dy}}p.rooms.push(r);p.activeRoom=r.id;$('#mRoom').classList.remove('show');commit('Добавлено помещение: '+r.name);center()}
 
 // ---------- Результаты ----------
 function drawResults(){

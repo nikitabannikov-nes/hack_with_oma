@@ -66,8 +66,12 @@ const Plan=(()=>{
     s+=`<text x="${c[0]}" y="${c[1]+6}" text-anchor="middle" font-size="${o.thin?12:18}" font-weight="800" fill="#0b3a9e" paint-order="stroke" stroke="#fff" stroke-width="4">${f2(a)} м²</text>`}
    // Ручки вершин и середин
    if(o.interactive){
-    for(let i=0;i<n;i++){const a=sp[i],b=sp[(i+1)%n],mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;
-     if(Math.hypot(b[0]-a[0],b[1]-a[1])>50)s+=`<g data-m="${i}" style="cursor:copy"><circle cx="${mx}" cy="${my}" r="7" fill="#fff" stroke="#0057d6" stroke-width="1.5" opacity=".9"/><text x="${mx}" y="${my+4}" text-anchor="middle" font-size="12" font-weight="800" fill="#0057d6">+</text></g>`}
+    for(let i=0;i<n;i++){const a=sp[i],b=sp[(i+1)%n],Lw=Geom.segLen(pts[i],pts[(i+1)%n]);
+     // «+» ставим в середину самого длинного участка стены без проёмов, чтобы не перекрывать двери и окна
+     const busy=(room.openings||[]).filter(o=>o.wallId===(room.walls[i]||{}).id).map(o=>[o.off,o.off+o.w]).sort((x,y)=>x[0]-y[0]);
+     let best=[0,0],cur=0;[...busy,[Lw,Lw]].forEach(([s0,s1])=>{if(s0-cur>best[1]-best[0])best=[cur,s0];cur=Math.max(cur,s1)});
+     const t=Lw?(best[0]+best[1])/2/Lw:0.5,mx=a[0]+(b[0]-a[0])*t,my=a[1]+(b[1]-a[1])*t;
+     if((best[1]-best[0])*v.s>40)s+=`<g data-m="${i}" data-t="${t.toFixed(4)}" style="cursor:copy"><circle cx="${mx}" cy="${my}" r="7" fill="#fff" stroke="#0057d6" stroke-width="1.5" opacity=".9"/><text x="${mx}" y="${my+4}" text-anchor="middle" font-size="12" font-weight="800" fill="#0057d6">+</text></g>`}
     sp.forEach((p,i)=>{const sel=o.selV===i;s+=`<circle data-v="${i}" cx="${p[0]}" cy="${p[1]}" r="${sel?9:7}" fill="${sel?'#ff9a1a':'#fff'}" stroke="${sel?'#c76b00':'#0057d6'}" stroke-width="2.5" style="cursor:grab"/>`});
    }
   }
