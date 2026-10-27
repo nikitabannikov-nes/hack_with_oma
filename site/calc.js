@@ -73,7 +73,7 @@ function compute(project,tierOverride){
   push('grout',gpk,`${gp.join(' + ')} (формат, толщина, шов 2 мм) + 10% = ${f2(gkg)} кг → ${gpk} уп.`,true);
   // СВП — для плитки от 30 см: ≈3 клипсы на плитку
   const clipTiles=Object.entries(tiles).filter(([,t])=>Math.min(...t.spec.size)>=30);
-  if(clipTiles.length){const n=clipTiles.reduce((s,[role,t])=>s+v.area[role]/(t.spec.size[0]*t.spec.size[1]/1e4)*3,0),pk=Math.ceil(n/200);push('clips',pk,`≈${Math.round(n)} клипс (3 на плитку) ÷ 200 → ${pk} уп.`,true)}
+  if(clipTiles.length){const cq=pick('clips',tier,pinned)?.pack?.q||200,n=clipTiles.reduce((s,[role,t])=>s+v.area[role]/(t.spec.size[0]*t.spec.size[1]/1e4)*3,0),pk=Math.ceil(n/cq);push('clips',pk,`≈${Math.round(n)} клипс (3 на плитку) ÷ ${cq} → ${pk} уп.`,true)}
  }
  if(v.wp>0){const p=pick('wp',tier,pinned),kg=v.wp*p.spec.rate,n=Math.ceil(kg/p.pack.q-1e-9);push('wp',n,`пол + 20 см на стены = ${f2(v.wp)} м² × ${f2(p.spec.rate)} кг/м² (2 слоя) = ${f2(kg)} кг → ${n} шт.`);
   const t=pick('wpTape',tier,pinned),rl=Math.ceil(v.wpTape/t.pack.q-1e-9);push('wpTape',rl,`примыкание пол–стена и углы ${f2(v.wpTape)} м ÷ ${t.pack.q} м → ${rl} рул.`)}

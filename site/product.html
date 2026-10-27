@@ -7,7 +7,7 @@
  <div id="mcRole"></div><div id="mcProj" class="mt2"></div>
  <button class="btn o wide mt2" onclick="startCalc()">Перейти к плану помещения →</button>
 </div></div>
-<script src="data.js"></script><script src="geom.js"></script><script src="calc.js"></script><script src="core.js"></script><script src="plan.js"></script><script src="omik.js"></script><script>
+<script src="oma-catalog.js"></script><script src="data.js"></script><script src="geom.js"></script><script src="calc.js"></script><script src="core.js"></script><script src="plan.js"></script><script src="omik.js"></script><script>
 const pr=P(qp('id'))||P('tw_opt');
 window.OMIK_CTX={page:'product',productId:pr.id};
 chrome('catalog');
@@ -17,13 +17,13 @@ function draw(){
  const ap=activeProject(),inEst=ap&&ap.est.lines.find(l=>l.pid===pr.id),A=analogs(pr.id).slice(0,4),rel=(pr.rel||[]).map(P).filter(Boolean).slice(0,4),sv=pr.service&&svc(pr.service);
  $('#app').innerHTML=`<div class="crumbs"><a href="index.html">Главная</a> / <a href="catalog.html">Каталог</a> / <a href="catalog.html?cat=${pr.cat}">${CATS[pr.cat].name}</a> / ${esc(pr.name)}</div>
  <div class="pg"><div>${pimg(pr,'big')}</div>
-  <div>${badges(pr)}<span class="tag demo">Арт. ${pr.id.toUpperCase()} · демо</span><h1 style="font-size:24px;margin-top:10px">${esc(pr.name)}</h1>
+  <div>${badges(pr)}${pr.real?`<span class="tag demo">Код: ${esc(pr.sku)}${pr.brand?' · '+esc(pr.brand):''}</span>${pr.rating?` <span class="tag">★ ${pr.rating.toFixed(1)}</span>`:''}`:`<span class="tag demo">Арт. ${pr.id.toUpperCase()} · демо</span>`}<h1 style="font-size:24px;margin-top:10px">${esc(pr.name)}</h1>
    <p style="margin:0 0 6px">${esc(pr.desc||'')}</p>
    <div class="spec">${(pr.props||[]).map(([k,v])=>`<div><span>${k}</span><b>${esc(v)}</b></div>`).join('')}${pr.pack?`<div><span>Единица продажи</span><b>${pr.unit} (${num(pr.pack.q)} ${pr.pack.u})</b></div>`:''}</div>
    ${pr.roles.length?`<div class="tip mt2" style="margin-bottom:0"><img src="img/omik-idea.png" alt=""><div>Расход считается по характеристикам этого товара${pr.spec.rate?` (${num(pr.spec.rate)} ${pr.cat==='mix'&&pr.roles[0]==='glue'?'кг/м² на 1 мм':pr.roles[0]==='primer'?'л/м²':'кг/м²'})`:pr.spec.cover?` (${pr.spec.cover} м²/л на слой)`:pr.spec.size?` (формат ${pr.spec.size.join('×')}, ${pr.pack.q} м² в упаковке)`:''} и площадям вашего плана.</div></div>`:''}
   </div>
-  <div class="card buy"><div class="price">${byn(pr.price)}</div><div class="note">за ${pr.unit}${pr.priceM2?` · ${byn(pr.priceM2)} за м²`:''}</div>
-   <div class="note" style="color:var(--ok);font-weight:600;margin:8px 0 14px">● Наличие в демо не проверяется</div>
+  <div class="card buy"><div class="price">${byn(pr.price)}${pr.oldPrice?` <s style="font-size:16px;color:var(--mute)">${byn(pr.oldPrice)}</s>`:''}</div><div class="note">за ${pr.unit}${pr.priceM2?` · ${byn(pr.priceM2)} за м²`:''}</div>
+   <div class="note" style="color:var(--ok);font-weight:600;margin:8px 0 14px">● ${pr.real?`Цена с oma.by · <a href="${pr.url}" target="_blank" rel="noopener" style="color:var(--blue)">карточка на сайте ОМА ↗</a>`:'Наличие в демо не проверяется'}</div>
    <div style="display:flex;gap:8px;align-items:center"><span class="qty"><button onclick="qty=Math.max(1,qty-1);draw()">−</button><input value="${qty}" onchange="qty=Math.max(1,+this.value||1);draw()"><button onclick="qty++;draw()">+</button></span><button class="btn o" style="flex:1" onclick="cartAdd(pr.id,qty);toast('🛒 Добавлено в корзину')">В корзину</button></div>
    <button class="btn g wide mt" onclick="toEst()">📋 ${inEst?`В смете: ${inEst.qty} ${pr.unit}`:'Добавить в смету проекта'}</button>
    ${pr.roles.length?`<div class="calcbox" id="calc"><b>Сколько нужно?</b><div class="note" style="margin:4px 0 10px">Постройте план комнаты, даже Г- или П-образной. Количество посчитается по реальной площади и упаковкам.</div><button class="btn wide" onclick="openCalc()">📐 Рассчитать количество</button></div>`:''}
