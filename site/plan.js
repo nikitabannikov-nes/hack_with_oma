@@ -35,11 +35,15 @@ const Plan=(()=>{
   if(o.grid!==false)s+=grid(v,W,H);
   if(o.under){const u=o.under,[a,b]=T(v,[u.x,u.y]);s+=`<image href="${u.src}" x="${a}" y="${b}" width="${u.w*v.s}" height="${u.h*v.s}" opacity="${o.underOp??.4}" preserveAspectRatio="none" style="pointer-events:none"/>`}
   (o.ghosts||[]).forEach(g=>{if(!g.pts||g.pts.length<3)return;const gp=g.pts.map(q=>T(v,q)),c=T(v,Geom.labelPoint(g.pts));
+   // Активная комната: пол и стены с отделкой, но без ручек — редактируется только выбранная
+   if(o.full){const ok=Geom.validate(g).ok,body=draw(g,v,{W,H,grid:false,scale:false,labels:false,valid:ok,floorMat:o.lookOf&&o.lookOf(g),id:'a'+g.id}).replace(/ data-[wox]="[^"]*"/g,'').replace(/cursor:(pointer|move|grab)/g,'cursor:inherit');
+    s+=`<g data-g="${g.id}" style="cursor:${o.movable?'move':'pointer'}">${body}<text x="${c[0]}" y="${c[1]}" text-anchor="middle" font-size="12" font-weight="700" fill="#1a2233" paint-order="stroke" stroke="#fff" stroke-width="3" style="pointer-events:none">${esc(g.name)}</text>${ok?`<text x="${c[0]}" y="${c[1]+15}" text-anchor="middle" font-size="11" font-weight="700" fill="#0b3a9e" paint-order="stroke" stroke="#fff" stroke-width="3" style="pointer-events:none">${f2(Geom.area(g.pts))} м²</text>`:''}</g>`;return}
    s+=`<g data-g="${g.id}" style="cursor:pointer"><polygon points="${gp.map(q=>q.join(',')).join(' ')}" fill="#dfe6f2" fill-opacity=".55" stroke="#9aa8c2" stroke-width="2"/><text x="${c[0]}" y="${c[1]+4}" text-anchor="middle" font-size="12" font-weight="700" fill="#5b6780">${esc(g.name)}</text></g>`});
   if(n>=3){
    const fill=!ok?'#fde6e3':fmFill?fmFill:room.floor==='tile'?`url(#tileP${o.id||''})`:room.floor==='laminate'?`url(#lamP${o.id||''})`:'#f6f8fc';
-   s+=`<polygon points="${sp.map(p=>p.join(',')).join(' ')}" fill="${fill}" stroke="none"/>`;
-   if(room.floor==='tile'&&ok&&!fmFill)s+=`<polygon points="${sp.map(p=>p.join(',')).join(' ')}" fill="#eef4ff" opacity=".55"/>`;
+   const body=o.interactive?' data-b="1" style="cursor:move"':'';
+   s+=`<polygon${body} points="${sp.map(p=>p.join(',')).join(' ')}" fill="${fill}" stroke="none"/>`;
+   if(room.floor==='tile'&&ok&&!fmFill)s+=`<polygon${body} points="${sp.map(p=>p.join(',')).join(' ')}" fill="#eef4ff" opacity=".55"/>`;
    // Вычитаемые области
    (room.excl||[]).forEach(x=>{const[a,b]=T(v,[x.x,x.y]);s+=`<g data-x="${x.id}" style="cursor:${o.interactive?'move':'default'}"><rect x="${a}" y="${b}" width="${x.w*v.s}" height="${x.h*v.s}" fill="url(#hatch${o.id||''})" stroke="#6b7488" stroke-width="1.5" opacity=".8"/>${o.labels!==false&&x.w*v.s>40?`<text x="${a+x.w*v.s/2}" y="${b+x.h*v.s/2+4}" text-anchor="middle" font-size="11" font-weight="700" fill="#1a2233" paint-order="stroke" stroke="#fff" stroke-width="3">${esc(x.name)}</text>`:''}</g>`});
    // Стены: тёмная линия + цвет отделки
@@ -69,7 +73,7 @@ const Plan=(()=>{
     if(o.numbers)s+=`<g data-w="${i}" style="cursor:pointer"><circle cx="${ix}" cy="${iy}" r="9" fill="${o.selWall===i?'#18a058':'#fff'}" stroke="${FIN[(room.walls[i]||{}).finish]||FIN.none}" stroke-width="2"/><text x="${ix}" y="${iy+4}" text-anchor="middle" font-size="10" font-weight="800" fill="${o.selWall===i?'#fff':'#1a2233'}">${i+1}</text></g>`;
    }
    if(o.labels!==false&&ok){const c=T(v,Geom.labelPoint(pts)),a=Geom.area(pts);
-    s+=`<text x="${c[0]}" y="${c[1]+6}" text-anchor="middle" font-size="${o.thin?12:18}" font-weight="800" fill="#0b3a9e" paint-order="stroke" stroke="#fff" stroke-width="4">${f2(a)} м²</text>`}
+    s+=`<text x="${c[0]}" y="${c[1]+6}" text-anchor="middle" font-size="${o.thin?12:18}" font-weight="800" fill="#0b3a9e" paint-order="stroke" stroke="#fff" stroke-width="4" style="pointer-events:none">${f2(a)} м²</text>`}
    // Ручки вершин и середин
    if(o.interactive){
     for(let i=0;i<n;i++){const a=sp[i],b=sp[(i+1)%n],Lw=Geom.segLen(pts[i],pts[(i+1)%n]);
