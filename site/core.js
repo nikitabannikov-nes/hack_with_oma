@@ -147,26 +147,82 @@ function shareUrl(p){
 function readShare(){const m=location.hash.match(/#d=(.+)/);if(!m)return null;try{return JSON.parse(decodeURIComponent(escape(atob(m[1]))))}catch(e){return null}}
 
 // ---------- Общие элементы интерфейса ----------
-const LOGO='<svg viewBox="0 0 120 40" aria-hidden="true"><path d="M2 20a18 18 0 0 1 18-18h4L10 38A18 18 0 0 1 2 20z" fill="#0057d6"/><path d="M26 38 40 4h6l14 34z" fill="#0057d6"/><path d="M60 38 74 4h6l14 34z" fill="#0057d6"/></svg>';
-const NAV=[['index','Главная','index.html'],['omik','Омик','omik.html'],['planner','Калькулятор','planner.html'],['catalog','Каталог','catalog.html'],['masters','Мастера и услуги','masters.html'],['projects','Мои проекты','projects.html']];
+// Шапка, меню каталога и подвал — копия oma.by (дерево разделов: oma-menu.js, иконки: img/oma-icons.svg)
+const OMA='https://www.oma.by';
+const ico=(id,cls='')=>`<svg class="${cls}"><use href="img/oma-icons.svg#${id}"></use></svg>`;
+// Сплошные иконки шапки (на oma.by они растровые в спрайте)
+const HICO={search:'<svg viewBox="0 0 24 24"><path d="M10.5 3a7.5 7.5 0 0 1 5.96 12.05l4.25 4.24-1.42 1.42-4.24-4.25A7.5 7.5 0 1 1 10.5 3zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11z"/></svg>',
+ user:'<svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-5.33 0-9 2.7-9 6v2h18v-2c0-3.3-3.67-6-9-6z"/></svg>',
+ heart:'<svg viewBox="0 0 24 24"><path d="M12 21.35 10.55 20C5.4 15.36 2 12.27 2 8.5A5.42 5.42 0 0 1 7.5 3 6 6 0 0 1 12 5.09 6 6 0 0 1 16.5 3 5.42 5.42 0 0 1 22 8.5c0 3.77-3.4 6.86-8.55 11.54z"/></svg>',
+ cart:'<svg viewBox="0 0 24 24"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM1 2v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7.42a.25.25 0 0 1-.22-.37L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 20 4H5.21l-.94-2z"/></svg>'};
+// Быстрые ссылки ОМА + наши модули (выделены фиолетовым)
+const QUICK=[['red','Все акции','/sales/',1],['darkblue2','Супер цены','/sales/super-tseny/'],['red','Топ продаж','/sales/top-prodazh/'],['darkorange','Оплата частями','/buyers/payment/#credit']];
+const NAV=[['omik','Омик','omik.html'],['planner','Калькулятор','planner.html'],['masters','Мастера','masters.html'],['projects','Мои проекты','projects.html']];
+// Подкатегория ОМА есть в нашем демо-каталоге → ведём в каталог, иначе — на oma.by
+function inCatalog(name){
+ const stem=String(name).toLowerCase().replace(/ё/g,'е').split(/[^a-zа-я0-9]+/).find(w=>w.length>3);
+ return!!stem&&PRODUCTS.some(p=>p.name.toLowerCase().replace(/ё/g,'е').includes(stem.slice(0,Math.max(4,stem.length-2))));
+}
+const menuLink=(name,h)=>inCatalog(name)?{href:'catalog.html?q='+encodeURIComponent(name),ours:true}:{href:OMA+h,ours:false,ext:true};
+function sideMenu(){
+ if(typeof OMA_MENU==='undefined')return'';
+ return`<nav class="omenu" onmouseleave="subOpen(-1)"><a class="omenu-i ours" href="omik.html"><img src="img/omik-avatar.png" alt="">Ремонт с Омиком</a>${OMA_MENU.map((m,i)=>`<a class="omenu-i" href="catalog.html" data-i="${i}" onmouseenter="subOpen(${i})">${ico(m.icon)}${esc(m.name)}</a>`).join('')}<div class="ssm" id="ssm"></div></nav>`;
+}
+function subOpen(i){
+ const box=$('#ssm');if(!box)return;$$('.omenu-i').forEach(a=>a.classList.toggle('on',+a.dataset.i===i));
+ if(i<0){box.classList.remove('open');return}
+ const m=OMA_MENU[i];
+ box.innerHTML=m.cols.map(col=>`<div class="ssm-col">${col.map(g=>{const t=menuLink(g.t,g.h);
+  return`<div class="ssm-g"><a class="ssm-t" href="${t.href}"${t.ext?' target="_blank" rel="noopener"':''}>${esc(g.t)}</a>${g.i.map(([n,h],k)=>{const l=menuLink(n,h);return`<a class="ssm-l ${l.ours?'ours':''}" href="${l.href}"${l.ext?' target="_blank" rel="noopener"':''}${k>=6?' style="display:none"':''}>${esc(n)}</a>`}).join('')}${g.i.length>6?`<span class="ssm-more" onclick="this.parentNode.querySelectorAll('.ssm-l').forEach(a=>a.style.display='');this.remove()">Еще</span>`:''}</div>`}).join('')}</div>`).join('');
+ box.classList.add('open');
+}
+function toggleDrop(on){const d=$('#omaDrop');if(d)d.classList.toggle('show',on??!d.classList.contains('show'))}
 function chrome(active,o={}){
- const s=load(),p=o.noCtx?null:activeProject();
+ const p=o.noCtx?null:activeProject(),onIndex=active==='index';
  $('#chrome').innerHTML=`
- <div class="demo"><div class="wrap"><b>ДЕМО</b><span>Прототип для Space Hackathon with ОМА. Товары, цены, мастера и оплата условные.</span><span class="sp"></span><button onclick="if(confirm('Сбросить все демо-данные?'))resetDemo()">↺ Сбросить демо</button></div></div>
- <header class="main"><div class="wrap">
-  <a class="logo" href="index.html">${LOGO}<span>ГИПЕРМАРКЕТ<br>ОМА</span></a>
-  <a class="cat" href="catalog.html">☰ Каталог</a>
-  <form class="search" onsubmit="event.preventDefault();location='catalog.html?q='+encodeURIComponent(this.q.value)"><input name="q" placeholder="Плитка, клей, смеситель, укладка…" value="${esc(active==='catalog'?qp('q')||'':'')}"><button>Найти</button></form>
-  <nav class="hico"><a href="projects.html"><i>📁</i>Проекты<span class="cnt" data-b="proj"></span></a><a href="masters.html#requests"><i>👷</i>Заявки<span class="cnt" data-b="req"></span></a><a href="cart.html"><i>🛒</i>Корзина<span class="cnt" data-b="cart"></span></a></nav>
- </div></header>
- <nav class="sub"><div class="wrap">${NAV.map(([k,t,h])=>`<a href="${h}" class="${k===active?'on':''}">${k==='omik'?'<img src="img/omik-avatar.png" alt="">':''}${t}</a>`).join('')}</div></nav>
+ <a class="oma-strip" href="${OMA}/buyers/discount/balans/#card-info" target="_blank" rel="noopener">Зарегистрировать карту</a>
+ <div class="oma-top"><div class="wrap"><span>Выбрано: <b>Минск</b></span><span class="hide-m">Контакт-центр: <b>536-45-00</b></span><span class="sp"></span>
+  <a class="hide-m" href="${OMA}/about/departments/" target="_blank" rel="noopener">Адреса магазинов</a><a class="hide-m" href="${OMA}/buyers/" target="_blank" rel="noopener">Покупателям</a><a class="hide-m" href="${OMA}/partners/become-partner/" target="_blank" rel="noopener">Партнерам</a><a class="hide-m" href="${OMA}/about/" target="_blank" rel="noopener">Компания ОМА</a></div></div>
+ <header class="oma-head">
+  <div class="oma-mid"><div class="wrap">
+   <a class="oma-logo" href="index.html" aria-label="ОМА"></a>
+   <form class="oma-search" onsubmit="event.preventDefault();location='catalog.html?q='+encodeURIComponent(this.q.value)"><input name="q" placeholder="Ламинат" value="${esc(active==='catalog'?qp('q')||'':'')}"><button aria-label="Найти">${HICO.search}</button></form>
+   <div class="oma-acts">
+    <a class="oma-act" href="projects.html">${HICO.user}<span class="t"><small>Мои</small><b>Проекты</b></span><span class="cnt" data-b="proj"></span></a>
+    <a class="oma-act" href="masters.html#requests">${HICO.heart}<span class="t"><b>Заявки</b></span><span class="cnt" data-b="req"></span></a>
+    <a class="oma-act" href="cart.html">${HICO.cart}<span class="t"><b>Корзина</b></span><span class="cnt" data-b="cart"></span></a>
+   </div>
+  </div></div>
+  <div class="oma-bot"><div class="wrap"><div class="oma-menu">
+   <button class="oma-catbtn" ${onIndex?`onclick="location='catalog.html'"`:`onclick="toggleDrop()"`}><i></i>Весь каталог</button>
+   <nav class="oma-quick">${QUICK.map(([c,t,h,f])=>`<a class="${c}" href="${OMA}${h}" target="_blank" rel="noopener">${f?ico('fire'):''}${t}</a>`).join('')}${NAV.map(([k,t,h])=>`<a class="ours ${k===active?'on':''}" href="${h}">${k==='omik'?'<img src="img/omik-avatar.png" alt="">':''}${t}</a>`).join('')}</nav>
+  </div>${onIndex?'':`<div class="oma-drop" id="omaDrop" onmouseleave="toggleDrop(false)">${sideMenu()}</div>`}</div></div>
+ </header>
  ${p?`<div class="ctx"><div class="wrap"><span class="ctx-l">Текущий проект:</span><a class="ctx-p" href="projects.html">${RT[p.task]?.icon||'📁'} <b>${esc(p.title)}</b></a>
   <span class="ctx-s">${num(floorArea(p),1)} м² · ${p.est.lines.length} поз. · ${byn(estTotal(p))}</span><span class="sp"></span>
   <a href="planner.html?project=${p.id}" class="${active==='planner'?'on':''}">📐 План</a><a href="smeta.html?project=${p.id}" class="${active==='smeta'?'on':''}">📋 Смета</a><a href="masters.html?project=${p.id}" class="${active==='masters'?'on':''}">👷 Мастер</a></div></div>`:''}`;
- if(!$('footer'))document.body.insertAdjacentHTML('beforeend',`<footer><div class="wrap"><div><b>ОМА Проект</b>Демо-прототип: от идеи ремонта до материалов и мастера.<br>Не является действующим сервисом ОМА.</div><div><b>Модули</b><a href="omik.html">Омик — AI-прораб</a><br><a href="planner.html">2D-калькулятор</a><br><a href="catalog.html">Каталог и смета</a><br><a href="masters.html">Мастера и услуги</a></div><div><b>Честно о демо</b>Омик работает по сценариям без внешней LLM.<br>Оплата и выплаты мастерам не проводятся.</div></div></footer>`);
+ if(!$('footer'))document.body.insertAdjacentHTML('beforeend',footerHtml());
  updateBadges();
  if(active!=='omik'&&typeof OmikWidget!=='undefined')OmikWidget.mount();
 }
+function footerHtml(){
+ const ext=(t,h)=>`<a href="${OMA}${h}" target="_blank" rel="noopener">${t}</a>`;
+ const soc=(typeof OMA_SOCIAL!=='undefined'?OMA_SOCIAL:[]).map(([n,h,s])=>`<a href="${h}" target="_blank" rel="noopener" aria-label="${n}">${ico(s)}</a>`).join('');
+ const medals=[['medal-1',2012],['medal-1',2013],['medal-1',2014],['medal-1',2016],['gold-19',2019],['medal-2',2014],['medal-2',2016],['medal-3',2025]];
+ return`<footer class="oma-f"><div class="wrap">
+  <div><a class="f-masters" href="masters.html"><span>Услуги мастеров</span></a><div class="f-soc">${soc}</div>
+   <div class="f-pay">${['pay-visa','pay-mastercard','pay-belcart','pay-google-pay','pay-apple-pay','pay-halva'].map(x=>ico(x)).join('')}</div></div>
+  <div class="f-cols">
+   <div><span class="f-h">Покупателям</span>${ext('Форма обратной связи','/buyers/')}${ext('Доставка','/buyers/delivery/')}${ext('Самовывоз','/buyers/samovyvoz/')}${ext('Способы оплаты','/buyers/payment/')}${ext('Оплата частями','/buyers/payment/#credit')}${ext('Полезные статьи','/buyers/helpful/')}${ext('Возврат и гарантия','/buyers/warranty/')}${ext('Программа лояльности','/buyers/discount/balans/#card-info')}</div>
+   <div><span class="f-h">Ремонт с ОМА</span><a class="ours" href="omik.html">Омик — помощник по ремонту</a><a class="ours" href="planner.html">2D-калькулятор материалов</a><a class="ours" href="import.html">Планировка по фото</a><a class="ours" href="catalog.html">Каталог и смета</a><a class="ours" href="masters.html">Мастера и прокат</a><a class="ours" href="projects.html">Мои проекты</a>
+    <span class="f-h" style="margin-top:22px">Компания ОМА</span>${ext('О компании','/about/')}${ext('Новости','/news/')}${ext('Работа в ОМА','/about/rabota-v-oma/')}${ext('Отзывы об ОМА','/reviews/')}</div>
+  </div>
+  <div><div class="f-awards">${medals.map(([m,y])=>`<div><img src="${OMA}/local/images/awards/${m}.png" alt="" loading="lazy">${y}</div>`).join('')}</div>
+   <div class="f-dipl"><img src="${OMA}/local/images/awards/diplom-1.png" alt="" loading="lazy"><img src="${OMA}/local/images/awards/diplom-2.png" alt="" loading="lazy"></div></div>
+  <div class="f-demo">Демо-прототип для Space Hackathon with ОМА: оформление, товары и цены взяты с oma.by, расчёты, мастера и заказы — демонстрационные. <button class="btn ghost sm" onclick="if(confirm('Сбросить все демо-данные?'))resetDemo()">↺ Сбросить демо</button></div>
+ </div></footer>`;
+}
+document.addEventListener('click',e=>{const d=$('#omaDrop');if(d&&d.classList.contains('show')&&!e.target.closest('#omaDrop,.oma-catbtn'))d.classList.remove('show')});
 function updateBadges(){
  const s=load(),set=(k,v)=>$$(`[data-b="${k}"]`).forEach(e=>{e.textContent=v;e.style.display=v?'inline-block':'none'});
  set('cart',s.cart.length);set('proj',s.projects.length);set('req',s.requests.filter(r=>r.status<3).length);
@@ -190,11 +246,18 @@ function pimg(p,cls=''){
 }
 const priceTag=p=>p.priceM2?`<b>${byn(p.price)}</b><small> / ${p.unit} · ${byn(p.priceM2)} за м²</small>`:`<b>${byn(p.price)}</b><small> / ${p.unit}</small>`;
 const badges=p=>`${p.stm?'<span class="tag stm">СТМ ОМА</span>':''}${p.tier&&TIERS[p.tier]?`<span class="tag t-${p.tier}">${TIERS[p.tier]}</span>`:''}`;
+// Цена как на oma.by: «34,92 Ƀ/уп.» (знак рубля — шрифт nbrb)
+const omaNum=n=>(+n).toLocaleString('ru-RU',{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2});
+const omaPrice=(n,u)=>`${omaNum(n)}<i class="nbrb">BYN</i>${u?`<span class="u">/${u.replace(/\.$/,'')}</span>`:''}`;
 function pcard(p,o={}){
- return`<div class="card pc"><a href="product.html?id=${p.id}">${pimg(p)}</a><div class="pc-b">
-  <div class="pc-t">${badges(p)}</div><a class="pc-n" href="product.html?id=${p.id}">${esc(p.name)}</a>
-  <div class="pc-p">${priceTag(p)}</div>
-  <div class="pc-a">${o.actions||`<button class="btn sm" onclick="quickCart('${p.id}')">В корзину</button><button class="btn sm g" onclick="quickEst('${p.id}')">В смету</button>`}</div></div></div>`;
+ const old=p.oldPrice&&p.oldPrice>p.price?p.oldPrice:null,disc=old?Math.round((1-p.price/old)*100):0;
+ return`<div class="card pc">${disc?`<span class="pc-disc">-${disc}%</span>`:''}<a href="product.html?id=${p.id}">${pimg(p)}</a><div class="pc-b">
+  <div class="pc-t"><span class="tags">${badges(p)}</span>${p.sku?`<span class="pc-code">Код: ${esc(p.sku)}</span>`:''}</div>
+  <a class="pc-n" href="product.html?id=${p.id}">${esc(p.name)}</a>
+  <div class="pc-p"><b class="${old?'sale':''}">${omaPrice(p.price)}</b>${old?`<s>${omaNum(old)}</s>`:''}<span class="u">/${String(p.unit).replace(/\.$/,'')}</span></div>
+  ${p.priceM2&&p.priceM2!==p.price?`<div class="pc-m2">${omaNum(p.priceM2)} BYN за м²</div>`:''}
+  <div class="pc-bonus"><span>+${(p.price/100).toFixed(2).replace('.',',')} бонусов</span> за покупку</div>
+  <div class="pc-a">${o.actions||`<button class="btn" onclick="quickCart('${p.id}')">${ico('icon__cart-add')}В корзину</button><button class="btn g" onclick="quickEst('${p.id}')">＋ В смету проекта</button>`}</div></div></div>`;
 }
 function quickCart(pid){cartAdd(pid,1);toast(`🛒 «${esc(P(pid).name)}» в корзине`)}
 function quickEst(pid){

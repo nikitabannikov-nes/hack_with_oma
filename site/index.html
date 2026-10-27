@@ -1,36 +1,85 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ОМА Проект — от идеи ремонта до материалов и мастера</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="app.css"></head><body><div id="chrome"></div>
-<div class="wrap">
- <section class="hero"><div>
-  <span class="tag" style="background:var(--orange);color:#fff">ОМА Проект · демо</span>
-  <h1>Что хотите сделать?</h1>
-  <p>Опишите задачу Омику или начните с плана комнаты. Посчитаем материалы по реальной геометрии, подберём товары под бюджет и найдём мастера. Все модули работают с одним проектом, данные между ними не теряются.</p>
-  <form class="ask" onsubmit="event.preventDefault();location='omik.html?q='+encodeURIComponent(this.q.value||'Хочу положить плитку в ванной, бюджет до 1500 BYN')"><input name="q" placeholder="Хочу положить плитку в ванной, бюджет до 1500 BYN"><button class="btn o">Спросить Омика</button></form>
-  <div class="hchips"><a href="omik.html?q=Плитка в ванной 2,2 на 1,7, бюджет 1500">🛁 Плитка в ванной</a><a href="omik.html?q=Покрасить комнату 4 на 3">🎨 Покрасить комнату</a><a href="planner.html?new=1&task=living">🪵 Ламинат в Г-образной комнате</a><a href="import.html?example=1">📷 Планировка по фото</a><a href="product.html?id=mix_bath">🚿 Установить смеситель</a></div>
- </div><img class="omik" src="img/omik-hero.png" alt="Омик — бобр в каске ОМА"></section>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Гипермаркет ОМА — ремонт с Омиком</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="app.css"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css"></head><body><div id="chrome"></div>
+<main class="wrap">
+ <section class="bb">
+  <div id="side"></div>
+  <div class="bb-r">
+   <div class="slider" id="slider">
+    <a class="slide on" href="omik.html"><div class="bnr"><div class="tx"><span class="lbl">Новинка · ИИ-помощник</span><h2>Ремонт<br>с Омиком</h2><p>Скиньте план или фото комнаты — Омик посчитает ламинат, плитку, клей и мешки цемента и соберёт корзину.</p><span class="btn o">Спросить Омика</span></div><img class="pers" src="img/omik-hero.png" alt="Омик"></div></a>
+    <a class="slide" href="planner.html?new=1&task=bath"><div class="bnr calc"><div class="tx"><span class="lbl">2D-калькулятор</span><h2>Посчитаем<br>до упаковки</h2><p>Г- и П-образные комнаты, ниши, проёмы. Количество — по реальной площади и упаковкам товаров ОМА.</p><span class="btn o">Построить план</span></div><div class="plan" id="bnrPlan"></div></div></a>
+    <a class="slide" href="masters.html"><div class="bnr mast"><div class="tx"><span class="lbl">Мастера ОМА</span><h2>Уложим<br>за вас</h2><p>Фиксированная цена работ по объёмам из плана. Не нужен мастер — возьмите инструмент в прокат.</p><span class="btn o">Найти мастера</span></div><img class="pers" src="img/omik-ok.png" alt=""></div></a>
+    <a class="slide" href="https://www.oma.by/news/khalva-12-mesyatsev-na-pokupki-ot-100r-c-23-10-po-01-11/" target="_blank" rel="noopener"><img class="full" src="https://www.oma.by/upload/images/resize/banners/a9/a8/2468264/1365x575_cut_q90.jpg" alt="Халва 12 месяцев"></a>
+    <button class="arr l" onclick="event.preventDefault();slide(-1)" aria-label="Назад">‹</button><button class="arr r" onclick="event.preventDefault();slide(1)" aria-label="Вперёд">›</button>
+    <div class="dots" id="dots"></div>
+   </div>
+   <div class="grid3">
+    <a class="bgi" href="import.html?example=1"><div><b>Планировка по фото</b><span>Сфотографируйте план квартиры — комнаты распознаются автоматически</span></div><img src="img/plan-example.jpg" alt=""></a>
+    <a class="bgi" href="planner.html?new=1&task=bath&title=%D0%9E%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%20%D0%BA%D0%BB%D0%B8%D0%B5%D0%BD%D1%82%D0%B0"><div><b>Смета клиенту ссылкой</b><span>Для мастеров: план, смета и согласование в одном месте</span></div><img src="img/omik-idea.png" alt="" style="object-fit:contain;background:#eef4fb"></a>
+    <a class="bgi" href="https://www.oma.by/buyers/certificates/" target="_blank" rel="noopener"><div><b>Подарочные карты ОМА</b><span>Идеальный подарок на любой праздник</span></div><img src="https://www.oma.by/upload/medialibrary/726/dc7t4x6hwvkkm1f2ombr1jp47456r1wb.PNG" alt=""></a>
+   </div>
+  </div>
+ </section>
+
  <div id="cont"></div>
- <h2>Начните с любого шага</h2>
- <div class="doors">
-  <a class="card door" href="omik.html"><span class="ic"><img src="img/omik-avatar.png" alt="" style="width:40px;height:40px;border-radius:50%"></span><h3>Омик — AI-прораб</h3><p>Уточнит задачу, создаст проект, подберёт материалы и мастера. Количество считает калькулятор, а не догадки.</p><b class="go">Написать Омику →</b></a>
-  <a class="card door" href="planner.html?new=1&task=bath"><span class="ic">📐</span><h3>2D-калькулятор</h3><p>Прямоугольные, Г- и П-образные комнаты, ниши, скосы, любой многоугольник — или весь дом по фото планировки.</p><b class="go">Построить план →</b></a>
-  <a class="card door" href="catalog.html"><span class="ic">🧱</span><h3>Материалы и смета</h3><p>Из карточки товара — сразу в расчёт. Три комплектации, аналоги, СТМ ОМА, сравнение.</p><b class="go">Открыть каталог →</b></a>
-  <a class="card door" href="masters.html"><span class="ic">👷</span><h3>Мастера и услуги</h3><p>Стоимость работ по объёмам из плана, заявка с привязкой к проекту и товарам, статусы.</p><b class="go">Найти мастера →</b></a>
+
+ <section class="omik-sec">
+  <img src="img/omik-hero.png" alt="Омик — бобр в каске ОМА">
+  <div><h2>Что хотите сделать?</h2>
+   <p>Опишите задачу Омику или начните с плана комнаты. Посчитаем материалы по реальной геометрии, подберём товары ОМА под бюджет и найдём мастера.</p>
+   <form class="omik-ask" onsubmit="event.preventDefault();location='omik.html?q='+encodeURIComponent(this.q.value||'Хочу положить плитку в ванной, бюджет до 1500 BYN')"><input name="q" placeholder="Хочу положить плитку в ванной, бюджет до 1500 BYN"><button class="btn o">Спросить Омика</button></form>
+   <div class="omik-chips"><a href="omik.html?q=Плитка в ванной 2,2 на 1,7, бюджет 1500">🛁 Плитка в ванной</a><a href="omik.html?q=Покрасить комнату 4 на 3">🎨 Покрасить комнату</a><a href="planner.html?new=1&task=living">🪵 Ламинат в Г-образной комнате</a><a href="import.html?example=1">📷 Планировка по фото</a><a href="product.html?id=mix_bath">🚿 Установить смеситель</a></div>
+  </div>
+ </section>
+
+ <div class="tools4">
+  <a class="tl" href="omik.html"><span class="ic"><img src="img/omik-avatar.png" alt=""></span><b>Омик — AI-прораб</b><span>Уточнит задачу, создаст проект, подберёт материалы и мастера.</span><em>Написать Омику →</em></a>
+  <a class="tl" href="planner.html?new=1&task=bath"><span class="ic">📐</span><b>2D-калькулятор</b><span>Любая форма комнаты или весь дом по фото планировки.</span><em>Построить план →</em></a>
+  <a class="tl" href="catalog.html"><span class="ic">📋</span><b>Материалы и смета</b><span>Три комплектации, аналоги, сравнение — по товарам ОМА.</span><em>Открыть каталог →</em></a>
+  <a class="tl" href="masters.html"><span class="ic">👷</span><b>Мастера и прокат</b><span>Работы по объёмам из плана, заявка со статусами.</span><em>Найти мастера →</em></a>
  </div>
- <h2>Как проходит путь клиента</h2>
- <div class="flowline">
-  <div><i>1</i><b>Задача</b>Текстом Омику, с карточки товара или сразу в калькулятор</div>
-  <div><i>2</i><b>План 2D</b>Форма любой сложности, проёмы, разные отделки стен</div>
-  <div><i>3</i><b>Смета</b>Количество по нормам товаров, комплектация под бюджет</div>
-  <div><i>4</i><b>Корзина и ссылка</b>Заказ материалов или согласование сметы по ссылке</div>
-  <div><i>5</i><b>Мастер</b>Заявка с объёмами и товарами, статус выполнения</div>
- </div>
- <h2>Популярное для ремонта ванной</h2>
- <div class="pgrid" id="pop"></div>
- <h2>Для мастеров</h2>
- <div class="card pad" style="display:grid;grid-template-columns:120px minmax(0,1fr) auto;gap:20px;align-items:center"><img src="img/omik-ok.png" alt="" style="width:110px"><div><h3 style="margin:0 0 4px">Смета клиенту — ссылкой</h3><p class="note" style="margin:0;font-size:14px">Мастер строит план и смету, отправляет ссылку в мессенджер. Клиент видит позиции и расчёт, согласует или просит изменения и сам заказывает материалы в ОМА. Любая правка после согласования приходит новой версией.</p></div><a class="btn" href="planner.html?new=1&task=bath&title=%D0%9E%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%20%D0%BA%D0%BB%D0%B8%D0%B5%D0%BD%D1%82%D0%B0">Составить смету</a></div>
-</div>
-<script src="oma-catalog.js"></script><script src="data.js"></script><script src="geom.js"></script><script src="calc.js"></script><script src="core.js"></script><script src="plan.js"></script><script src="omik.js"></script><script>
-chrome('index');
+
+ <section class="sel"><a class="sel-h" href="https://www.oma.by/sales/podborka--mesyatsa/" target="_blank" rel="noopener" aria-label="Подборка месяца"></a><div class="pgrid" id="pick"></div><a class="sel-more" href="catalog.html">Смотреть все ›</a></section>
+
+ <section class="sel"><div class="sel-h ours"><img src="img/omik-happy.png" alt="">Всё для ремонта ванной</div><div class="pgrid" id="bath"></div><a class="sel-more" href="catalog.html?cat=tile">Смотреть все ›</a></section>
+
+ <section class="info">
+  <div class="info-c news"><div class="info-h">Новости<a class="gbtn" href="https://www.oma.by/news/" target="_blank" rel="noopener">Все новости</a></div><ul id="news"></ul></div>
+  <div class="info-c"><div class="info-h">Полезные статьи и обзоры<a class="gbtn" href="https://www.oma.by/buyers/helpful/" target="_blank" rel="noopener">Больше статей</a></div><div class="arts" id="arts"></div></div>
+ </section>
+
+ <section class="promo6" id="promo6"></section>
+</main>
+<script src="oma-catalog.js"></script><script src="oma-menu.js"></script><script src="oma-social.js"></script><script src="data.js"></script><script src="geom.js"></script><script src="calc.js"></script><script src="core.js"></script><script src="plan.js"></script><script src="omik.js"></script><script>
+chrome('index',{noCtx:true});
+$('#side').outerHTML=sideMenu();
+// слайдер баннеров
+const slides=$$('.slide');let cur=0,timer;
+$('#dots').innerHTML=slides.map((_,i)=>`<i class="${i?'':'on'}" onclick="event.preventDefault();slide(${i}-cur)"></i>`).join('');
+function slide(d){slides[cur].classList.remove('on');$$('#dots i')[cur].classList.remove('on');cur=(cur+d+slides.length)%slides.length;slides[cur].classList.add('on');$$('#dots i')[cur].classList.add('on');clearInterval(timer);timer=setInterval(()=>slide(1),6000)}
+timer=setInterval(()=>slide(1),6000);
+try{const r=makeRoom('living');r.pts=Geom.fromTemplate('L',{A:5,B:4,a:2,b:1.6});$('#bnrPlan').innerHTML=Plan.mini(r,344,250,true)}catch(e){$('#bnrPlan').remove()}
+// продолжить проект
 const s=load(),ps=[...s.projects].sort((a,b)=>b.updated-a.updated).slice(0,2);
-if(ps.length)$('#cont').innerHTML=`<h2>Продолжить проект</h2><div class="doors" style="grid-template-columns:repeat(2,1fr)">${ps.map(p=>`<div class="card door" style="flex-direction:row;align-items:center;gap:16px">${p.rooms[0]?Plan.mini(p.rooms[0],120,90,Geom.validate(p.rooms[0]).ok):''}<div style="flex:1;min-width:0"><h3 style="margin:0">${esc(p.title)}</h3><p>${num(floorArea(p),1)} м² · ${p.est.lines.length} поз. · ${byn(estTotal(p))}<br>обновлён ${fmtDate(p.updated)}</p><div class="seg mt"><a class="btn sm" href="smeta.html?project=${p.id}">Смета</a><a class="btn sm g" href="planner.html?project=${p.id}">План</a></div></div></div>`).join('')}</div>`;
-$('#pop').innerHTML=['tw_opt','tf_opt','glue_stm','mix_bath'].map(P).map(x=>pcard(x)).join('');
+if(ps.length)$('#cont').innerHTML=`<h2 style="margin-top:0">Продолжить проект</h2><div class="doors cont2">${ps.map(p=>`<div class="card door" style="flex-direction:row;align-items:center;gap:16px">${p.rooms[0]?Plan.mini(p.rooms[0],120,90,Geom.validate(p.rooms[0]).ok):''}<div style="flex:1;min-width:0"><h3 style="margin:0">${esc(p.title)}</h3><p>${num(floorArea(p),1)} м² · ${p.est.lines.length} поз. · ${byn(estTotal(p))}<br>обновлён ${fmtDate(p.updated)}</p><div class="seg mt"><a class="btn sm" href="smeta.html?project=${p.id}">Смета</a><a class="btn sm g" href="planner.html?project=${p.id}">План</a></div></div></div>`).join('')}</div>`;
+// подборки товаров ОМА
+$('#pick').innerHTML=['lam_opt','tf_prem','glue_opt','pw_opt','mixer_d','x_lam1','tw_prem','primer_opt','cutter','skirt_prem'].map(P).filter(Boolean).map(x=>pcard(x)).join('');
+$('#bath').innerHTML=['tw_opt','tf_opt','glue_stm','grout_opt','wp_opt','mix_bath','wc','rail','clips','trowel8'].map(P).filter(Boolean).map(x=>pcard(x)).join('');
+// новости и статьи ОМА (снимок oma.by)
+const O='https://www.oma.by';
+$('#news').innerHTML=[['22.10.2026','Халва 12 месяцев на покупки от 100р. c 23.10 по 01.11','/upload/Sh/imageCache/341/770/7704163925637720.jpg','/news/khalva-12-mesyatsev-na-pokupki-ot-100r-c-23-10-po-01-11/'],
+ ['22.10.2026','Вернём 20% бонусами на карту лояльности 23-25.10.2026!','/upload/Sh/imageCache/413/925/9254893593094570.jpg','/news/vernyem-20-bonusami-na-kartu-loyalnosti-23-25-10-2026-/'],
+ ['20.10.2026','Alpina Эластичная Универсальная','/upload/Sh/imageCache/198/485/4859652634960540.jpg','/news/alpina-elastichnaya-universalnaya-/'],
+ ['15.10.2026','Халва 20 месяцев на покупки от 100р. c 16.10 по 18.10','/upload/Sh/imageCache/164/462/462781123949860.jpg','/news/khalva-20-mesyatsev-na-pokupki-ot-100r-c-16-10-po-18-10/'],
+ ['14.10.2026','Скидка -15% при покупке от 50 рублей в ОМА 15-18.10','/upload/Sh/imageCache/353/954/9542271400695454.jpg','/news/skidka-15-pri-pokupke-ot-50-rub-v-oma-15-18-10/']]
+ .map(([d,t,i,h])=>`<li><img src="${O+i}" alt=""><span><small>${d}</small><a href="${O+h}" target="_blank" rel="noopener">${t}</a></span></li>`).join('');
+const eye='<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>',heart='<svg viewBox="0 0 24 24"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z" stroke-width="2"/></svg>';
+$('#arts').innerHTML=[['Werker pro 280 и Werker pro 280 F | обзор, возможности и функционал.','/upload/Sh/imageCache/170/069/0696503408337251.webp','/buyers/helpful/instrumenty/elektroinstrument/werker-pro-280-i-werker-pro-280-f-obzor-vozmozhnosti-i-funktsional',254,4,'07.09.2026'],
+ ['Обзор УШМ WERKER PRO AGP 900 и AGP 1100: характеристики, тест и сравнение','/upload/Sh/imageCache/721/081/081423190003612.webp','/buyers/helpful/instrumenty/elektroinstrument/obzor-yshm-werker',331,9,'20.07.2026']]
+ .map(([t,i,h,v,l,d])=>`<a class="art" href="${O+h}" target="_blank" rel="noopener"><div class="art-img"><img src="${O+i}" alt=""></div><div class="art-b"><h4>${t}</h4><span class="art-l"><i>▶</i>Видео</span><div class="art-s"><span>${eye}${v}</span><span>${heart}${l}</span><span class="d">${d}</span></div></div></a>`).join('');
+$('#promo6').innerHTML=[['/upload/medialibrary/71e/71ebb41245ef808281cb105997008ac7.png','Доставка по Беларуси','Доставка заказов по ВСЕЙ Беларуси - более 180 городов доставки по единой цене'],
+ ['/local/images/markup-images/banners/promo-banner-2.png','Гарантия качества','Сертифицированная продукция от официальных поставщиков.'],
+ ['/upload/medialibrary/b3e/b3e22099d2480f9b1da9939eb58d1cbb.png','Полезные услуги','Компьютерная колеровка красок, прокат прицепов и инструментов, 3D-дизайн кухонь и ванных комнат.'],
+ ['/upload/medialibrary/e54/e549e70a25d9aa065e6842862c13dc03.png','34 года на рынке','За это время мы заслужили доверие клиентов и наладили прямые поставки порядка 70 000 товаров из 25 стран'],
+ ['/local/images/markup-images/banners/promo-banner-5.png','Удобная оплата','Наличными, банковской картой. В розничном магазине или через курьера. Выбор за вами!'],
+ ['/upload/medialibrary/85d/85df60f467c28aedd86354f4e3d56bdd.png','Скидки и акции','Акционные товары каждую неделю. Оплата частями и кредит. Программа лояльности.']]
+ .map(([i,t,x])=>`<div><img src="${O+i}" alt=""><b>${t}</b><span>${x}</span></div>`).join('');
 </script></body></html>
