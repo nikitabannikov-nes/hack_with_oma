@@ -1,94 +1,118 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ОМА Проект — смета</title><link rel="stylesheet" href="style.css">
-<style>
-.g{display:grid;grid-template-columns:1fr 340px;gap:20px}
-.card.p{padding:22px;margin-bottom:20px}
-h3{margin:0 0 14px}
-.dims{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.dims label{font-size:12px;color:var(--mute);font-weight:600;display:block}
-.dims input{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px;font:inherit;margin-top:3px}
-.plan{display:flex;gap:24px;align-items:center;margin-top:16px;flex-wrap:wrap}
-.areas{display:grid;gap:6px;font-size:14px}.areas b{color:var(--blue)}
-.slide{margin:6px 0 16px}.slide input{width:100%;accent-color:var(--blue)}
-.slide .v{display:flex;justify-content:space-between;font-size:13px;color:var(--mute)}.slide .v b{color:var(--ink);font-size:20px}
-.tabs{display:flex;gap:8px;margin-bottom:14px}
-.tabs button{flex:1;border:2px solid var(--line);background:#fff;border-radius:12px;padding:12px;font:inherit;font-weight:700;cursor:pointer;text-align:left}
-.tabs button small{display:block;font-weight:500;color:var(--mute)}
-.tabs button.on{border-color:var(--blue);background:var(--blue-l)}
-.tabs button.fit{box-shadow:0 0 0 3px #bfe8cf}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th{text-align:left;font-size:12px;color:var(--mute);padding:6px 4px;border-bottom:1px solid var(--line)}
-td{padding:11px 4px;border-bottom:1px solid var(--line)}td.r,th.r{text-align:right}
-.alt{font-size:12px;color:var(--blue);font-weight:600;cursor:pointer;border:0;background:none}
-.sum{position:sticky;top:130px;padding:22px}
-.sum .tot{font-size:30px;font-weight:800;margin:6px 0}
-.sum .row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--mute)}
-.ba{position:relative;height:260px;border-radius:14px;overflow:hidden;user-select:none}
-.ba .room{position:absolute;inset:0;display:grid;place-items:center;font-size:15px;font-weight:700;color:#fff}
-.ba .before{place-items:center start;padding-left:18px}.ba .after{place-items:center end;padding-right:18px}.ba .before{background:repeating-linear-gradient(0deg,#cfc7b8 0 2px,#e4ddcf 2px 40px),#ddd}
-.ba .after{clip-path:inset(0 0 0 50%)}
-.ba .hand{position:absolute;top:0;bottom:0;left:50%;width:3px;background:#fff;box-shadow:0 0 8px rgba(0,0,0,.4)}
-.ba .hand::after{content:"↔";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:50%;width:34px;height:34px;display:grid;place-items:center;color:var(--blue);font-weight:800}
-.ba input{position:absolute;inset:0;width:100%;opacity:0;cursor:ew-resize}
-.omik{display:flex;gap:12px;align-items:flex-start;background:var(--blue-l);border-radius:14px;padding:12px 14px;font-size:13px;margin-bottom:20px}
-.omik img{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:none}
-@media(max-width:900px){.g{grid-template-columns:1fr}.dims{grid-template-columns:1fr 1fr}.sum{position:static}}
-</style></head><body><div id="chrome"></div>
-<div class="wrap"><div class="crumbs"><a href="index.html">Главная</a> / <a href="prorab.html">ОМА Прораб</a> / Смета</div>
-<div class="steps"><span class="done">✔ Задача</span><span class="done">✔ Планировка</span><span class="on">3 Смета</span><span>4 Корзина</span><span>5 Исполнение</span></div>
-<div class="omik"><img src="img/omik-avatar.png"><div><b>ОМИК:</b> количество считают формулы по вашим размерам, с запасом 10%. Я только подобрал позиции под бюджет.</div></div>
-<div class="g"><div>
- <div class="card p"><h3>1. Планировка — ванная</h3>
-  <div class="dims"><div><label>Длина, м</label><input id="L" type="number" step=".1" value="2"></div><div><label>Ширина, м</label><input id="W" type="number" step=".1" value="2"></div><div><label>Высота, м</label><input id="H" type="number" step=".1" value="2.5"></div><div><label>Дверь, м²</label><input id="D" type="number" step=".1" value="1.6"></div></div>
-  <div class="plan"><svg id="sch" width="150" height="130" viewBox="0 0 150 130"></svg>
-  <div class="areas"><div>Пол: <b id="aF"></b></div><div>Стены (за вычетом двери): <b id="aW"></b></div><button class="btn g sm" style="margin-top:6px">Заказать замер</button></div></div>
- </div>
- <div class="card p"><h3>2. Смета по бюджету</h3>
-  <div class="slide"><div class="v"><span>Ваш бюджет на материалы</span><b id="bv"></b></div><input id="bud" type="range" min="500" max="2600" step="50" value="1200"></div>
-  <div class="tabs" id="tabs"></div>
-  <table><thead><tr><th>Материал</th><th class="r">Кол-во</th><th class="r">Цена</th><th class="r">Сумма</th><th></th></tr></thead><tbody id="rows"></tbody></table>
- </div>
- <div class="card p"><h3>3. До / после</h3>
-  <div class="ba" id="ba"><div class="room before">ВАШЕ ФОТО · ДО</div><div class="room after" id="aft">ПОСЛЕ</div><div class="hand" id="hd"></div><input type="range" min="0" max="100" value="50" id="sl"></div>
-  <p class="note">⚠ Визуализация ориентировочная: генерация не повторит точный оттенок плитки.</p>
-  <button class="btn g sm">📷 Загрузить фото комнаты</button>
- </div>
-</div>
-<aside><div class="card sum"><div class="note">Итого по смете</div><div class="tot" id="tot"></div><span class="tag gr" id="fit"></span>
- <div style="margin:14px 0" id="brk"></div>
- <a class="btn o" style="width:100%" href="cart.html" onclick="save()">Добавить всё в корзину-проект</a></div></aside></div></div>
-<script src="common.js"></script><script>chrome()
-const $=id=>document.getElementById(id);
-const tiers={
- eco:{n:'Эконом',c:'#8a93a6',tile:{w:'Плитка настенная «Белый кирпич» 30×60',f:'Керамогранит 30×30 серый',pw:24.9,pf:19.9},glue:['Клей Ceresit CM 9, 25 кг',15.2],grout:['Затирка Ceresit CE 33, 2 кг',9.9],prim:['Грунтовка Ceresit CT 17, 5 л',16.5],img:'linear-gradient(135deg,#c9ced8,#9aa3b5)'},
- opt:{n:'Оптимум',c:'#0057d6',tile:{w:'Плитка настенная Kerama Marazzi «Метро» 30×60',f:'Керамогранит Cersanit 42×42',pw:38.9,pf:31.5},glue:['Клей Ceresit CM 11, 25 кг',21.5],grout:['Затирка Ceresit CE 40, 2 кг',16.8],prim:['Грунтовка Ceresit CT 17, 10 л',27.9],img:'linear-gradient(135deg,#7db0ff,#0057d6)'},
- pre:{n:'Премиум',c:'#ff9a1a',tile:{w:'Плитка Italon «Мрамор» 30×90',f:'Керамогранит Italon 60×60 полированный',pw:84,pf:69},glue:['Клей Litokol X11, 25 кг',44],grout:['Затирка Litokol Starlike, 2 кг',38],prim:['Грунтовка Knauf Tiefengrund, 10 л',34],img:'linear-gradient(135deg,#ffd9a0,#ff9a1a)'}};
-let cur='opt',ov={};
-const geo=()=>{const L=+$('L').value,W=+$('W').value,H=+$('H').value,D=+$('D').value;return{F:L*W,Wl:Math.max(0,2*(L+W)*H-D)}};
-function items(k){const g=geo(),t=tiers[k],r=1.1;
- const fl=g.F*r,wl=g.Wl*r,all=g.F+g.Wl;
- return[
- [t.tile.f,fl,'м²',t.tile.pf],[t.tile.w,wl,'м²',t.tile.pw],
- [t.glue[0],Math.ceil(all*5/25),'меш.',t.glue[1]],
- [t.grout[0],Math.ceil(all*.4/2),'уп.',t.grout[1]],
- [t.prim[0],Math.ceil(all*.2/(/10/.test(t.prim[0])?10:5)),'шт.',t.prim[1]]]}
-const total=k=>items(k).reduce((s,i)=>s+(i[1]*i[3]),0);
-function draw(){
- const g=geo(),B=+$('bud').value;$('bv').textContent=byn(B).replace('.00','');
- $('aF').textContent=g.F.toFixed(1)+' м²';$('aW').textContent=g.Wl.toFixed(1)+' м²';
- const L=+$('L').value,W=+$('W').value,s=Math.min(110/L,90/W);
- $('sch').innerHTML=`<rect x="15" y="10" width="${L*s}" height="${W*s}" fill="#e8f0fd" stroke="#0057d6" stroke-width="3"/><rect x="${15+L*s/2-12}" y="${10+W*s-3}" width="24" height="6" fill="#ff9a1a"/><text x="${15+L*s/2}" y="${10+W*s/2+4}" text-anchor="middle" font-size="12" fill="#0b3a9e">${g.F.toFixed(1)} м²</text><text x="${15+L*s/2}" y="${W*s+30}" text-anchor="middle" font-size="10" fill="#6b7488">${L} м</text>`;
- const best=Object.keys(tiers).filter(k=>total(k)<=B).pop();
- $('tabs').innerHTML=Object.keys(tiers).map(k=>`<button data-k="${k}" class="${k===cur?'on':''} ${k===best?'fit':''}"><span style="color:${tiers[k].c}">●</span> ${tiers[k].n}<small>${byn(total(k)).replace('.00','')}${k===best?' · по бюджету':''}</small></button>`).join('');
- $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{cur=b.dataset.k;ov={};draw()});
- const it=items(cur);
- $('rows').innerHTML=it.map((i,n)=>`<tr><td>${i[0]}<br><button class="alt" onclick="alt(${n})">↻ Подобрать аналог</button></td><td class="r">${i[2]==='м²'?i[1].toFixed(1):i[1]} ${i[2]}</td><td class="r">${byn(i[3])}</td><td class="r"><b>${byn(i[1]*i[3])}</b></td></tr>`).join('');
- const T=total(cur);$('tot').textContent=byn(T);
- $('fit').textContent=T<=B?'✔ В рамках бюджета':'Выше бюджета на '+byn(T-B).replace('.00','');$('fit').className='tag '+(T<=B?'gr':'or');
- $('brk').innerHTML=`<div class="row"><span>Комплектация</span><b>${tiers[cur].n}</b></div><div class="row"><span>Запас материала</span><b>10%</b></div><div class="row"><span>Позиций</span><b>${it.length}</b></div>`;
- $('aft').style.background=tiers[cur].img;$('aft').textContent='ПОСЛЕ · '+tiers[cur].n.toUpperCase();
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Смета — ОМА Проект</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="app.css">
+<style>.flash{animation:fl 2.4s}@keyframes fl{0%,40%{background:#fff1c2}}.rooms{display:flex;gap:14px;flex-wrap:wrap}.rm{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px 14px 10px 10px}.rm .note b{color:var(--ink)}</style></head><body><div id="chrome"></div>
+<div class="wrap" id="app"></div>
+<div class="modal-bg" id="mShare" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal">
+ <button class="x" onclick="$('#mShare').classList.remove('show')">×</button>
+ <h2 style="margin:0 0 6px">Ссылка на смету</h2>
+ <p class="note" style="margin:0">Отправьте её клиенту или мастеру в Viber или Telegram. Регистрация не нужна: ссылка содержит копию сметы и откроется на любом устройстве.</p>
+ <div class="linkbox"><input id="url" readonly><button class="btn sm" onclick="copyUrl()" id="cpb">Скопировать</button></div>
+ <a class="btn o wide" id="openC" href="#" target="_self">Открыть как получатель →</a>
+ <p class="note">Демо без сервера: согласование, сделанное в этом браузере, сразу видно в проекте. На другом устройстве получатель увидит смету и сможет оформить заказ, но статус вернётся к вам только с подключённым сервером.</p>
+</div></div>
+<script src="data.js"></script><script src="geom.js"></script><script src="calc.js"></script><script src="core.js"></script><script src="plan.js"></script><script src="omik.js"></script><script>
+let p=activeProject();
+if(!p){location='planner.html?new=1';throw 0}
+setActive(p);
+window.OMIK_CTX={page:'smeta',projectId:p.id};
+const ST={draft:['Черновик',''],sent:['Отправлена по ссылке','or'],changes:['Просят изменения','red'],approved:['Согласована','gr'],ordered:['Заказ оформлен','bl']};
+const SEC={tile:'Плитка',mix:'Смеси и гидроизоляция',paint:'Краски',floor:'Напольные покрытия',plumb:'Сантехника',elec:'Электрика',tools:'Инструмент'};
+let focus=qp('focus'),showWork=true;
+
+function renderSmeta(){
+ p=getProject(p.id);
+ chrome('smeta');
+ const E=p.est,c=p.calc||{},tot=estTotal(p),tt={};['eco','opt','prem'].forEach(k=>tt[k]=tierTotal(p,k));
+ const fit=p.budget?['prem','opt','eco'].find(k=>tt[k]!=null&&tt[k]<=p.budget):null;
+ const cartStale=load().cart.some(i=>i.projectId===p.id)&&p.cartRev!==E.rev;
+ const inCart=load().cart.some(i=>i.projectId===p.id);
+ const [stT,stC]=ST[E.status]||ST.draft;
+ let h=`<div class="crumbs"><a href="index.html">Главная</a> / <a href="projects.html">Мои проекты</a> / Смета</div>
+ <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+  <div><h1 style="margin-bottom:4px"><span contenteditable="true" spellcheck="false" onblur="rename(this.textContent)" title="Нажмите, чтобы переименовать">${esc(p.title)}</span></h1>
+  <p class="lead" style="margin:0 0 14px"><span class="st ${stC}">${stT}</span> · версия ${E.version}${E.dirty?' (есть неотправленные изменения)':''} · обновлено ${fmtDate(p.updated)}</p></div>
+  <div class="seg"><a class="btn sm g" href="planner.html?project=${p.id}&from=smeta">📐 Изменить геометрию</a><a class="btn sm g" href="catalog.html?add=${p.id}">＋ Добавить товар</a></div></div>`;
+ // Баннеры
+ if(!c.ok)h+=omikTip('warn',`<b>Смета не пересчитана: в плане ошибка.</b><br>${(c.errors||[]).map(esc).join('<br>')}<div class="mt"><a class="btn sm" href="planner.html?project=${p.id}&from=smeta">Исправить план</a></div>`,'bad');
+ if(E.status==='changes')h+=omikTip('think',`<b>Получатель просит изменения:</b> «${esc(E.comment)}». Поправьте смету и отправьте новую версию по той же ссылке.`,'warn');
+ if(E.status==='approved'&&!E.dirty)h+=omikTip('ok',`<b>Смета v${E.approved?.version} согласована</b> ${E.approved?fmtDate(E.approved.at):''}. Можно оформлять заказ материалов.`,'ok');
+ if(E.dirty)h+=omikTip('idea',`<b>Смета изменилась после отправки (v${E.version}).</b> Получатель увидит изменения и согласует заново, когда вы отправите новую версию. <button class="btn sm mt" onclick="share()">Отправить v${E.version+1}</button>`,'warn');
+ if(focus&&P(focus)){const fl=E.lines.find(l=>l.pid===focus);if(fl)h+=omikTip('happy',`<b>«${esc(P(focus).name)}»: ${fl.qty} ${P(focus).unit}</b> — посчитано по плану${fl.basis?`: ${esc(fl.basis)}`:''}. Остальные материалы подобраны под этот товар.`,'ok')}
+ (c.warn||[]).forEach(w=>{const alt=PRODUCTS.find(x=>x.roles.includes(w.role)&&x.spec.maxTile>=Math.max(...Object.values(p.est.lines).filter(l=>l.role&&l.role.startsWith('tile')).map(l=>Math.max(...P(l.pid).spec.size))));h+=omikTip('warn',`<b>Проверка совместимости:</b> ${esc(w.text)}${alt?` <button class="btn sm mt" onclick="pin('${w.role}','${alt.id}')">Заменить на «${esc(alt.name)}»</button>`:''}`,'warn')});
+ h+=`<div class="g2"><div>`;
+ // Помещения
+ h+=`<div class="card pad"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px"><h3 style="margin:0">Помещения и объёмы работ</h3><a class="btn ghost sm" href="planner.html?project=${p.id}&from=smeta">Изменить →</a></div><div class="rooms">${p.rooms.map(r=>{const v=Geom.validate(r);let m=null;if(v.ok)m=Geom.metrics(r);
+  return`<a class="rm" href="planner.html?project=${p.id}&room=${r.id}&from=smeta">${Plan.mini(r,120,90,v.ok)}<div><b>${RT[r.type]?.icon||''} ${esc(r.name)}</b><div class="note">${v.ok?`Пол <b>${num(m.floorNet)} м²</b> · стены <b>${num(m.wallNet)} м²</b><br>Периметр ${num(m.perim)} м · h ${num(r.h)} м · ${r.pts.length} углов`:'<span style="color:var(--red)">Ошибка геометрии</span>'}</div></div></a>`}).join('')}</div>
+  ${c.ok?`<p class="note" style="margin-bottom:0">Объёмы: ${areaSummary(p)||'нет отделки'}${c.areas.wp?` · гидроизоляция ${num(c.areas.wp,1)} м²`:''}</p>`:''}</div>`;
+ // Комплектации
+ const diffs={eco:'Клей C1, цементная затирка, краска класса 4',opt:'Клей C2TE, влагостойкая затирка, моющаяся краска',prem:'Клей S1, эпоксидная затирка, крупный формат'};
+ h+=`<div class="card pad"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px"><h3 style="margin:0">Комплектация</h3>
+  <label class="fld" style="display:flex;align-items:center;gap:8px">Бюджет на материалы<input type="number" step="50" min="0" style="width:120px;margin:0" value="${p.budget||''}" placeholder="не задан" onchange="p.budget=+this.value||null;log(p,'Изменён бюджет');save();renderSmeta()"> BYN</label></div>
+  <div class="tiers">${['eco','opt','prem'].map(k=>`<button class="${p.tier===k?'on':''} ${fit===k?'fit':''}" onclick="setTier('${k}')">${TIERS[k]}<small>${tt[k]!=null?byn(tt[k]):'—'}${fit===k?' · в бюджете':''}</small><em>${diffs[k]}</em></button>`).join('')}</div>
+  ${Object.keys(p.pinned).length?`<p class="note" style="margin-bottom:0">Ваш выбор сохраняется при смене комплектации: ${Object.entries(p.pinned).map(([r,id])=>`<b>${esc(P(id)?.name)}</b> <button class="btn ghost sm" style="padding:2px 6px" onclick="unpin('${r}')">сбросить</button>`).join(' · ')}</p>`:''}
+  ${p.budget&&!fit?`<p class="note" style="color:var(--red);margin-bottom:0">Ни одна комплектация не помещается в ${byn(p.budget)}. <button class="btn ghost sm" onclick="OmikWidget.open('Как удешевить смету?')">Спросить Омика, как сэкономить</button></p>`:''}</div>`;
+ // Позиции
+ const groups={};E.lines.forEach(l=>{const pr=P(l.pid);if(!pr)return;(groups[pr.cat]=groups[pr.cat]||[]).push(l)});
+ const offs=Object.keys(E.off).filter(k=>E.off[k]);
+ h+=`<div class="card pad"><h3>Материалы · ${E.lines.length} позиций</h3><div class="est"><div class="ln h"><span></span><span>Товар и расчёт</span><span class="r">Количество</span><span class="r">Цена</span><span class="r">Сумма</span><span></span></div>`;
+ Object.keys(SEC).filter(k=>groups[k]).forEach(k=>{h+=`<div class="sec">${SEC[k]}</div>`+groups[k].map(lineHTML).join('')});
+ if(!E.lines.length)h+=`<div class="empty"><img src="img/omik-think.png" alt=""><p>В смете пока пусто. Задайте отделку в плане или добавьте товары.</p></div>`;
+ h+=`</div>${offs.length?`<div class="chips mt"><span class="note" style="align-self:center">Убрано из расчёта:</span>${offs.map(r=>`<button onclick="delete p.est.off['${r}'];recalc(p);touchEst(p,'Возвращено: ${ROLES[r]}');save();renderSmeta()">↺ ${ROLES[r]}</button>`).join('')}</div>`:''}</div>`;
+ // Сопутствующие
+ const works=new Set();const a=c.areas||{};if(a.tileWall||a.tileFloor)works.add('tile');if(a.paintWall||a.paintCeil)works.add('paint');if(a.laminate)works.add('floor');if(a.wp)works.add('wet');
+ const kit=[...works].flatMap(w=>KITS[w]).filter((id,i,arr)=>arr.indexOf(id)===i&&!E.lines.some(l=>l.pid===id)).map(P).filter(Boolean).slice(0,6);
+ if(kit.length)h+=`<div class="card pad"><h3>Часто берут вместе</h3><div class="pgrid">${kit.map(x=>pcard(x,{actions:`<button class="btn sm g" onclick="addKit('${x.id}')">＋ В смету</button>`})).join('')}</div></div>`;
+ // Работы
+ const svcs=SERVICES.filter(s=>s.area&&a[s.area]>0).map(s=>({s,q:a[s.area],sum:a[s.area]*s.price}));
+ E.lines.filter(l=>P(l.pid)?.service&&!P(l.pid).roles.length).forEach(l=>{const s=svc(P(l.pid).service);svcs.push({s,q:l.qty,sum:l.qty*s.price,pid:l.pid})});
+ const wsum=svcs.reduce((x,y)=>x+y.sum,0);
+ h+=`<div class="card pad"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Работы мастера <span class="tag demo">ориентировочно, демо</span></h3><a class="btn sm" href="masters.html?project=${p.id}">👷 Найти мастера</a></div>
+  ${svcs.length?`<div class="mt">${svcs.map(x=>`<div class="row" style="font-size:14px"><span>${x.s.name}${x.pid?` — ${esc(P(x.pid).name)}`:''} · ${num(x.q,1)} ${x.s.unit} × ${byn(x.s.price)}</span><b>${byn(x.sum)}</b></div>`).join('')}<div class="row" style="font-size:15px;border-top:1px solid var(--line);margin-top:6px;padding-top:10px"><span><b style="color:var(--ink)">Итого работы (справочно)</b></span><b>${byn(wsum)}</b></div></div>`:'<p class="note">Нет работ по расчёту.</p>'}
+  <p class="note" style="margin-bottom:0">Работы оплачиваются мастеру по договорённости. В прототипе цены и мастера демонстрационные.</p></div>`;
+ // История
+ h+=`<div class="card pad"><h3>История проекта</h3><div class="tl">${[...p.history].reverse().slice(0,12).map(x=>`<div><time>${fmtDate(x.at)}</time><span>${esc(x.text)}</span></div>`).join('')}</div></div>`;
+ h+=`</div><aside class="card side"><div class="note">Материалы ОМА · ${TIERS[p.tier]}</div><div class="tot">${byn(tot)}</div>
+  ${p.budget?`<span class="tag ${tot<=p.budget?'gr':'or'}">${tot<=p.budget?'✓ В рамках бюджета':'Выше бюджета на '+byn(tot-p.budget)}</span>`:''}
+  <div style="margin:12px 0 16px"><div class="row"><span>Позиций</span><b>${E.lines.length}</b></div><div class="row"><span>Площадь помещений</span><b>${num(floorArea(p),1)} м²</b></div><div class="row"><span>Работы (справочно)</span><b>${byn(wsum)}</b></div>${E.lines.some(stale)?`<div class="row" style="color:#c76b00"><span>Требуют решения</span><b style="color:#c76b00">${E.lines.filter(stale).length}</b></div>`:''}</div>
+  ${cartStale?`<div class="banner warn" style="font-size:13px;padding:10px 12px">В корзине старая версия этой сметы.</div><button class="btn o wide" onclick="toCart()">Обновить корзину</button>`:inCart?`<a class="btn o wide" href="cart.html">Перейти в корзину →</a>`:`<button class="btn o wide" onclick="toCart()" ${!E.lines.length?'disabled':''}>🛒 Добавить всё в корзину</button>`}
+  <button class="btn wide mt" onclick="share()">🔗 ${E.status==='draft'?'Отправить смету по ссылке':'Ссылка на смету'}</button>
+  <a class="btn g wide mt" href="masters.html?project=${p.id}">👷 Нужен мастер</a>
+  <button class="btn ghost wide mt" onclick="copyP()">⧉ Повторить для другого объекта</button>
+  <p class="note">Количества считает калькулятор по плану и нормам товаров. Если вы меняете количество вручную, пересчёт его не перезапишет.</p></aside></div>`;
+ $('#app').innerHTML=h;
+ if(focus){const el=document.querySelector(`[data-pid="${focus}"]`);if(el){el.classList.add('flash');el.scrollIntoView({block:'center'})}focus=null}
 }
-function alt(n){alert('Подбираем аналог для позиции «'+items(cur)[n][0]+'»… (в демо — заглушка)')}
-function save(){localStorage.setItem('omaCartN','5');localStorage.setItem('omaTier',cur);localStorage.setItem('omaTotal',total(cur));localStorage.setItem('omaGeo',JSON.stringify(geo()))}
-['L','W','H','D','bud'].forEach(i=>$(i).oninput=draw);
-$('sl').oninput=e=>{$('aft').style.clipPath=`inset(0 0 0 ${e.target.value}%)`;$('hd').style.left=e.target.value+'%'};
-draw()</script></body></html>
+function lineHTML(l){
+ const pr=P(l.pid),st=stale(l),pinned=l.role&&p.pinned[l.role]===l.pid;
+ const flags=`${l.role?'<span class="flag b">по расчёту</span>':`<span class="flag">${l.src==='omik'?'от Омика':'добавлено вами'}</span>`}${l.manual?'<span class="flag">изменено вручную</span>':''}${pinned?'<span class="flag g">ваш выбор</span>':''}${l.approx?'<span class="flag" style="background:#eef0f4;color:var(--mute)">ориентировочно</span>':''}`;
+ let warn='';
+ if(st&&l.gone)warn=`<div class="banner bad" style="margin:8px 0 0;padding:8px 10px;font-size:12px">После изменения плана эта позиция больше не нужна. <button class="btn ghost sm" onclick="rm('${l.id}')">Убрать</button><button class="btn ghost sm" onclick="keep('${l.id}')">Оставить</button></div>`;
+ else if(st)warn=`<div class="banner warn" style="margin:8px 0 0;padding:8px 10px;font-size:12px">По новому расчёту нужно <b>${l.calcQty} ${pr.unit}</b>, у вас ${l.qty}. <button class="btn ghost sm" onclick="accept('${l.id}')">Принять расчёт</button><button class="btn ghost sm" onclick="keep('${l.id}')">Оставить моё</button></div>`;
+ const pack=pr.pack?`<small>${pr.unit==='уп.'||pr.unit==='рул.'?`по ${num(pr.pack.q)} ${pr.pack.u}`:`${num(pr.pack.q)} ${pr.pack.u}`}</small>`:'';
+ return`<div class="ln ${st?(l.gone?'gone':'stale'):''}" data-pid="${l.pid}"><span class="c-img"><a href="product.html?id=${pr.id}&project=${p.id}">${pimg(pr,'sm')}</a></span>
+  <span class="nm"><a href="product.html?id=${pr.id}&project=${p.id}">${esc(pr.name)}</a> ${flags}${l.basis?`<span class="basis">${esc(l.basis)}</span>`:''}
+   <span class="acts">${l.role?`<a href="catalog.html?replace=${l.role}&project=${p.id}">↻ Заменить</a>`:''}<button onclick="OmikWidget.open('Найди аналог для ${esc(pr.name.replace(/'/g,''))}')">Аналоги</button>${pr.service?`<a href="masters.html?service=${pr.service}&project=${p.id}&product=${pr.id}">Установка</a>`:''}</span>${warn}</span>
+  <span class="c-qty"><span class="qty"><button onclick="dq('${l.id}',-1)" aria-label="Меньше">−</button><input class="${l.manual?'man':''}" type="number" min="0" step="1" value="${l.qty}" onchange="setQ('${l.id}',this.value)"><button onclick="dq('${l.id}',1)" aria-label="Больше">+</button><small>${pr.unit}</small></span><span style="display:block;text-align:right">${pack}</span></span>
+  <span class="r c-price">${byn(pr.price)}</span><span class="r c-sum"><b>${byn(pr.price*l.qty)}</b></span>
+  <span class="c-x"><button class="xbtn" title="Убрать из сметы" onclick="rm('${l.id}')">×</button></span></div>`;
+}
+const L=id=>p.est.lines.find(l=>l.id===id);
+function setQ(id,v){const l=L(id),q=Math.max(0,Math.round(+v||0));l.qty=q;if(l.role){l.manual=q!==l.calcQty;l.ack=null}touchEst(p,`Количество «${P(l.pid).name}»: ${q}`);save();renderSmeta()}
+function dq(id,d){setQ(id,L(id).qty+d)}
+function accept(id){const l=L(id);l.qty=l.calcQty;l.manual=false;l.ack=null;touchEst(p,`Принят расчёт: ${P(l.pid).name}`);save();renderSmeta()}
+function keep(id){const l=L(id);if(l.gone){l.role=null;l.manual=false;l.gone=false;l.src='catalog'}else l.ack=l.calcQty;touchEst(p);save();renderSmeta()}
+function rm(id){const l=L(id);if(l.role&&!l.gone)p.est.off[l.role]=true;p.est.lines=p.est.lines.filter(x=>x.id!==id);touchEst(p,`Убрано: ${P(l.pid).name}`);save();renderSmeta()}
+function setTier(k){p.tier=k;recalc(p);touchEst(p,'Комплектация: '+TIERS[k]);save();renderSmeta()}
+function pin(role,pid){p.pinned[role]=pid;recalc(p);touchEst(p,`Выбран товар «${P(pid).name}»`);save();renderSmeta()}
+function unpin(role){delete p.pinned[role];recalc(p);touchEst(p,'Сброшен выбор товара');save();renderSmeta()}
+function addKit(pid){addLine(p,pid,1);save();renderSmeta();toast('Добавлено в смету')}
+function rename(t){t=t.trim();if(t&&t!==p.title){p.title=t;log(p,'Проект переименован');save();renderSmeta()}}
+function toCart(){cartSyncProject(p);toast(`🛒 Смета в корзине: ${p.est.lines.length} позиций · <a href="cart.html">открыть корзину</a>`);renderSmeta()}
+function share(){
+ const E=p.est;
+ if(E.status==='draft'||E.dirty){if(E.dirty)E.version++;E.dirty=false;E.status='sent';E.versions.push({version:E.version,at:now(),lines:JSON.parse(JSON.stringify(E.lines)),total:estTotal(p)});log(p,`Смета v${E.version} отправлена по ссылке`);save()}
+ const u=shareUrl(p);$('#url').value=u;$('#openC').href=u;$('#cpb').textContent='Скопировать';$('#mShare').classList.add('show');renderSmeta();
+}
+function copyUrl(){const v=$('#url').value;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).catch(()=>{$('#url').select();document.execCommand('copy')}).finally(()=>$('#cpb').textContent='✓ Скопировано')}
+function copyP(){const n=copyProject(p);location='planner.html?project='+n.id+'&from=smeta'}
+recalc(p);save();renderSmeta();
+</script></body></html>

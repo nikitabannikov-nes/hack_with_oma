@@ -1,0 +1,49 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ОМА Объект — кабинет мастера</title><link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="obj.css"></head><body><div id="chrome"></div>
+<div class="wrap">
+ <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+  <div><h1>Мои объекты</h1><p class="lead">Сметы, которые вы отправили клиентам, и их статусы.</p></div>
+  <button class="btn o" onclick="$('#mNew').classList.add('show')">+ Создать смету</button>
+ </div>
+ <div class="kpi" id="kpi"></div>
+ <div id="list"></div>
+</div>
+<div class="modal-bg" id="mNew" onclick="if(event.target===this)this.classList.remove('show')"><form class="modal" onsubmit="event.preventDefault();create(this)">
+ <button type="button" class="x" onclick="$('#mNew').classList.remove('show')">×</button>
+ <h2 style="margin:0 0 6px">Новая смета</h2><p class="note" style="margin:0 0 16px">Шаблон: <b>ванная комната</b>. Другие помещения — следующий этап.</p>
+ <label class="fld">Название объекта<input name="title" value="Ванная, ул. Сурганова" required></label>
+ <label class="fld mt">Имя клиента<input name="client" value="Анна" required></label>
+ <label class="fld mt">Адрес (необязательно)<input name="address" placeholder="Минск, ул. …"></label>
+ <button class="btn o wide" style="margin-top:18px">Перейти к расчёту</button>
+</form></div>
+<script src="../common.js"></script><script src="obj.js"></script><script>
+ochrome('master','Шаг 1 из 5 · нажмите «Создать смету» или скопируйте готовый объект');
+const d=load();
+function draw(){
+ const E=[...d.estimates].sort((a,b)=>b.updated-a.updated);
+ const paid=E.filter(e=>e.order).reduce((s,e)=>s+e.order.total,0);
+ $('#kpi').innerHTML=`<div class="card"><b>${E.length}</b><span>объектов</span></div>
+  <div class="card"><b>${E.filter(e=>e.status==='sent'||e.status==='changes').length}</b><span>ждут клиента</span></div>
+  <div class="card"><b>${E.filter(e=>e.status==='approved').length}</b><span>согласованы, к оплате</span></div>
+  <div class="card"><b>${money(paid)}</b><span>материалов оплачено через ОМА</span></div>`;
+ $('#list').innerHTML=E.map(e=>{const t=totals(e),open=e.status==='draft'?'builder':'estimate';
+  return`<div class="card obj ${e.seen?'':'new'}"><div>
+   <h4>${esc(e.title)} ${e.seen?'':'<span class="tag or">Новое</span>'}</h4>${chip(e.status)} ${e.version>1?`<span class="note">v${e.version}</span>`:''}
+   <div class="meta"><span>👤 ${esc(e.client||'—')}</span><span>Материалы ОМА: <b>${money(t.oma)}</b></span><span>Обновлено ${fmtDate(e.updated)}</span>${e.order?`<span>Заказ ${e.order.no}</span>`:''}</div>
+   ${e.status==='changes'&&e.comment?`<div class="note mt">💬 «${esc(e.comment)}»</div>`:''}
+  </div><div class="acts">
+   <a class="btn sm ${e.status==='draft'?'o':''}" href="${open}.html?id=${e.id}">${e.status==='draft'?'Продолжить':'Открыть смету'}</a>
+   <button class="btn sm g" onclick="copyE('${e.id}')">⧉ Копировать для нового объекта</button>
+  </div></div>`}).join('');
+}
+function create(f){
+ const e=mkEstimate({title:f.title.value,client:f.client.value,address:f.address.value});
+ d.estimates.push(e);save(d);location='builder.html?id='+e.id;
+}
+function copyE(id){
+ const s=getE(d,id);
+ const e=mkEstimate({title:'Копия — '+s.title,dims:{...s.dims},tier:s.tier,off:[...s.off],extra:JSON.parse(JSON.stringify(s.extra)),work:{...s.work}});
+ log(e,'master','Создано копированием «'+s.title+'»');
+ d.estimates.push(e);save(d);location='builder.html?id='+e.id+'&copied=1';
+}
+draw();
+</script></body></html>

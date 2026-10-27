@@ -1,0 +1,65 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ОМА Объект — смета</title><link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="obj.css"></head><body><div id="chrome"></div>
+<div class="wrap">
+ <div class="crumbs"><a href="master.html">Мои объекты</a> / Смета</div>
+ <h1 id="ttl"></h1><p class="lead" id="sub"></p>
+ <div id="ban"></div>
+ <div class="g2"><div>
+  <div class="card pad"><h3>Материалы</h3><div id="lines"></div></div>
+  <div class="card pad"><h3>Работы мастера <span class="note" style="font-weight:500">— справочно, оплачиваются мастеру напрямую</span></h3>
+   <div class="row" style="font-size:14px"><span id="wN"></span><b id="wA"></b></div></div>
+  <div class="card pad"><h3>История</h3><div class="tl" id="tl"></div></div>
+ </div>
+ <aside class="card side"><div class="note">Материалы ОМА</div><div class="tot" id="tot"></div><div id="brk" style="margin:10px 0 16px"></div><div id="acts"></div></aside>
+ </div>
+</div>
+<div class="modal-bg" id="mSend" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal">
+ <button class="x" onclick="$('#mSend').classList.remove('show')">×</button>
+ <h2 style="margin:0 0 6px">Ссылка для клиента</h2>
+ <p class="note" style="margin:0">Отправьте её клиенту в Viber или Telegram. Регистрация клиенту не нужна.</p>
+ <div class="linkbox"><input id="url" readonly><button class="btn sm" onclick="copyUrl()" id="cpb">Скопировать</button></div>
+ <a class="btn o wide" id="openC" href="#">Открыть как клиент (демо) →</a>
+ <p class="note">В демо статусы синхронизируются в этом браузере. На другом устройстве ссылка откроет копию сметы.</p>
+</div></div>
+<script src="../common.js"></script><script src="obj.js"></script><script>
+const d=load(),e=getE(d,qp('id'));
+if(!e)location='master.html';
+const HINT={draft:'Шаг 3 из 5 · нажмите «Отправить клиенту»',sent:'Шаг 4 из 5 · переключитесь в роль «Клиент» или откройте ссылку',changes:'Клиент просит изменения · нажмите «Изменить смету»',approved:'Шаг 5 из 5 · клиент согласовал — переключитесь в роль «Клиент» и оформите заказ',paid:'Готово · скопируйте объект для следующего клиента'};
+if(e&&!e.seen){e.seen=true;save(d)}
+ochrome('master',e?HINT[e.status]:'');
+function draw(){
+ const t=totals(e),url=clientUrl(e,d);
+ $('#ttl').textContent=e.title;
+ $('#sub').innerHTML=`${chip(e.status)} &nbsp;Клиент: <b>${esc(e.client||'—')}</b> · версия v${e.version} · комплектация «${TIERS[e.tier]}»${e.address?' · '+esc(e.address):''}`;
+ const B={
+  draft:`<div class="banner info"><img src="../img/omik-idea.png"><div><b>Смета готова.</b> Отправьте клиенту ссылку — он проверит материалы и согласует их без регистрации.</div></div>`,
+  sent:`<div class="banner warn"><div><b>Ждём ответа клиента.</b> Смета v${e.version} отправлена. Здесь появится согласование или запрос изменений.</div></div>`,
+  changes:`<div class="banner red"><div><b>Клиент просит изменения:</b> «${esc(e.comment)}»<br><a class="btn sm mt" href="builder.html?id=${e.id}">Изменить смету</a></div></div>`,
+  approved:`<div class="banner ok"><img src="../img/omik-ok.png"><div><b>Клиент согласовал смету v${e.approved?.version}</b> ${e.approved?fmtDate(e.approved.at):''}. Теперь он может оформить заказ материалов в ОМА.</div></div>`,
+  paid:`<div class="banner ok"><img src="../img/omik-happy.png"><div><b>Материалы оплачены.</b> Заказ ${e.order?.no} на ${money(e.order?.total||0)}, ${e.order?.delivery==='delivery'?'доставка на объект':'самовывоз из магазина'}. Платил ${e.order?.payer==='master'?'мастер':'клиент'}.${qp('locked')?'<br>Оплаченную смету менять нельзя — скопируйте её для нового объекта.':''}</div></div>`
+ };
+ $('#ban').innerHTML=B[e.status];
+ $('#lines').innerHTML=linesHTML(e.lines);
+ $('#wN').textContent=e.work.note||'Работы';$('#wA').textContent=money(t.work);
+ $('#tot').textContent=money(t.oma);$('#brk').innerHTML=totalsHTML(t);
+ $('#tl').innerHTML=[...e.history].reverse().map(h=>`<div><time>${fmtDate(h.at)}</time><span>${h.who==='client'?'🙋':'👷'} ${esc(h.text)}</span></div>`).join('')||'<span class="note">Смета ещё не отправлена</span>';
+ const send=e.status==='draft'?`<button class="btn o wide" onclick="sendE()">Отправить клиенту</button>`:e.status!=='paid'?`<button class="btn wide" onclick="showLink()">🔗 Ссылка для клиента</button>`:'';
+ $('#acts').innerHTML=send+
+  (e.status!=='paid'?`<a class="btn g wide mt" href="builder.html?id=${e.id}">✎ Изменить смету</a>`:'')+
+  `<button class="btn ${e.status==='paid'?'o':'g'} wide mt" onclick="copyE()">⧉ Копировать для нового объекта</button>`;
+ $('#url').value=url;$('#openC').href=url;
+}
+function sendE(){
+ e.status='sent';e.versions.push(snap(e));log(e,'master','Смета отправлена клиенту');save(d);draw();
+ ochrome('master',HINT.sent);showLink();
+}
+function showLink(){$('#mSend').classList.add('show')}
+function copyUrl(){
+ const v=$('#url').value;
+ (navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).catch(()=>{$('#url').select();document.execCommand('copy')}).finally(()=>{$('#cpb').textContent='✓ Скопировано'});
+}
+function copyE(){
+ const n=mkEstimate({title:'Копия — '+e.title,dims:{...e.dims},tier:e.tier,off:[...e.off],extra:JSON.parse(JSON.stringify(e.extra)),work:{...e.work}});
+ log(n,'master','Создано копированием «'+e.title+'»');d.estimates.push(n);save(d);location='builder.html?id='+n.id+'&copied=1';
+}
+if(e)draw();
+</script></body></html>

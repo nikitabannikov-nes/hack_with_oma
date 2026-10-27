@@ -1,0 +1,22 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Мои проекты — ОМА Проект</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="app.css"></head><body><div id="chrome"></div>
+<div class="wrap">
+ <div class="crumbs"><a href="index.html">Главная</a> / Мои проекты</div>
+ <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><div><h1>Мои проекты</h1><p class="lead">Каждый проект хранит план, смету, корзину и заявки. Откройте любой модуль — данные подхватятся.</p></div>
+  <div class="seg"><a class="btn o" href="planner.html?new=1&task=bath">＋ Новый проект</a><a class="btn g" href="omik.html">Спросить Омика</a></div></div>
+ <div id="list"></div>
+</div>
+<script src="data.js"></script><script src="geom.js"></script><script src="calc.js"></script><script src="core.js"></script><script src="plan.js"></script><script src="omik.js"></script><script>
+const ST={draft:['Черновик',''],sent:['Отправлена по ссылке','or'],changes:['Просят изменения','red'],approved:['Согласована','gr'],ordered:['Заказ оформлен','bl']};
+function draw(){
+ chrome('projects');
+ const s=load(),L=[...s.projects].sort((a,b)=>b.updated-a.updated);
+ $('#list').innerHTML=L.map(p=>{const[t,c]=ST[p.est.status]||ST.draft,inCart=s.cart.some(i=>i.projectId===p.id),reqs=s.requests.filter(r=>r.projectId===p.id),act=s.active===p.id;
+  return`<div class="card prj" style="${act?'border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-l)':''}">${p.rooms[0]?Plan.mini(p.rooms[0],150,110,Geom.validate(p.rooms[0]).ok):''}
+  <div><h3>${esc(p.title)} ${act?'<span class="tag">текущий</span>':''}</h3><div class="meta"><span class="st ${c}">${t}</span><span>${p.rooms.length} помещ. · ${num(floorArea(p),1)} м²</span><span>${p.est.lines.length} поз. · <b style="color:var(--ink)">${byn(estTotal(p))}</b></span><span>${TIERS[p.tier]}</span></div>
+   <div class="meta mt">${inCart?'<span>🛒 в корзине</span>':''}${reqs.length?`<span>👷 заявок: ${reqs.length} (${reqs.map(r=>REQ_ST[r.status].toLowerCase()).join(', ')})</span>`:''}${p.order?`<span>📦 заказ ${p.order}</span>`:''}<span>обновлён ${fmtDate(p.updated)}</span>${p.source==='omik'?'<span>создан Омиком</span>':''}</div></div>
+  <div class="acts"><a class="btn sm" href="smeta.html?project=${p.id}">📋 Смета</a><a class="btn sm g" href="planner.html?project=${p.id}">📐 План</a><a class="btn sm g" href="masters.html?project=${p.id}">👷 Мастер</a>${inCart?`<a class="btn sm g" href="cart.html">🛒 Корзина</a>`:''}<button class="btn sm ghost" onclick="dup('${p.id}')">⧉ Повторить</button><button class="btn sm ghost" style="color:var(--red)" onclick="delP('${p.id}')">Удалить</button></div></div>`}).join('')||`<div class="card empty"><img src="img/omik-hi.png" alt=""><h2>Проектов пока нет</h2><p class="note">Начните с плана комнаты или напишите Омику.</p><a class="btn o" href="planner.html?new=1">Новый проект</a></div>`;
+}
+function dup(id){const n=copyProject(getProject(id));toast('Проект скопирован: поменяйте геометрию под новый объект');location='planner.html?project='+n.id+'&from=smeta'}
+function delP(id){if(!confirm('Удалить проект?'))return;const s=load();s.projects=s.projects.filter(p=>p.id!==id);s.cart=s.cart.filter(i=>i.projectId!==id);if(s.active===id)s.active=null;save();draw()}
+draw();
+</script></body></html>

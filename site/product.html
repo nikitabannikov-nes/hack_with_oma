@@ -1,57 +1,60 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ОМА — смеситель Grohe</title><link rel="stylesheet" href="style.css">
-<style>
-.pg{display:grid;grid-template-columns:1fr 1fr 340px;gap:24px;margin-top:6px}
-.img{background:#fff;border:1px solid var(--line);border-radius:16px;height:420px;display:grid;place-items:center;font-size:150px}
-h1{font-size:24px;margin:0 0 10px}
-.spec{display:grid;gap:8px;font-size:14px;margin-top:14px}.spec div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:5px 0}.spec span{color:var(--mute)}
-.buy{padding:22px;height:fit-content}
-.price{font-size:34px;font-weight:800}.price s{font-size:16px;color:var(--mute);font-weight:500}
-.stock{color:var(--ok);font-size:13px;font-weight:600;margin:6px 0 16px}
-.buy .btn{width:100%;margin-bottom:10px}
-.inst{background:#fff1de;border:2px dashed var(--orange);border-radius:12px;padding:12px;margin-bottom:10px}
-.inst b{display:block}.inst small{color:#a85d00}
-.help{display:flex;gap:10px;align-items:center;font-size:13px;margin-top:14px;color:var(--blue);font-weight:600}
-.help img{width:34px;height:34px;border-radius:50%;object-fit:cover}
-.fld{margin:14px 0}.fld label{display:block;font-size:12px;font-weight:700;color:var(--mute);margin-bottom:4px}
-.fld input,.fld select{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit}
-.chk{display:flex;gap:10px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:14px;cursor:pointer;margin-bottom:10px}
-.chk input{accent-color:var(--blue);width:18px;height:18px}
-.line{display:flex;justify-content:space-between;font-size:20px;font-weight:800;margin:16px 0}
-.mast{display:flex;gap:10px;align-items:center;background:var(--blue-l);border-radius:12px;padding:10px;font-size:13px;margin-bottom:12px}
-.mast img{width:40px;height:40px;border-radius:50%;object-fit:cover}
-.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 22px;border-radius:12px;display:none;z-index:60;font-size:14px}
-@media(max-width:1000px){.pg{grid-template-columns:1fr}}
-</style></head><body><div id="chrome"></div>
-<div class="wrap"><div class="crumbs"><a href="index.html">Главная</a> / Сантехника / Смесители / Grohe Eurosmart</div>
-<div class="pg">
- <div class="img">🚿</div>
- <div><span class="tag">Артикул 33300003</span><h1 style="margin-top:8px">Смеситель для ванны Grohe Eurosmart хром</h1>
-  <div class="note">★★★★★ 4.8 · 126 отзывов · Гарантия 5 лет</div>
-  <div class="spec"><div><span>Тип</span>однорычажный</div><div><span>Монтаж</span>на борт ванны / настенный</div><div><span>Материал</span>латунь</div><div><span>Страна</span>Германия</div></div>
-  <div class="help"><img src="img/omik-think.png" style="object-fit:cover;mix-blend-mode:multiply;background:#fff"><a href="prorab.html">Не знаете, сколько нужно материалов? Спросите ОМИКа →</a></div>
- </div>
- <div class="card buy"><div class="price">189.00 BYN <s>215.00</s></div><div class="stock">● В наличии в 4 магазинах Минска</div>
-  <button class="btn o" onclick="toast('Добавлено в корзину')">В корзину</button>
-  <div class="inst"><b>🔧 Установить — от 45 BYN</b><small>Мастер «Проверен ОМА», фиксированная цена, гарантия на работу</small>
-  <button class="btn" style="margin:10px 0 0" onclick="openM()">Установить</button></div>
-  <div class="note">Доставка завтра · Самовывоз сегодня</div>
- </div>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Товар — ОМА Проект</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="app.css">
+<style>.pg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 340px;gap:24px;margin-top:6px;align-items:start}.spec{display:grid;gap:2px;font-size:14px;margin-top:14px}.spec div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding:7px 0}.spec span{color:var(--mute)}.buy{padding:22px}.price{font-size:32px;font-weight:800}.inst{background:#fff1de;border:2px dashed var(--orange);border-radius:12px;padding:12px;margin-top:12px}.calcbox{background:var(--blue-l);border-radius:12px;padding:14px;margin-top:12px}@media(max-width:1000px){.pg{grid-template-columns:1fr}.pimg.big{height:260px}}</style></head><body><div id="chrome"></div>
+<div class="wrap" id="app"></div>
+<div class="modal-bg" id="mCalc" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal">
+ <button class="x" onclick="$('#mCalc').classList.remove('show')">×</button>
+ <h2 style="margin:0 0 6px">Рассчитать количество</h2><p class="note" style="margin:0 0 14px" id="mcSub"></p>
+ <div id="mcRole"></div><div id="mcProj" class="mt2"></div>
+ <button class="btn o wide mt2" onclick="startCalc()">Перейти к плану помещения →</button>
 </div></div>
-<div class="modal-bg" id="mb" onclick="if(event.target===this)closeM()"><div class="modal"><button class="x" onclick="closeM()">×</button>
- <h2 style="margin:0 0 4px">Установка смесителя</h2><div class="note">Фиксированная цена — без сметы и сюрпризов</div>
- <div class="mast"><img src="img/omik-ok.png" style="mix-blend-mode:multiply;background:#fff"><div><b>Мастер подберётся автоматически</b><br>Проверен ОМА · оплата через ОМА · гарантия 12 мес.</div></div>
- <div class="line" style="margin:8px 0"><span style="font-size:15px;font-weight:600">Установка смесителя</span><span>45.00 BYN</span></div>
- <div class="fld"><label>Дата</label><select id="dt"></select></div>
- <div class="fld"><label>Время</label><select><option>09:00–12:00</option><option>12:00–15:00</option><option>15:00–18:00</option></select></div>
- <label class="chk"><input type="checkbox" id="dm" onchange="calc()"><span>Демонтаж старого смесителя <b>+15.00 BYN</b></span></label>
- <div class="line"><span>Работа</span><span id="wp">45.00 BYN</span></div>
- <button class="btn o" style="width:100%" onclick="add()">Добавить в корзину</button></div></div>
-<div class="toast" id="ts"></div>
-<script src="common.js"></script><script>chrome()
-const sel=document.getElementById('dt');const days=['вс','пн','вт','ср','чт','пт','сб'];
-for(let i=1;i<=7;i++){const d=new Date(Date.now()+i*864e5);sel.add(new Option(d.getDate()+'.'+String(d.getMonth()+1).padStart(2,'0')+' ('+days[d.getDay()]+')'))}
-const openM=()=>document.getElementById('mb').classList.add('show'),closeM=()=>document.getElementById('mb').classList.remove('show');
-const calc=()=>document.getElementById('wp').textContent=byn(45+(document.getElementById('dm').checked?15:0));
-function toast(t){const e=document.getElementById('ts');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
-function add(){closeM();localStorage.setItem('omaCartN','2');document.getElementById('cn').style.display='inline';document.getElementById('cn').textContent=2;toast('Смеситель и установка добавлены в корзину')}
+<script src="data.js"></script><script src="geom.js"></script><script src="calc.js"></script><script src="core.js"></script><script src="plan.js"></script><script src="omik.js"></script><script>
+const pr=P(qp('id'))||P('tw_opt');
+window.OMIK_CTX={page:'product',productId:pr.id};
+chrome('catalog');
+document.title=pr.name+' — ОМА Проект';
+let qty=1,roleSel=pr.roles.includes('tileFloor')&&pr.roles.includes('tileWall')?'both':pr.roles[0],target='new';
+function draw(){
+ const ap=activeProject(),inEst=ap&&ap.est.lines.find(l=>l.pid===pr.id),A=analogs(pr.id).slice(0,4),rel=(pr.rel||[]).map(P).filter(Boolean).slice(0,4),sv=pr.service&&svc(pr.service);
+ $('#app').innerHTML=`<div class="crumbs"><a href="index.html">Главная</a> / <a href="catalog.html">Каталог</a> / <a href="catalog.html?cat=${pr.cat}">${CATS[pr.cat].name}</a> / ${esc(pr.name)}</div>
+ <div class="pg"><div>${pimg(pr,'big')}</div>
+  <div>${badges(pr)}<span class="tag demo">Арт. ${pr.id.toUpperCase()} · демо</span><h1 style="font-size:24px;margin-top:10px">${esc(pr.name)}</h1>
+   <p style="margin:0 0 6px">${esc(pr.desc||'')}</p>
+   <div class="spec">${(pr.props||[]).map(([k,v])=>`<div><span>${k}</span><b>${esc(v)}</b></div>`).join('')}${pr.pack?`<div><span>Единица продажи</span><b>${pr.unit} (${num(pr.pack.q)} ${pr.pack.u})</b></div>`:''}</div>
+   ${pr.roles.length?`<div class="tip mt2" style="margin-bottom:0"><img src="img/omik-idea.png" alt=""><div>Расход считается по характеристикам этого товара${pr.spec.rate?` (${num(pr.spec.rate)} ${pr.cat==='mix'&&pr.roles[0]==='glue'?'кг/м² на 1 мм':pr.roles[0]==='primer'?'л/м²':'кг/м²'})`:pr.spec.cover?` (${pr.spec.cover} м²/л на слой)`:pr.spec.size?` (формат ${pr.spec.size.join('×')}, ${pr.pack.q} м² в упаковке)`:''} и площадям вашего плана.</div></div>`:''}
+  </div>
+  <div class="card buy"><div class="price">${byn(pr.price)}</div><div class="note">за ${pr.unit}${pr.priceM2?` · ${byn(pr.priceM2)} за м²`:''}</div>
+   <div class="note" style="color:var(--ok);font-weight:600;margin:8px 0 14px">● Наличие в демо не проверяется</div>
+   <div style="display:flex;gap:8px;align-items:center"><span class="qty"><button onclick="qty=Math.max(1,qty-1);draw()">−</button><input value="${qty}" onchange="qty=Math.max(1,+this.value||1);draw()"><button onclick="qty++;draw()">+</button></span><button class="btn o" style="flex:1" onclick="cartAdd(pr.id,qty);toast('🛒 Добавлено в корзину')">В корзину</button></div>
+   <button class="btn g wide mt" onclick="toEst()">📋 ${inEst?`В смете: ${inEst.qty} ${pr.unit}`:'Добавить в смету проекта'}</button>
+   ${pr.roles.length?`<div class="calcbox" id="calc"><b>Сколько нужно?</b><div class="note" style="margin:4px 0 10px">Постройте план комнаты, даже Г- или П-образной. Количество посчитается по реальной площади и упаковкам.</div><button class="btn wide" onclick="openCalc()">📐 Рассчитать количество</button></div>`:''}
+   ${sv?`<div class="inst"><b>🔧 ${sv.name} — от ${byn(sv.price)}</b><div class="note">Мастера и цены — демо. Заявка привяжется к этому товару.</div><a class="btn sm mt" href="masters.html?service=${sv.id}&product=${pr.id}${ap?'&project='+ap.id:''}">Заказать установку</a></div>`:''}
+  </div></div>
+ ${A.length?`<h2>Аналоги${A.some(x=>x.stm)?' и СТМ ОМА':''}</h2><div class="pgrid">${A.map(x=>pcard(x,{actions:`<a class="btn sm g" href="product.html?id=${x.id}">${x.price<pr.price?'−'+byn(pr.price-x.price):'+'+byn(x.price-pr.price)}</a><a class="btn sm" href="catalog.html?cmp=${pr.id},${x.id}">Сравнить</a>`})).join('')}</div>`:''}
+ ${rel.length?`<h2>С этим товаром берут</h2><div class="pgrid">${rel.map(x=>pcard(x)).join('')}</div>`:''}`;
+ if(location.hash==='#calc'&&pr.roles.length){history.replaceState(null,'',location.pathname+location.search);openCalc()}
+}
+function toEst(){const p=ensureProject(pr.cat==='floor'?'living':'bath');const r=addLine(p,pr.id,qty);save();toast(r.dup?`Уже в смете «${esc(p.title)}» · <a href="smeta.html?project=${p.id}&focus=${pr.id}">открыть</a>`:`📋 В смете «${esc(p.title)}» · <a href="smeta.html?project=${p.id}&focus=${pr.id}">открыть</a>`);draw()}
+function openCalc(){
+ const ap=activeProject();target=ap?'cur':'new';
+ $('#mcSub').textContent=pr.name;
+ $('#mcRole').innerHTML=pr.roles.includes('tileFloor')&&pr.roles.includes('tileWall')?`<div class="fld">Куда укладываем</div><div class="seg mt">${[['tileFloor','На пол'],['tileWall','На стены'],['both','Пол и стены']].map(([k,t])=>`<button class="${roleSel===k?'on':''}" onclick="roleSel='${k}';openCalc()">${t}</button>`).join('')}</div>`:'';
+ $('#mcProj').innerHTML=`<div class="fld">Где считать</div><div class="opts2"><label><input type="radio" name="tg" ${target==='new'?'checked':''} onchange="target='new'"><span><b>Новый расчёт</b><small>Создадим проект с этим товаром</small></span></label>${ap?`<label><input type="radio" name="tg" ${target==='cur'?'checked':''} onchange="target='cur'"><span><b>В текущий проект «${esc(ap.title)}»</b><small>Товар заменит типовую позицию, план сохранится</small></span></label>`:''}</div>`;
+ $('#mCalc').classList.add('show');
+}
+function startCalc(){
+ const roles=roleSel==='both'?['tileFloor','tileWall']:pr.cat==='tile'?[roleSel]:pr.roles;
+ const task=pr.cat==='floor'||pr.cat==='paint'?'living':'bath';
+ let p=target==='cur'?activeProject():null;
+ if(!p)p=addProject(newProject({task,title:'Расчёт: '+pr.name.split(/[,«]/)[0].trim(),logText:`Проект создан из карточки товара «${pr.name}»`}));
+ const r=room(p);
+ roles.forEach(role=>{p.pinned[role]=pr.id;
+  if(role==='tileWall'&&!r.walls.some(w=>w.finish==='tile'))r.walls.forEach(w=>w.finish='tile');
+  if(role==='tileFloor')r.floor='tile';if(role==='laminate')r.floor='laminate';
+  if(role==='paintWall'&&!r.walls.some(w=>w.finish==='paint'))r.walls.forEach(w=>w.finish='paint');if(role==='paintCeil')r.ceil='paint';});
+ if(roleSel==='tileFloor'&&target==='new')r.walls.forEach(w=>w.finish='paint');
+ if(roleSel==='tileWall'&&target==='new')r.floor='none';
+ recalc(p);touchEst(p,`Выбран товар «${pr.name}» для расчёта`);setActive(p);save();
+ location=`planner.html?project=${p.id}&pid=${pr.id}`;
+}
+draw();
 </script></body></html>

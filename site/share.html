@@ -1,0 +1,50 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Смета по ссылке — ОМА Проект</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="app.css"></head><body><div id="chrome"></div>
+<div class="wrap" id="app"></div>
+<div class="modal-bg" id="mCh" onclick="if(event.target===this)this.classList.remove('show')"><form class="modal" onsubmit="event.preventDefault();askChanges()">
+ <button type="button" class="x" onclick="$('#mCh').classList.remove('show')">×</button>
+ <h2 style="margin:0 0 10px">Что изменить?</h2>
+ <div class="chips" style="margin-bottom:10px"><button type="button" onclick="pre(this)">Хочу дешевле — давайте «Эконом»</button><button type="button" onclick="pre(this)">Другой цвет плитки</button><button type="button" onclick="pre(this)">Смеситель у меня уже есть</button></div>
+ <label class="fld">Комментарий<textarea id="cm" rows="4" required placeholder="Напишите, что поменять"></textarea></label>
+ <button class="btn wide mt">Отправить</button>
+</form></div>
+<script src="data.js"></script><script src="geom.js"></script><script src="calc.js"></script><script src="core.js"></script><script src="plan.js"></script><script src="omik.js"></script><script>
+const snap=readShare();
+chrome('share',{noCtx:true});
+// В этом браузере проект может уже существовать (демо: автор и получатель на одном устройстве)
+let local=snap&&getProject(snap.id);
+function project(){
+ if(local)return local;
+ // Другое устройство: сохраняем копию сметы как проект получателя
+ const s=load();let imp=s.projects.find(p=>p.importedFrom===snap.id&&p.importedV===snap.v);
+ if(!imp){imp=newProject({title:snap.title,rooms:snap.rooms.map(r=>({...r,id:uid(),shape:{kind:'poly'}})),tier:snap.tier,logText:`Получена смета по ссылке (v${snap.v})`});
+  imp.est.lines=snap.lines.map(l=>({id:uid(),role:l.role,pid:l.pid,qty:l.qty,calcQty:l.qty,manual:false,basis:l.basis,src:l.role?'calc':'catalog'}));
+  imp.importedFrom=snap.id;imp.importedV=snap.v;imp.est.status='sent';imp.est.version=snap.v;s.projects.unshift(imp);save()}
+ return imp;
+}
+const current=()=>local||load().projects.find(p=>p.importedFrom===snap.id&&p.importedV===snap.v)||null;
+function draw(){
+ if(!snap){$('#app').innerHTML=`<div class="card empty mt2"><img src="img/omik-warn.png" alt=""><h2>Ссылка повреждена</h2><p class="note">Попросите отправителя прислать ссылку ещё раз.</p></div>`;return}
+ const p=current(),st=p?p.est.status:'sent',newer=!!local&&local.est.version>snap.v,lines=snap.lines.filter(l=>P(l.pid));
+ const tot=lines.reduce((s,l)=>s+P(l.pid).price*l.qty,0);
+ const approvedHere=p&&p.est.approved&&p.est.approved.version===snap.v;
+ let ban='';
+ if(newer)ban=omikTip('warn',`<b>Есть более новая версия сметы (v${p.est.version}).</b> Вы смотрите v${snap.v}. Попросите отправителя прислать свежую ссылку.`,'warn');
+ else if(st==='changes')ban=omikTip('think',`<b>Вы попросили изменения:</b> «${esc(p.est.comment)}». Отправитель увидит это в своей смете.`,'warn');
+ else if(approvedHere||st==='approved')ban=omikTip('ok',`<b>Смета v${snap.v} согласована.</b> Можно заказать материалы в ОМА.`,'ok');
+ else if(st==='ordered')ban=omikTip('happy',`<b>Материалы по этой смете заказаны${p.order?` (${p.order})`:''}.</b>`,'ok');
+ $('#app').innerHTML=`<div style="display:flex;gap:14px;align-items:center;margin-top:22px"><img src="img/omik-ok.png" alt="" style="width:56px;height:56px;border-radius:50%;background:var(--blue-l);object-fit:cover"><div><div class="note">Смета на материалы ОМА · версия ${snap.v}</div><b style="font-size:17px">Вам отправили смету для согласования</b></div></div>
+ <h1>${esc(snap.title)}</h1><p class="lead">Проверьте помещения и материалы. Количество посчитано калькулятором ОМА по плану и нормам расхода товаров. Регистрация не нужна.</p>${ban}
+ <div class="g2"><div>
+  <div class="card pad"><h3>Помещения</h3><div style="display:flex;gap:14px;flex-wrap:wrap">${snap.rooms.map((r,i)=>{const rr={...r,id:'s'+i},ok=Geom.validate(rr).ok,m=ok?Geom.metrics(rr):null;return`<div style="display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px">${Plan.mini(rr,130,96,ok)}<div><b>${esc(r.name)}</b><div class="note">${ok?`Пол ${num(m.floorNet)} м²<br>Стены ${num(m.wallNet)} м²<br>Высота ${num(r.h)} м`:'ошибка геометрии'}</div></div></div>`}).join('')}</div></div>
+  <div class="card pad"><h3>Материалы · ${lines.length} позиций</h3><div class="est">${lines.map(l=>{const pr=P(l.pid);return`<div class="ln"><span class="c-img">${pimg(pr,'sm')}</span><span class="nm"><a href="product.html?id=${pr.id}">${esc(pr.name)}</a>${l.manual?` <span class="flag">изменено вручную · по расчёту ${l.calcQty}</span>`:l.role?' <span class="flag b">по расчёту</span>':''}${l.basis?`<span class="basis">${esc(l.basis)}</span>`:''}</span><span class="c-qty" style="text-align:right"><b>${l.qty}</b> ${pr.unit}</span><span class="r c-price">${byn(pr.price)}</span><span class="r c-sum"><b>${byn(pr.price*l.qty)}</b></span><span></span></div>`}).join('')}</div></div>
+ </div><aside class="card side"><div class="note">Материалы ОМА</div><div class="tot">${byn(tot)}</div><div class="note" style="margin-bottom:14px">${lines.length} позиций · цены демо</div>
+  ${st==='ordered'?'':approvedHere||st==='approved'?`<button class="btn o wide" onclick="order()">🛒 Заказать материалы в ОМА</button><button class="btn g wide mt" onclick="$('#mCh').classList.add('show')">✎ Попросить изменения</button>`:`<button class="btn o wide" onclick="approve()" ${newer?'disabled':''}>✓ Согласовать смету</button><button class="btn g wide mt" onclick="$('#mCh').classList.add('show')">✎ Запросить изменения</button><button class="btn ghost wide mt" onclick="order()">Сразу заказать материалы</button>`}
+  <a class="btn ghost wide mt" href="#" onclick="location='masters.html?project='+project().id;return false">👷 Нужен мастер</a>
+  <p class="note">После согласования любая правка придёт новой версией — состав нельзя изменить незаметно. Работы оплачиваются исполнителю отдельно.</p></aside></div>`;
+}
+function approve(){const p=project();p.est.status='approved';p.est.approved={version:snap.v,at:now()};log(p,`Смета v${snap.v} согласована получателем`);save();draw();scrollTo(0,0)}
+function pre(b){$('#cm').value=($('#cm').value?$('#cm').value+'. ':'')+b.textContent}
+function askChanges(){const c=$('#cm').value.trim();if(!c)return;const p=project();p.est.status='changes';p.est.comment=c;log(p,'Получатель просит изменения: «'+c+'»');save();$('#mCh').classList.remove('show');draw();scrollTo(0,0)}
+function order(){const p=project();cartSyncProject(p);setActive(p);location='cart.html'}
+draw();
+</script></body></html>

@@ -1,0 +1,57 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ОМА Объект — оформление заказа</title><link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="obj.css"></head><body><div id="chrome"></div>
+<div class="wrap" id="app"></div>
+<script src="../common.js"></script><script src="obj.js"></script><script>
+const d=load(),e=getE(d,qp('id'));
+const DATES=['Завтра','Послезавтра','В субботу'];
+let o={payer:'client',delivery:'pickup',date:DATES[0],address:e?.address||''};
+ochrome('client',e?.status==='paid'?'Готово · переключитесь в роль «Мастер», чтобы увидеть статус':'Шаг 5 из 5 · выберите получение и нажмите «Оплатить»');
+const oma=()=>e.lines.filter(l=>l.src!=='free');
+const ship=()=>o.delivery==='delivery'&&totals(e).oma<300?25:0;
+function draw(){
+ if(!e){location='master.html';return}
+ if(e.status==='paid')return done();
+ if(e.status!=='approved'){$('#app').innerHTML=`<div class="card done" style="margin-top:24px"><img src="../img/omik-warn.png"><h2>Сначала согласуйте смету</h2><p class="note">Оформить заказ можно только по согласованной версии сметы.</p><a class="btn" href="client.html?id=${e.id}">К смете</a></div>`;return}
+ const t=totals(e),free=e.lines.filter(l=>l.src==='free'),total=t.oma+ship();
+ $('#app').innerHTML=`
+ <div class="crumbs"><a href="client.html?id=${e.id}">Смета</a> / Оформление заказа</div>
+ <h1>Заказ материалов</h1><p class="lead">${esc(e.title)} · по согласованной смете v${e.approved.version}</p>
+ <div class="g2"><div>
+  <div class="card pad"><h3>Товары ОМА · ${oma().length} позиций</h3>${linesHTML(oma())}
+   ${free.length?`<p class="note">Не входит в заказ: ${free.map(l=>esc(l.name)).join(', ')} — мастер покупает сам.</p>`:''}</div>
+  <div class="card pad"><h3>Кто оплачивает</h3><div class="opts">
+   <label><input type="radio" name="p" value="client" ${o.payer==='client'?'checked':''} onchange="o.payer=this.value"><span><b>Я, клиент</b><small>Мастеру не нужно платить за материалы своими деньгами</small></span></label>
+   <label><input type="radio" name="p" value="master" ${o.payer==='master'?'checked':''} onchange="o.payer=this.value"><span><b>Мастер</b><small>Мастер оплатит заказ сам, вы рассчитаетесь с ним по договорённости</small></span></label></div></div>
+  <div class="card pad"><h3>Получение</h3><div class="opts">
+   <label><input type="radio" name="dl" value="pickup" ${o.delivery==='pickup'?'checked':''} onchange="o.delivery=this.value;draw()"><span><b>Самовывоз из магазина ОМА</b><small>Бесплатно · заказ соберут и подержат в резерве 3 дня (демо-условия)</small></span></label>
+   <label><input type="radio" name="dl" value="delivery" ${o.delivery==='delivery'?'checked':''} onchange="o.delivery=this.value;draw()"><span><b>Доставка на объект</b><small>25 BYN, бесплатно от 300 BYN (демо-условия)</small></span></label></div>
+   ${o.delivery==='delivery'?`<label class="fld mt">Адрес объекта<input value="${esc(o.address)}" placeholder="Минск, ул. …" oninput="o.address=this.value"></label>`:''}
+   <div class="fld mt">Когда<div class="chips">${DATES.map(x=>`<button type="button" style="${x===o.date?'border-color:var(--blue);color:var(--blue);font-weight:700':''}" onclick="o.date='${x}';draw()">${x}</button>`).join('')}</div></div>
+  </div>
+ </div>
+ <aside class="card side"><div class="note">Итого к оплате</div><div class="tot">${money(total)}</div>
+  <div style="margin:10px 0 16px"><div class="row"><span>Материалы</span><b>${money(t.oma)}</b></div><div class="row"><span>${o.delivery==='delivery'?'Доставка':'Самовывоз'}</span><b>${ship()?money(ship()):'бесплатно'}</b></div></div>
+  <button class="btn o wide" id="pay" onclick="pay()">Оплатить ${money(total)}</button>
+  <p class="note">⚠ Демонстрационная оплата: деньги не списываются, данные карты не запрашиваются.</p></aside></div>`;
+}
+function pay(){
+ if(o.delivery==='delivery'&&!o.address.trim()){alert('Укажите адрес объекта для доставки');return}
+ const b=$('#pay');b.disabled=true;b.textContent='Оплата…';
+ setTimeout(()=>{
+  e.order={no:'D-'+(10000+Math.floor(Math.random()*89999)),payer:o.payer,delivery:o.delivery,date:o.date,address:o.address,total:totals(e).oma+ship(),at:now()};
+  e.status='paid';log(e,'client',`Заказ ${e.order.no} оплачен (${o.payer==='master'?'платит мастер':'платит клиент'}), ${o.delivery==='delivery'?'доставка на объект':'самовывоз'} — ${o.date.toLowerCase()}`);save(d);
+  ochrome('client','Готово · переключитесь в роль «Мастер», чтобы увидеть статус');draw();scrollTo(0,0);
+ },900);
+}
+function done(){
+ const r=e.order;
+ $('#app').innerHTML=`<div class="card done" style="margin-top:24px"><img src="../img/omik-happy.png">
+  <h1 style="margin-top:6px">Заказ ${r.no} оплачен</h1>
+  <p class="lead">${money(r.total)} · ${r.delivery==='delivery'?'доставка на объект':'самовывоз из магазина ОМА'}${r.date?' · '+r.date.toLowerCase():''}</p>
+  <div style="max-width:420px;margin:0 auto 20px;text-align:left">
+   <div class="row"><span>Мастер</span><b>видит статус «Оплачено» в кабинете</b></div>
+   <div class="row"><span>Чеки и гарантии</span><b>сохранены в «Балансе» (демо)</b></div>
+</div>
+  <a class="btn g" href="client.html?id=${e.id}">Вернуться к смете</a> <a class="btn" href="estimate.html?id=${e.id}">Перейти в роль мастера →</a></div>`;
+}
+draw();
+</script></body></html>

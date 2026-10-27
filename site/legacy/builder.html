@@ -1,0 +1,108 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ОМА Объект — конструктор сметы</title><link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="obj.css"></head><body><div id="chrome"></div>
+<div class="wrap">
+ <div class="crumbs"><a href="master.html">Мои объекты</a> / Конструктор сметы</div>
+ <h1 id="ttl"></h1><p class="lead">Количество считают формулы по размерам помещения. Проверьте, добавьте сантехнику и свои позиции.</p>
+ <div id="ban"></div>
+ <div class="g2"><div>
+  <div class="card pad"><h3>1. Объект и клиент</h3>
+   <div class="f3"><label class="fld">Название<input id="iT"></label><label class="fld">Клиент<input id="iC"></label><label class="fld">Адрес<input id="iA" placeholder="необязательно"></label></div>
+  </div>
+  <div class="card pad"><h3>2. Размеры ванной</h3>
+   <div class="f4">
+    <label class="fld">Длина, м<input id="dL" type="number" step="0.05" min="0.5" max="10"></label>
+    <label class="fld">Ширина, м<input id="dW" type="number" step="0.05" min="0.5" max="10"></label>
+    <label class="fld">Высота, м<input id="dH" type="number" step="0.05" min="1.5" max="4"></label>
+    <label class="fld">Проём двери, м²<input id="dD" type="number" step="0.1" min="0" max="5"></label>
+   </div>
+   <p class="note" id="geo"></p>
+  </div>
+  <div class="card pad"><h3>3. Материалы по расчёту</h3>
+   <div class="tiers" id="tiers"></div>
+   <div id="calc"></div><div id="offs" class="chips"></div>
+  </div>
+  <div class="card pad"><h3>4. Сантехника и другое из каталога ОМА</h3><div class="addon" id="add"></div></div>
+  <div class="card pad"><h3>5. Своя позиция <span class="note" style="font-weight:500">— если нужного товара нет в ОМА</span></h3>
+   <form class="f4" onsubmit="event.preventDefault();addFree(this)">
+    <label class="fld" style="grid-column:span 2">Название<input name="n" placeholder="Например: профиль для торца плитки" required></label>
+    <label class="fld">Кол-во<input name="q" type="number" step="0.1" min="0.1" value="1" required></label>
+    <label class="fld">Цена, BYN<input name="p" type="number" step="0.01" min="0" value="0" required></label>
+    <label class="fld">Ед.<input name="u" value="шт."></label>
+    <span></span><span></span><button class="btn g" style="align-self:end">+ Добавить</button>
+   </form>
+   <div id="free" class="mt"></div>
+   <p class="note">Такие позиции видны клиенту с пометкой «Не из ОМА» и не попадают в заказ ОМА.</p>
+  </div>
+  <div class="card pad"><h3>6. Работы мастера <span class="note" style="font-weight:500">— справочно</span></h3>
+   <div class="f3"><label class="fld">Что входит<input id="wN"></label><label class="fld">Стоимость, BYN<input id="wA" type="number" step="10" min="0"></label><span></span></div>
+   <p class="note">Работы оплачиваются мастеру напрямую. ОМА продаёт только материалы и за работы не отвечает.</p>
+  </div>
+ </div>
+ <aside class="card side"><div class="note">Материалы ОМА</div><div class="tot" id="tot"></div><div id="brk" style="margin:10px 0 16px"></div>
+  <button class="btn o wide" onclick="saveE()">Сохранить и перейти к смете →</button>
+  <p class="note" id="sn"></p></aside>
+ </div>
+</div>
+<script src="../common.js"></script><script src="obj.js"></script><script>
+ochrome('master','Шаг 2 из 5 · введите размеры, выберите комплектацию и нажмите «Сохранить»');
+const d=load(),e0=getE(d,qp('id'));
+if(!e0)location='master.html';
+if(e0&&e0.status==='paid')location='estimate.html?id='+e0.id+'&locked=1';
+const e=JSON.parse(JSON.stringify(e0));
+$('#ttl').textContent=e.title;
+$('#iT').value=e.title;$('#iC').value=e.client;$('#iA').value=e.address;
+['L','W','H','D'].forEach(k=>$('#d'+k).value=e.dims[k]);
+$('#wN').value=e.work.note;$('#wA').value=e.work.amount;
+let ban='';
+if(qp('copied'))ban+=`<div class="banner ok"><img src="../img/omik-ok.png"><div><b>Объект скопирован.</b> Размеры, комплектация и позиции перенесены — поменяйте размеры под новую ванную.</div></div>`;
+if(e.status!=='draft')ban+=`<div class="banner warn"><div><b>Смета уже у клиента (v${e.version}).</b> Если вы что-то измените, клиент увидит новую версию со списком изменений и должен будет согласовать её заново.</div></div>`;
+$('#ban').innerHTML=ban;
+
+function rebuild(){e.lines=build(e)}
+function draw(){
+ const g=geo(e.dims);
+ $('#geo').textContent=`Пол ${num(g.F.toFixed(2))} м² · стены ${num(g.Wl.toFixed(2))} м² · периметр ${num(g.P.toFixed(2))} м`;
+ $('#tiers').innerHTML=Object.keys(TIERS).map(k=>{const t=[...calcLines(e.dims,k,e.off),...e.extra].filter(l=>l.src!=='free').reduce((s,l)=>s+sum(l),0);
+  return`<button class="${k===e.tier?'on':''}" onclick="setTier('${k}')">${TIERS[k]}<small>${money(t)} материалы ОМА</small></button>`}).join('');
+ const calc=e.lines.filter(l=>l.src==='calc');
+ $('#calc').innerHTML=linesHTML(calc,{hints:1,remove:'rmCalc'});
+ $('#offs').innerHTML=e.off.length?'<span class="note" style="align-self:center">Убрано:</span>'+e.off.map(r=>`<button onclick="unOff('${r}')">↺ ${ROLES[r]}</button>`).join(''):'';
+ $('#add').innerHTML=ADDONS.map(k=>{const c=CAT[k],x=e.extra.find(l=>l.key===k);
+  return`<div class="it ${x?'in':''}"><span class="note">${c.group}</span><span>${c.name}</span><b>${money(c.price)}</b>
+   ${x?`<div style="display:flex;gap:6px;align-items:center"><button class="btn sm g" onclick="qty('${k}',-1)">−</button><b style="flex:1;text-align:center">${x.qty} ${c.unit}</b><button class="btn sm g" onclick="qty('${k}',1)">+</button></div>`
+     :`<button class="btn sm g" onclick="qty('${k}',1)">+ В смету</button>`}</div>`}).join('');
+ const free=e.extra.filter(l=>l.src==='free');
+ const t=totals(e);
+ $('#tot').textContent=money(t.oma);
+ $('#brk').innerHTML=totalsHTML(t)+`<div class="row"><span>Комплектация</span><b>${TIERS[e.tier]}</b></div><div class="row"><span>Позиций</span><b>${e.lines.length}</b></div>`;
+ $('#free').innerHTML=free.length?linesHTML(free,{remove:'rmFree'}):'';
+ $('#sn').textContent=e.status==='draft'?'Смета сохранится как черновик. Отправить клиенту можно на следующем шаге.':'';
+}
+function setTier(k){e.tier=k;rebuild();draw()}
+function rmCalc(i){const l=e.lines.filter(l=>l.src==='calc')[i];e.off.push(l.role);rebuild();draw()}
+function unOff(r){e.off=e.off.filter(x=>x!==r);rebuild();draw()}
+function rmFree(i){const l=e.extra.filter(l=>l.src==='free')[i];e.extra.splice(e.extra.indexOf(l),1);rebuild();draw()}
+function qty(k,dq){
+ const x=e.extra.find(l=>l.key===k);
+ if(x){x.qty+=dq;if(x.qty<=0)e.extra.splice(e.extra.indexOf(x),1)}
+ else e.extra.push({src:'catalog',key:k,name:CAT[k].name,unit:CAT[k].unit,price:CAT[k].price,qty:1});
+ rebuild();draw();
+}
+function addFree(f){
+ e.extra.push({src:'free',name:f.n.value.trim(),qty:+f.q.value,unit:f.u.value||'шт.',price:+f.p.value});
+ f.reset();f.u.value='шт.';rebuild();draw();
+}
+['L','W','H','D'].forEach(k=>$('#d'+k).oninput=ev=>{const v=parseFloat(ev.target.value);if(v>0||(k==='D'&&v===0)){e.dims[k]=v;rebuild();draw()}});
+$('#wA').oninput=ev=>{e.work.amount=+ev.target.value||0;draw()};
+function saveE(){
+ e.title=$('#iT').value.trim()||'Ремонт ванной';e.client=$('#iC').value.trim();e.address=$('#iA').value.trim();e.work.note=$('#wN').value.trim();
+ rebuild();
+ const changed=JSON.stringify([e.lines,e.work])!==JSON.stringify([e0.lines,e0.work]);
+ if(e.status!=='draft'&&changed){
+  e.version++;e.status='sent';e.versions.push(snap(e));
+  log(e,'master',`Смета изменена: v${e.version}. Клиенту нужно согласовать её заново`);
+ }else e.updated=now();
+ d.estimates[d.estimates.indexOf(e0)]=e;save(d);
+ location='estimate.html?id='+e.id;
+}
+rebuild();draw();
+</script></body></html>

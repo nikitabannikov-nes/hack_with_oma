@@ -1,0 +1,73 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ОМА Проект — главная</title><link rel="stylesheet" href="../style.css">
+<style>
+.hero{display:grid;grid-template-columns:1.8fr 1fr;gap:20px;margin-top:18px}
+.hero .l{padding-right:340px!important;background:linear-gradient(120deg,#0057d6,#0b3a9e);color:#fff;border-radius:22px;padding:40px;position:relative;overflow:hidden;min-height:380px}
+.hero h1{font-size:36px;line-height:1.15;margin:0 0 10px;max-width:520px}
+.hero .l>p{margin:0 0 22px;color:#cfe0ff;max-width:480px}
+.ask{background:#fff;border-radius:14px;padding:8px;display:flex;gap:8px;max-width:520px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.ask input{flex:1;border:0;font:inherit;padding:10px 12px;outline:0;color:var(--ink);min-width:0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;max-width:520px}
+.chips a{background:rgba(255,255,255,.16);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600}
+.chips a:hover{background:rgba(255,255,255,.3)}
+.hero .mascot{position:absolute;right:18px;bottom:0;width:320px;background:#fff;border-radius:26px 26px 0 0}
+.hero .mascot-wrap{position:absolute;right:10px;bottom:0;width:320px;height:370px;background:#fff;border-radius:200px 200px 0 0;opacity:.0}
+.side{display:grid;gap:20px}
+.promo{border-radius:22px;padding:24px;display:flex;flex-direction:column;justify-content:center}
+.promo h3{margin:6px 0;font-size:20px}
+.promo>.tag{align-self:flex-start}.promo.a{background:#fff1de}.promo.b{background:#fff;border:1px solid var(--line)}
+h2{font-size:24px;margin:44px 0 16px}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.flow .card{padding:20px}
+.flow .n{width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:800;margin-bottom:10px}
+.flow h4{margin:0 0 4px}.flow p{margin:0;font-size:13px;color:var(--mute)}
+.prods{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.pr{padding:14px;display:flex;flex-direction:column;gap:8px}
+.pr .ph{height:150px;border-radius:12px;display:grid;place-items:center;font-size:56px}
+.pr b{font-size:20px}.pr small{color:var(--mute);font-size:12px}
+.pr .btn{margin-top:auto}
+.svc{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.svc .card{padding:20px}
+@media(max-width:900px){.hero .l{padding-right:26px!important;padding-bottom:300px!important}.hero .mascot{right:50%;transform:translateX(50%);width:260px}.hero,.flow,.prods,.svc{grid-template-columns:1fr 1fr}.hero{grid-template-columns:1fr}.hero .mascot{width:200px}.hero .l{padding:26px}.hero h1{font-size:26px}}
+</style></head><body><div id="chrome"></div>
+<div class="wrap">
+<div class="hero">
+ <div class="l">
+  <span class="tag or" style="background:#ff9a1a;color:#fff">NEW · ОМА Проект</span>
+  <h1 style="margin-top:14px">Что хотите сделать?</h1>
+  <p>Опишите задачу — ОМИК, ваш AI-прораб, посчитает материалы, подберёт комплектацию под бюджет и найдёт мастера.</p>
+  <form class="ask" onsubmit="event.preventDefault();location='prorab.html?q='+encodeURIComponent(this.q.value||'Хочу поменять плитку в ванной 4 м²')">
+   <input name="q" placeholder="Например: хочу поменять плитку в ванной 4 м²"><button class="btn o">Рассчитать</button>
+  </form>
+  <div class="chips"><a href="prorab.html?q=Поменять плитку в ванной 4 м²">🛁 Плитка в ванной</a><a href="prorab.html?q=Покрасить стены в комнате">🎨 Покраска стен</a><a href="prorab.html?q=Положить ламинат">🪵 Ламинат</a><a href="#">📷 Загрузить фото</a></div>
+  <img class="mascot" src="../img/omik-hero.png" alt="ОМИК" >
+ </div>
+ <div class="side">
+  <div class="promo a card"><span class="tag or">Новая кнопка</span><h3>Купили смеситель — установим сегодня</h3><p style="margin:0 0 12px;font-size:13px">Фиксированная цена монтажа прямо в карточке товара.</p><a class="btn sm o" style="align-self:flex-start" href="product.html">Смотреть пример</a></div>
+  <div class="promo b"><span class="tag">Паспорт дома</span><h3>Все покупки и гарантии — в одном месте</h3><p style="margin:0 0 12px;font-size:13px;color:var(--mute)">Коды краски, артикулы плитки, напоминания.</p><a class="btn sm g" style="align-self:flex-start" href="passport.html">Открыть</a></div>
+ </div>
+</div>
+
+<h2>Как работает ОМА Проект</h2>
+<div class="flow">
+ <div class="card"><div class="n">1</div><h4>Расскажите задачу</h4><p>Текстом или фото. ОМИК задаст 2–3 вопроса.</p></div>
+ <div class="card"><div class="n">2</div><h4>Смета под бюджет</h4><p>Три комплектации: эконом, оптимум, премиум.</p></div>
+ <div class="card"><div class="n">3</div><h4>Одна корзина</h4><p>Материалы, работы, доставка и аренда инструмента.</p></div>
+ <div class="card"><div class="n">4</div><h4>С мастером или сам</h4><p>Трекинг выезда или аренда инструмента + видеоинструкции.</p></div>
+</div>
+
+<h2>Популярное для ремонта ванной</h2>
+<div class="prods">
+ <div class="card pr"><div class="ph" style="background:#e8f0fd">🧱</div><small>Керамическая плитка</small><span>Плитка настенная «Белый кирпич» 30×60</span><b>38.90 BYN/м²</b><a class="btn sm g" href="smeta.html">В смету</a></div>
+ <div class="card pr"><div class="ph" style="background:#fff1de">🚿</div><small>Сантехника</small><span>Смеситель для ванны Grohe Eurosmart</span><b>189.00 BYN</b><a class="btn sm g" href="product.html">Подробнее</a></div>
+ <div class="card pr"><div class="ph" style="background:#e1f6ea">🪣</div><small>Сухие смеси</small><span>Клей плиточный Ceresit CM 11, 25 кг</span><b>21.50 BYN</b><a class="btn sm g" href="smeta.html">В смету</a></div>
+ <div class="card pr"><div class="ph" style="background:#f0eaf8">🔧</div><small>Прокат</small><span>Плиткорез электрический, сутки</span><b>35.00 BYN</b><a class="btn sm g" href="cart.html">В аренду</a></div>
+</div>
+
+<h2 id="services">Услуги мастеров</h2>
+<div class="svc">
+ <div class="card"><h4>Монтаж «под ключ»</h4><p class="note">Проверенные мастера «Проверен ОМА». Оплата через ОМА, гарантия на работу.</p></div>
+ <div class="card"><h4>Аренда инструмента</h4><p class="note">Готовый набор под вашу работу. Залог блокируется на карте лояльности.</p></div>
+ <div class="card"><h4>Заказать замер</h4><p class="note">Не хотите мерить сами — мастер приедет и снимет размеры.</p></div>
+</div>
+</div>
+<script src="../common.js"></script><script>chrome()</script></body></html>

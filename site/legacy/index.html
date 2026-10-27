@@ -1,0 +1,29 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ОМА Объект — демо</title><link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="obj.css">
+<style>
+.hero{margin-top:22px;background:linear-gradient(120deg,#0057d6,#0b3a9e);color:#fff;border-radius:22px;padding:40px;display:grid;grid-template-columns:1fr 260px;gap:20px;align-items:center}
+.hero h1{font-size:36px;margin:12px 0 12px;line-height:1.15}
+.hero p{color:#dbe7ff;margin:0 0 10px;max-width:640px}
+.hero img{width:100%;background:#fff;border-radius:50%}
+.path{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:22px 0}
+.path .card{padding:16px}.path b{display:block;margin:6px 0 2px}.path span{font-size:13px;color:var(--mute)}
+.path i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+@media(max-width:900px){.hero{grid-template-columns:1fr;padding:26px}.hero img{width:150px}.hero h1{font-size:26px}.path{grid-template-columns:1fr 1fr}}
+</style></head><body><div id="chrome"></div>
+<div class="wrap">
+ <div class="hero"><div>
+  <span class="tag or" style="background:#ff9a1a;color:#fff">Space Hackathon with ОМА · демо</span>
+  <h1>ОМА Объект: смета мастера, которую клиент оплачивает в ОМА</h1>
+  <p>Мастер собирает смету материалов в ОМА и отправляет клиенту ссылку. Клиент сам проверяет и оплачивает материалы, поэтому мастер не платит за них своими деньгами и не спорит о каждой позиции.</p>
+  <p>ОМА получает закупку на весь объект и новых клиентов через мастера, не отвечая за работы.</p>
+  <a class="btn o" href="master.html" style="margin-top:10px">Начать демо как мастер →</a>
+ </div><img src="../img/omik-hi.png" alt="ОМИК"></div>
+ <div class="path">
+  <div class="card"><i>1</i><b>Кабинет мастера</b><span>Объекты и статусы</span></div>
+  <div class="card"><i>2</i><b>Конструктор</b><span>Размеры → формулы → материалы</span></div>
+  <div class="card"><i>3</i><b>Ссылка клиенту</b><span>Viber, Telegram, без регистрации</span></div>
+  <div class="card"><i>4</i><b>Согласование</b><span>Или запрос изменений</span></div>
+  <div class="card"><i>5</i><b>Заказ в ОМА</b><span>Оплата и получение</span></div>
+ </div>
+ <p class="note">Проблемы мастеров и клиентов, на которые опирается сервис, — гипотезы для проверки на пилоте, а не результаты исследования. Товары, цены и оплата в демо условные.</p>
+</div>
+<script src="../common.js"></script><script src="obj.js"></script><script>ochrome('master','Нажмите «Начать демо как мастер»')</script></body></html>

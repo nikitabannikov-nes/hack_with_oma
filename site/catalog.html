@@ -1,0 +1,64 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Каталог — ОМА Проект</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="app.css">
+<style>.cl{display:grid;grid-template-columns:240px minmax(0,1fr);gap:20px;align-items:start}.cats{padding:10px;position:sticky;top:84px}.cats a{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:10px;font-size:14px;font-weight:600}.cats a.on,.cats a:hover{background:var(--blue-l);color:var(--blue)}.cats a small{margin-left:auto;color:var(--mute);font-weight:500}.flt{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}.flt select{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:13px;background:#fff}.flt label.ck{display:flex;gap:6px;align-items:center;font-size:13px;font-weight:600;background:#fff;border:1px solid var(--line);border-radius:10px;padding:7px 10px;cursor:pointer}.pc .cmpck{font-size:12px;color:var(--mute);display:flex;gap:6px;align-items:center;cursor:pointer}.pc.cur{border-color:var(--ok);box-shadow:0 0 0 2px #bfe8cf}@media(max-width:800px){.cl{grid-template-columns:1fr}.cats{position:static;display:flex;overflow:auto;gap:4px}.cats a{white-space:nowrap}.cats a small{display:none}}</style></head><body><div id="chrome"></div>
+<div class="wrap">
+ <div class="crumbs"><a href="index.html">Главная</a> / Каталог</div>
+ <div id="mode"></div>
+ <h1 id="ttl">Каталог материалов</h1>
+ <div class="cl"><nav class="card cats" id="cats"></nav>
+  <div><div class="flt"><select id="sort"><option value="pop">По умолчанию</option><option value="asc">Сначала дешевле</option><option value="desc">Сначала дороже</option></select>
+   <select id="tier"><option value="">Любая комплектация</option><option value="eco">Эконом</option><option value="opt">Оптимум</option><option value="prem">Премиум</option></select>
+   <label class="ck"><input type="checkbox" id="stm"> Только СТМ ОМА</label><span class="note" id="cnt"></span></div>
+   <div class="pgrid" id="grid"></div></div></div>
+</div>
+<div class="cmpbar" id="cmpbar" style="display:none"></div>
+<div class="modal-bg" id="mCmp" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal" style="max-width:900px"><button class="x" onclick="$('#mCmp').classList.remove('show')">×</button><h2 style="margin:0 0 12px">Сравнение товаров</h2><div id="cmpT" style="overflow:auto"></div></div></div>
+<script src="data.js"></script><script src="geom.js"></script><script src="calc.js"></script><script src="core.js"></script><script src="plan.js"></script><script src="omik.js"></script><script>
+chrome('catalog');
+const q=qp('q')||'',addTo=getProject(qp('add')),replRole=qp('replace'),replP=getProject(qp('project'));
+let cat=qp('cat')||'',cmp=(qp('cmp')||'').split(',').filter(P);
+if(addTo)setActive(addTo);
+function modeBar(){
+ if(replRole&&replP){const cur=replP.est.lines.find(l=>l.role===replRole);
+  $('#mode').innerHTML=omikTip('think',`<b>Замена позиции «${ROLES[replRole]}»</b> в смете «${esc(replP.title)}». Сейчас: ${cur?esc(P(cur.pid).name):'—'}. Выберите товар — количество пересчитается по его характеристикам (упаковка, расход). <a class="btn ghost sm" href="smeta.html?project=${replP.id}">← Вернуться без замены</a>`);
+  $('#ttl').textContent='Выбор: '+ROLES[replRole];}
+ else if(addTo)$('#mode').innerHTML=omikTip('idea',`<b>Добавление в смету «${esc(addTo.title)}».</b> Нажмите «В смету» у нужных товаров. <a class="btn ghost sm" href="smeta.html?project=${addTo.id}">← Вернуться в смету</a>`);
+ else if(q)$('#ttl').textContent=`Поиск: «${q}»`;
+}
+function list(){
+ let L=replRole?PRODUCTS.filter(p=>p.roles.includes(replRole)):q?searchProducts(q):PRODUCTS.slice();
+ if(cat&&!replRole)L=L.filter(p=>p.cat===cat);
+ if($('#stm').checked)L=L.filter(p=>p.stm);
+ if($('#tier').value)L=L.filter(p=>p.tier===$('#tier').value);
+ if($('#sort').value==='asc')L.sort((a,b)=>a.price-b.price);if($('#sort').value==='desc')L.sort((a,b)=>b.price-a.price);
+ return L;
+}
+function draw(){
+ const base=replRole?PRODUCTS.filter(p=>p.roles.includes(replRole)):q?searchProducts(q):PRODUCTS;
+ $('#cats').innerHTML=`<a href="#" class="${!cat?'on':''}" onclick="cat='';draw();return false">📦 Все товары<small>${base.length}</small></a>`+Object.entries(CATS).map(([k,c])=>{const n=base.filter(p=>p.cat===k).length;return n?`<a href="#" class="${cat===k?'on':''}" onclick="cat='${k}';draw();return false">${c.icon} ${c.name}<small>${n}</small></a>`:''}).join('');
+ const L=list(),cur=replRole&&replP?replP.est.lines.find(l=>l.role===replRole)?.pid:null;
+ $('#cnt').textContent=`${L.length} товаров`;
+ $('#grid').innerHTML=L.map(p=>{
+  let act;
+  if(replRole&&replP)act=p.id===cur?`<button class="btn sm" disabled>Сейчас в смете</button>`:`<button class="btn sm o" onclick="choose('${p.id}')">Выбрать</button>`;
+  else if(addTo)act=`<button class="btn sm o" onclick="addE('${p.id}')">＋ В смету</button><button class="btn sm g" onclick="quickCart('${p.id}')">🛒</button>`;
+  const html=pcard(p,act?{actions:act}:{});
+  return html.replace('<div class="pc-b">',`<div class="pc-b"><label class="cmpck"><input type="checkbox" ${cmp.includes(p.id)?'checked':''} onchange="toggleCmp('${p.id}',this.checked)"> Сравнить</label>`).replace('class="card pc"',`class="card pc ${p.id===cur?'cur':''}"`);
+ }).join('')||`<div class="empty card" style="grid-column:1/-1"><img src="img/omik-think.png" alt=""><p>Ничего не нашлось. Попробуйте другой запрос или <a href="#" onclick="OmikWidget.open('${esc(q)}');return false" style="color:var(--blue);font-weight:700">спросите Омика</a>.</p></div>`;
+ cmpBar();
+}
+function addE(pid){const r=addLine(addTo,pid,1);save();toast(r.dup?'Этот товар уже есть в смете':r.replaced?'Товар закреплён в смете вместо типового, количество пересчитано':'📋 Добавлено в смету',!r.dup)}
+function choose(pid){replP.pinned[replRole]=pid;recalc(replP);touchEst(replP,`Замена: ${ROLES[replRole]} → ${P(pid).name}`);save();location='smeta.html?project='+replP.id+'&focus='+pid}
+function toggleCmp(id,on){cmp=on?[...new Set([...cmp,id])].slice(-4):cmp.filter(x=>x!==id);cmpBar()}
+function cmpBar(){const b=$('#cmpbar');b.style.display=cmp.length?'flex':'none';b.innerHTML=`<span>К сравнению: ${cmp.length}</span><button class="btn sm o" ${cmp.length<2?'disabled':''} onclick="showCmp()">Сравнить</button><button class="btn sm ghost" style="color:#fff" onclick="cmp=[];draw()">Очистить</button>`}
+function showCmp(){
+ const L=cmp.map(P),keys=[...new Set(L.flatMap(x=>(x.props||[]).map(q=>q[0])))],best=Math.min(...L.map(x=>x.price));
+ $('#cmpT').innerHTML=`<table class="cmp"><tr><th></th>${L.map(x=>`<td>${pimg(x,'sm')}<a href="product.html?id=${x.id}" style="font-weight:700;display:block;margin-top:6px">${esc(x.name)}</a>${badges(x)}</td>`).join('')}</tr>
+  <tr><th>Цена</th>${L.map(x=>`<td><b style="color:${x.price===best?'var(--ok)':'inherit'}">${byn(x.price)}</b> / ${x.unit}${x.priceM2?`<br><small>${byn(x.priceM2)} за м²</small>`:''}</td>`).join('')}</tr>
+  ${keys.map(k=>`<tr><th>${k}</th>${L.map(x=>`<td>${esc((x.props.find(q=>q[0]===k)||[,'—'])[1])}</td>`).join('')}</tr>`).join('')}
+  <tr><th>Описание</th>${L.map(x=>`<td class="note">${esc(x.desc||'—')}</td>`).join('')}</tr>
+  <tr><th></th>${L.map(x=>`<td><button class="btn sm" onclick="quickCart('${x.id}')">В корзину</button> <button class="btn sm g mt" onclick="quickEst('${x.id}')">В смету</button></td>`).join('')}</tr></table>`;
+ $('#mCmp').classList.add('show');
+}
+['sort','tier','stm'].forEach(id=>$('#'+id).onchange=draw);
+modeBar();draw();if(cmp.length>=2)showCmp();
+</script></body></html>

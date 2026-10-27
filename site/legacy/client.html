@@ -1,0 +1,65 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ОМА Объект — смета от мастера</title><link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="obj.css"></head><body><div id="chrome"></div>
+<div class="wrap" id="app"></div>
+<div class="modal-bg" id="mOk" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal">
+ <button class="x" onclick="$('#mOk').classList.remove('show')">×</button>
+ <h2 style="margin:0 0 10px">Согласовать смету?</h2>
+ <p id="okT" style="margin:0 0 10px"></p>
+ <p class="note">После согласования мастер не сможет незаметно заменить позиции: любое изменение придёт вам новой версией на повторное согласование.</p>
+ <button class="btn o wide mt" onclick="approve()">✓ Согласовать</button>
+</div></div>
+<div class="modal-bg" id="mCh" onclick="if(event.target===this)this.classList.remove('show')"><form class="modal" onsubmit="event.preventDefault();askChanges()">
+ <button type="button" class="x" onclick="$('#mCh').classList.remove('show')">×</button>
+ <h2 style="margin:0 0 10px">Что изменить?</h2>
+ <div class="chips"><button type="button" onclick="pre(this)">Хочу дешевле, давайте «Эконом»</button><button type="button" onclick="pre(this)">Другой цвет плитки</button><button type="button" onclick="pre(this)">Смеситель у меня уже есть</button><button type="button" onclick="pre(this)">Добавьте полотенцесушитель</button></div>
+ <label class="fld">Комментарий мастеру<textarea id="cm" rows="4" required placeholder="Напишите, что поменять"></textarea></label>
+ <button class="btn wide mt">Отправить мастеру</button>
+</form></div>
+<script src="../common.js"></script><script src="obj.js"></script><script>
+const d=load(),id=qp('id');
+const e=getE(d,id)||importFromHash(d,id);
+const HINT={sent:'Шаг 4 из 5 · проверьте смету и нажмите «Согласовать» или «Запросить изменения»',changes:'Изменения запрошены · переключитесь в роль «Мастер»',approved:'Шаг 5 из 5 · нажмите «Оформить заказ материалов»',paid:'Готово · переключитесь в роль «Мастер», чтобы увидеть статус'};
+ochrome('client',e?HINT[e.status]||'':'');
+function draw(){
+ if(!e||e.status==='draft'){$('#app').innerHTML=`<div class="card done" style="margin-top:24px"><img src="../img/omik-think.png"><h2>${e?'Мастер ещё не отправил смету':'Смета не найдена'}</h2><p class="note">Попросите мастера прислать ссылку ещё раз.</p></div>`;return}
+ const t=totals(e),cur=e.approved&&e.approved.version===e.version;
+ const prev=e.approved&&!cur?e.approved:e.versions.length>1?e.versions[e.versions.length-2]:null;
+ const ch=prev&&e.status==='sent'?diff(prev.lines,e.lines):[];
+ const marks={};ch.forEach(c=>{const n=c.text.replace(/^[^:]+: /,'').split(' — ')[0];marks[n]=c.t});
+ let ban='';
+ if(ch.length)ban=`<div class="banner warn"><div><b>${e.approved&&!cur?'Мастер изменил смету после вашего согласования':'Мастер обновил смету'}: v${prev.version} → v${e.version}.</b> Нужно согласовать заново.<ul style="margin:8px 0 0;padding-left:18px">${ch.map(c=>`<li>${esc(c.text)}</li>`).join('')}</ul></div></div>`;
+ if(e.status==='changes')ban=`<div class="banner info"><div><b>Вы попросили изменения:</b> «${esc(e.comment)}». Мастер получил уведомление и пришлёт новую версию по этой же ссылке.</div></div>`;
+ if(e.status==='approved')ban=`<div class="banner ok"><img src="../img/omik-ok.png"><div><b>Вы согласовали смету v${e.approved.version}</b> ${fmtDate(e.approved.at)}. Осталось оформить заказ материалов.</div></div>`;
+ if(e.status==='paid')ban=`<div class="banner ok"><img src="../img/omik-happy.png"><div><b>Заказ ${e.order.no} оплачен.</b> Чеки и гарантии сохранены в «Балансе» (демо).</div></div>`;
+ const act={
+  sent:`<button class="btn o wide" onclick="openOk()">✓ Согласовать смету</button><button class="btn g wide mt" onclick="$('#mCh').classList.add('show')">✎ Запросить изменения</button>`,
+  changes:`<button class="btn o wide" onclick="openOk()">✓ Всё-таки согласовать</button><button class="btn g wide mt" onclick="$('#mCh').classList.add('show')">✎ Дополнить запрос</button>`,
+  approved:`<a class="btn o wide" href="checkout.html?id=${e.id}">Оформить заказ материалов →</a><button class="btn g wide mt" onclick="$('#mCh').classList.add('show')">✎ Попросить изменения</button>`,
+  paid:`<a class="btn g wide" href="checkout.html?id=${e.id}">Посмотреть заказ</a>`
+ }[e.status];
+ $('#app').innerHTML=`
+ <div style="display:flex;gap:14px;align-items:center;margin-top:22px"><span class="av" style="width:52px;height:52px">АН</span>
+  <div><div class="note">Смета от мастера</div><b style="font-size:17px">${esc(d.master.name)}</b> <span class="tag gr">ОМА PRO</span></div></div>
+ <h1>${esc(e.title)}</h1><p class="lead">${esc(e.client?e.client+', ':'')}это список материалов для вашего ремонта. Проверьте его и согласуйте. ${chip(e.status)} <span class="note">v${e.version}</span></p>
+ ${ban}
+ <div class="g2"><div>
+  <div class="card pad"><h3>Материалы</h3>${linesHTML(e.lines,{marks})}
+   <p class="note"><span class="src calc">Рассчитано</span> — количество посчитано по размерам помещения с запасом 10%. <span class="src catalog">Добавлено мастером</span> — выбрано мастером из каталога ОМА. <span class="src free">Не из ОМА</span> — мастер покупает сам.</p></div>
+  <div class="card pad"><h3>Работы мастера</h3><div class="row" style="font-size:14px"><span>${esc(e.work.note||'Работы')}</span><b>${money(t.work)}</b></div>
+   <p class="note">Работы вы оплачиваете мастеру напрямую по вашей договорённости. ОМА продаёт только материалы.</p></div>
+ </div>
+ <aside class="card side"><div class="note">Материалы ОМА к оплате</div><div class="tot">${money(t.oma)}</div><div style="margin:10px 0 16px">${totalsHTML(t)}</div>${act}
+  <p class="note">Материалы вы оплачиваете в ОМА напрямую — мастеру не нужно платить за них своими деньгами.</p></aside></div>`;
+}
+function openOk(){const t=totals(e);$('#okT').innerHTML=`Смета <b>v${e.version}</b>: ${e.lines.length} позиций, материалы ОМА на <b>${money(t.oma)}</b>.`;$('#mOk').classList.add('show')}
+function approve(){
+ e.status='approved';e.approved=snap(e);log(e,'client',`Клиент согласовал смету v${e.version}`);save(d);
+ $('#mOk').classList.remove('show');ochrome('client',HINT.approved);draw();scrollTo(0,0);
+}
+function pre(b){$('#cm').value=($('#cm').value?$('#cm').value+'. ':'')+b.textContent}
+function askChanges(){
+ const c=$('#cm').value.trim();if(!c)return;
+ e.status='changes';e.comment=c;log(e,'client','Клиент просит изменения: «'+c+'»');save(d);
+ $('#mCh').classList.remove('show');$('#cm').value='';ochrome('client',HINT.changes);draw();scrollTo(0,0);
+}
+draw();
+</script></body></html>
