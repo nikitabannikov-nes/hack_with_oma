@@ -27,6 +27,9 @@ const Plan=(()=>{
    <pattern id="lamP${o.id||''}" width="${Math.max(10,1.2*v.s)}" height="${Math.max(4,0.2*v.s)}" patternUnits="userSpaceOnUse" x="${v.ox}" y="${v.oy}"><rect width="100%" height="100%" fill="#f5ead9"/><path d="M0 0H${Math.max(10,1.2*v.s)}" stroke="#e2cfb1"/></pattern>
    <pattern id="hatch${o.id||''}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#9aa3b5" stroke-width="2"/></pattern></defs>`;
   if(o.grid!==false)s+=grid(v,W,H);
+  if(o.under){const u=o.under,[a,b]=T(v,[u.x,u.y]);s+=`<image href="${u.src}" x="${a}" y="${b}" width="${u.w*v.s}" height="${u.h*v.s}" opacity="${o.underOp??.4}" preserveAspectRatio="none" style="pointer-events:none"/>`}
+  (o.ghosts||[]).forEach(g=>{if(!g.pts||g.pts.length<3)return;const gp=g.pts.map(q=>T(v,q)),c=T(v,Geom.labelPoint(g.pts));
+   s+=`<g data-g="${g.id}" style="cursor:pointer"><polygon points="${gp.map(q=>q.join(',')).join(' ')}" fill="#dfe6f2" fill-opacity=".55" stroke="#9aa8c2" stroke-width="2"/><text x="${c[0]}" y="${c[1]+4}" text-anchor="middle" font-size="12" font-weight="700" fill="#5b6780">${esc(g.name)}</text></g>`});
   if(n>=3){
    const fill=!ok?'#fde6e3':room.floor==='tile'?`url(#tileP${o.id||''})`:room.floor==='laminate'?`url(#lamP${o.id||''})`:'#f6f8fc';
    s+=`<polygon points="${sp.map(p=>p.join(',')).join(' ')}" fill="${fill}" stroke="none"/>`;

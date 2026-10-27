@@ -5,13 +5,13 @@
   <h1>Что хотите сделать?</h1>
   <p>Опишите задачу Омику или начните с плана комнаты. Посчитаем материалы по реальной геометрии, подберём товары под бюджет и найдём мастера. Все модули работают с одним проектом, данные между ними не теряются.</p>
   <form class="ask" onsubmit="event.preventDefault();location='omik.html?q='+encodeURIComponent(this.q.value||'Хочу положить плитку в ванной, бюджет до 1500 BYN')"><input name="q" placeholder="Хочу положить плитку в ванной, бюджет до 1500 BYN"><button class="btn o">Спросить Омика</button></form>
-  <div class="hchips"><a href="omik.html?q=Плитка в ванной 2,2 на 1,7, бюджет 1500">🛁 Плитка в ванной</a><a href="omik.html?q=Покрасить комнату 4 на 3">🎨 Покрасить комнату</a><a href="planner.html?new=1&task=living">🪵 Ламинат в Г-образной комнате</a><a href="product.html?id=mix_bath">🚿 Установить смеситель</a></div>
+  <div class="hchips"><a href="omik.html?q=Плитка в ванной 2,2 на 1,7, бюджет 1500">🛁 Плитка в ванной</a><a href="omik.html?q=Покрасить комнату 4 на 3">🎨 Покрасить комнату</a><a href="planner.html?new=1&task=living">🪵 Ламинат в Г-образной комнате</a><a href="import.html?example=1">📷 Планировка по фото</a><a href="product.html?id=mix_bath">🚿 Установить смеситель</a></div>
  </div><img class="omik" src="img/omik-hero.png" alt="Омик — бобр в каске ОМА"></section>
  <div id="cont"></div>
  <h2>Начните с любого шага</h2>
  <div class="doors">
   <a class="card door" href="omik.html"><span class="ic"><img src="img/omik-avatar.png" alt="" style="width:40px;height:40px;border-radius:50%"></span><h3>Омик — AI-прораб</h3><p>Уточнит задачу, создаст проект, подберёт материалы и мастера. Количество считает калькулятор, а не догадки.</p><b class="go">Написать Омику →</b></a>
-  <a class="card door" href="planner.html?new=1&task=bath"><span class="ic">📐</span><h3>2D-калькулятор</h3><p>Прямоугольные, Г- и П-образные комнаты, ниши, скосы и любой многоугольник. Двери, окна, вычеты.</p><b class="go">Построить план →</b></a>
+  <a class="card door" href="planner.html?new=1&task=bath"><span class="ic">📐</span><h3>2D-калькулятор</h3><p>Прямоугольные, Г- и П-образные комнаты, ниши, скосы, любой многоугольник — или весь дом по фото планировки.</p><b class="go">Построить план →</b></a>
   <a class="card door" href="catalog.html"><span class="ic">🧱</span><h3>Материалы и смета</h3><p>Из карточки товара — сразу в расчёт. Три комплектации, аналоги, СТМ ОМА, сравнение.</p><b class="go">Открыть каталог →</b></a>
   <a class="card door" href="masters.html"><span class="ic">👷</span><h3>Мастера и услуги</h3><p>Стоимость работ по объёмам из плана, заявка с привязкой к проекту и товарам, статусы.</p><b class="go">Найти мастера →</b></a>
  </div>

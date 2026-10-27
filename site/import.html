@@ -1,0 +1,173 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Планировка по фото — ОМА Проект</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="app.css">
+<style>.steps2{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}.steps2 span{padding:7px 12px;border-radius:18px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--mute)}.steps2 span.on{background:var(--blue);border-color:var(--blue);color:#fff}.steps2 span.done{color:var(--blue);border-color:var(--blue)}.drop{border:2px dashed #b9cdf2;border-radius:16px;padding:40px 20px;text-align:center;background:#f8fbff;cursor:pointer}.drop:hover{background:var(--blue-l)}.rl{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}.rl i{width:14px;height:14px;border-radius:4px;flex:none}.rl input,.rl select{border:1px solid var(--line);border-radius:8px;padding:5px 6px;font:inherit;font-size:13px;min-width:0}.rl input{flex:1}</style></head><body><div id="chrome"></div>
+<div class="wrap">
+ <div class="crumbs"><a href="index.html">Главная</a> / <a href="planner.html">2D-калькулятор</a> / Планировка по фото</div>
+ <h1>Планировка по фото или скану</h1>
+ <p class="lead">Загрузите чертёж квартиры или дома, задайте масштаб по одному известному размеру и обведите комнаты. Точки примагничиваются к линиям стен на чертеже. Получится проект, в котором все помещения посчитаны по реальной геометрии.</p>
+ <div class="steps2" id="steps"></div>
+ <div class="pl">
+  <div><div class="canvas" id="cv" style="height:600px"><svg id="svg"></svg>
+   <div class="ctool"><div class="grp"><button onclick="zoom(1.2)">＋</button><button onclick="zoom(1/1.2)">－</button><button onclick="fitView()">⌖</button></div><button id="bMag" class="on" onclick="mag=!mag;this.classList.toggle('on',mag)" title="Примагничивать точки к тёмным линиям стен">🧲 Магнит к стенам</button><span class="sp"></span><button id="bUndo" onclick="undo()">↶ Точка</button><button id="bClose" onclick="closeRoom()">✔ Замкнуть</button></div>
+   <div class="hintbar" id="hint" style="top:auto;bottom:10px"></div></div></div>
+  <aside class="card pad" style="margin:0" id="panel"></aside>
+ </div>
+</div>
+<input type="file" id="file" accept="image/*" hidden>
+<script src="data.js"></script><script src="geom.js"></script><script src="calc.js"></script><script src="core.js"></script><script src="plan.js"></script><script src="omik.js"></script><script>
+window.OMIK_CTX={page:'import'};
+chrome('planner');
+const target=getProject(qp('project'));
+// Состояние: координаты точек — в пикселях изображения
+let img=null,pix=null,step=1,cal={a:null,b:null,mm:''},ppm=null,rooms=[],cur=[],cursor=null,v={s:1,ox:0,oy:0},mag=true,drag=null,example=false,editIdx=null;
+const svg=$('#svg'),cv=$('#cv');
+const COLORS=['#0057d6','#ff9a1a','#18a058','#7a4cc2','#c4321b','#2a7f8f','#8a6a1f','#d6336c'];
+
+// ---------- Пример: дом 11 × 8,5 м, размеры сняты с осей чертежа ----------
+const EX={src:'img/plan-example.jpg',o:[96.5,56.5],ppm:30.32,cal:[[96.5,30],[430,30],11000],rooms:[
+ {name:'Спальня 1',type:'living',pts:[[0,0],[3.5,0],[3.5,3.5],[0,3.5]],ops:[{w:0,kind:'window',off:1.15,width:1.2},{w:2,kind:'door',off:0.35,width:0.8}]},
+ {name:'Спальня 2',type:'living',pts:[[3.5,0],[7,0],[7,2.95],[5.6,2.95],[5.6,3.5],[3.5,3.5]],ops:[{w:0,kind:'window',off:1.15,width:1.2},{w:2,kind:'door',off:0.4,width:0.8}]},
+ {name:'С/у',type:'wc',pts:[[7,0],[8.5,0],[8.5,1.78],[7,1.78]],ops:[{w:2,kind:'door',off:0.3,width:0.7}]},
+ {name:'Душевая',type:'bath',pts:[[8.5,0],[11,0],[11,2.95],[8.5,2.95]],ops:[{w:3,kind:'door',off:0.15,width:0.7},{w:0,kind:'window',off:0.9,width:0.6}]},
+ {name:'Тамбур',type:'hall',pts:[[0,3.5],[2,3.5],[2,6],[0,6]],ops:[{w:2,kind:'door',off:0.6,width:0.8},{w:1,kind:'door',off:0.85,width:0.8}]},
+ {name:'Кухня-гостиная',type:'kitchen',pts:[[2,3.5],[5.6,3.5],[5.6,2.95],[7,2.95],[7,1.78],[8.5,1.78],[8.5,2.95],[11,2.95],[11,6],[2,6]],ops:[{w:8,kind:'door',off:2.25,width:1.8},{w:8,kind:'window',off:6,width:2}]}
+]};
+function loadExample(){
+ example=true;
+ setImage(EX.src,()=>{
+  cal={a:EX.cal[0],b:EX.cal[1],mm:EX.cal[2]};ppm=EX.ppm;
+  rooms=EX.rooms.map((r,i)=>({name:r.name,type:r.type,color:COLORS[i%COLORS.length],pts:r.pts.map(([x,y])=>[EX.o[0]+x*ppm,EX.o[1]+y*ppm]),ops:r.ops}));
+  step=3;render();toast('Пример разобран: 6 помещений по осевым размерам чертежа');
+ });
+}
+// ---------- Загрузка ----------
+$('#file').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{
+ // Сжимаем до 1600 px, чтобы фото поместилось в хранилище браузера
+ const im=new Image();im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k|0;c.height=im.height*k|0;c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+  example=false;rooms=[];cal={a:null,b:null,mm:''};ppm=null;setImage(c.toDataURL('image/jpeg',0.85),()=>{step=2;render()})};im.src=rd.result};rd.readAsDataURL(f)};
+function setImage(src,cb){const im=new Image();im.onload=()=>{img={src,w:im.width,h:im.height};
+ const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);
+ try{pix=x.getImageData(0,0,c.width,c.height)}catch(e){pix=null}
+ fitView();cb&&cb()};im.src=src}
+// ---------- Привязка точек ----------
+const lum=(x,y)=>{if(!pix||x<0||y<0||x>=pix.width||y>=pix.height)return 255;const i=(y*pix.width+x)*4,d=pix.data;return .3*d[i]+.59*d[i+1]+.11*d[i+2]};
+function snapWall(p){
+ if(!mag||!pix)return p;
+ // Ищем ось стены в окне вокруг клика: столбцы (для X) и строки (для Y), тёмные хотя бы на половину окна.
+ // Перпендикулярная стена даёт лишь короткую полосу и не мешает — так точка садится и на углы.
+ const r=10,x0=Math.round(p[0]),y0=Math.round(p[1]),dark=(x,y)=>lum(x,y)<110?1:0;
+ const axis=f=>{const ok=[];for(let d=-r;d<=r;d++){let c=0;for(let e=-r;e<=r;e++)c+=f(d,e);ok.push(c>=r)}
+  let best=null;for(let i=0;i<ok.length;i++){if(!ok[i])continue;let j=i;while(j+1<ok.length&&ok[j+1])j++;const len=j-i+1,c=(i+j)/2-r;if(len>=2&&len<=16&&(best==null||Math.abs(c)<Math.abs(best)))best=c;i=j}return best};
+ const dx=axis((d,e)=>dark(x0+d,y0+e)),dy=axis((d,e)=>dark(x0+e,y0+d));
+ return[dx!=null?x0+dx:p[0],dy!=null?y0+dy:p[1]];
+}
+function snapAll(p){
+ let q=snapWall(p);const tol=10/v.s;
+ // к вершинам уже обведённых комнат (общие стены)
+ for(const r of rooms)for(const t of r.pts)if(Math.hypot(t[0]-q[0],t[1]-q[1])<tol)return[...t];
+ const prev=cur[cur.length-1];
+ if(prev){if(Math.abs(q[0]-prev[0])<tol)q[0]=prev[0];if(Math.abs(q[1]-prev[1])<tol)q[1]=prev[1]}
+ if(cur.length>1){const f=cur[0];if(Math.abs(q[0]-f[0])<tol)q[0]=f[0];if(Math.abs(q[1]-f[1])<tol)q[1]=f[1]}
+ return q;
+}
+// ---------- Вид ----------
+function size(){return[cv.clientWidth,cv.clientHeight]}
+function fitView(){if(!img){draw();return}const[W,H]=size(),s=Math.min((W-40)/img.w,(H-40)/img.h);v={s,ox:(W-img.w*s)/2,oy:(H-img.h*s)/2};draw()}
+function zoom(k,cx,cy){const[W,H]=size();cx=cx??W/2;cy=cy??H/2;const s=Math.max(.1,Math.min(20,v.s*k)),kk=s/v.s;v.ox=cx-(cx-v.ox)*kk;v.oy=cy-(cy-v.oy)*kk;v.s=s;draw()}
+const SC=p=>[v.ox+p[0]*v.s,v.oy+p[1]*v.s];
+function toPx(e){const b=svg.getBoundingClientRect();return[(e.clientX-b.left-v.ox)/v.s,(e.clientY-b.top-v.oy)/v.s]}
+const m2=pts=>Geom.area(pts)/(ppm*ppm);
+function draw(){
+ const[W,H]=size();svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+ if(!img){svg.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="#6b7488" font-size="15">Загрузите фото планировки или откройте пример →</text>`;$('#hint').style.display='none';return}
+ let s=`<rect width="${W}" height="${H}" fill="#eef2f8"/><image href="${img.src}" x="${v.ox}" y="${v.oy}" width="${img.w*v.s}" height="${img.h*v.s}" opacity="${step>=3?.75:1}"/>`;
+ rooms.forEach((r,i)=>{const sp=r.pts.map(SC),c=Geom.labelPoint(r.pts),C=SC(c),sel=editIdx===i;
+  s+=`<polygon data-r="${i}" points="${sp.map(p=>p.join(',')).join(' ')}" fill="${r.color}" fill-opacity="${sel?.35:.2}" stroke="${r.color}" stroke-width="${sel?4:2.5}" style="cursor:pointer"/>`;
+  s+=`<text x="${C[0]}" y="${C[1]}" text-anchor="middle" font-size="12" font-weight="800" fill="#1a2233" paint-order="stroke" stroke="#fff" stroke-width="3">${esc(r.name)}</text>${ppm?`<text x="${C[0]}" y="${C[1]+15}" text-anchor="middle" font-size="11" font-weight="700" fill="${r.color}" paint-order="stroke" stroke="#fff" stroke-width="3">${Plan.f2(m2(r.pts))} м²</text>`:''}`;
+  if(sel)sp.forEach((p,j)=>s+=`<circle data-rv="${i}:${j}" cx="${p[0]}" cy="${p[1]}" r="6" fill="#fff" stroke="${r.color}" stroke-width="2.5" style="cursor:grab"/>`);
+ });
+ if(cal.a){const a=SC(cal.a),b=cal.b?SC(cal.b):cursor&&step===2?SC(cursor):null;s+=`<circle cx="${a[0]}" cy="${a[1]}" r="6" fill="#c4321b"/>`;if(b)s+=`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#c4321b" stroke-width="3" stroke-dasharray="${cal.b?0:6}"/><circle cx="${b[0]}" cy="${b[1]}" r="6" fill="#c4321b"/>${cal.b&&cal.mm?`<text x="${(a[0]+b[0])/2}" y="${(a[1]+b[1])/2-10}" text-anchor="middle" font-size="13" font-weight="800" fill="#c4321b" paint-order="stroke" stroke="#fff" stroke-width="4">${num(cal.mm,0)} мм</text>`:''}`}
+ if(cur.length){const sp=cur.map(SC),c=cursor&&step===3?SC(cursor):null;s+=`<polyline points="${sp.map(p=>p.join(',')).join(' ')}${c?' '+c.join(','):''}" fill="none" stroke="#0057d6" stroke-width="3"/>`;sp.forEach((p,i)=>s+=`<circle cx="${p[0]}" cy="${p[1]}" r="${i?5:8}" fill="${i?'#fff':'#ff9a1a'}" stroke="#0057d6" stroke-width="2"/>`);
+  if(c&&ppm){const L=Math.hypot(cursor[0]-cur[cur.length-1][0],cursor[1]-cur[cur.length-1][1])/ppm;s+=`<text x="${c[0]+12}" y="${c[1]-10}" font-size="12" font-weight="800" fill="#0057d6" paint-order="stroke" stroke="#fff" stroke-width="3">${Plan.f2(L)} м</text>`}}
+ if(cursor&&(step===3||step===2&&!cal.b)){const c=SC(cursor);s+=`<circle cx="${c[0]}" cy="${c[1]}" r="4" fill="${step===2?'#c4321b':'#0057d6'}"/>`}
+ svg.innerHTML=s;
+ const h={2:cal.a?'Кликните по концу размера':'Кликните по началу известного размера (например, на выносной линии общей длины)',3:cur.length?(cur.length<3?'Ставьте вершины по углам комнаты':'Кликните по оранжевой точке, чтобы замкнуть комнату'):editIdx!=null?'Перетаскивайте вершины выбранной комнаты':'Кликайте по углам комнаты, чтобы обвести её. Клик по готовой комнате — выбрать её'};
+ $('#hint').style.display=h[step]?'':'none';$('#hint').textContent=h[step]||'';
+ $('#bUndo').style.display=$('#bClose').style.display=step===3&&cur.length?'':'none';$('#bClose').disabled=cur.length<3;
+}
+svg.addEventListener('pointerdown',e=>{
+ if(!img)return;const p=toPx(e),t=e.target;
+ if(t.dataset.rv){const[i,j]=t.dataset.rv.split(':').map(Number);drag={k:'v',i,j};svg.setPointerCapture(e.pointerId);return}
+ if(step===2){const q=snapWall(p);if(!cal.a||cal.b){cal={a:q,b:null,mm:cal.mm}}else{const tl=12/v.s;cal.b=[Math.abs(q[0]-cal.a[0])<tl?cal.a[0]:q[0],Math.abs(q[1]-cal.a[1])<tl?cal.a[1]:q[1]];renderPanel();setTimeout(()=>$('#mm')?.focus(),30)}draw();return}
+ if(step===3){
+  if(!cur.length&&t.dataset.r){editIdx=+t.dataset.r;render();return}
+  const q=snapAll(p);
+  if(cur.length>=3&&Math.hypot(q[0]-cur[0][0],q[1]-cur[0][1])*v.s<14){closeRoom();return}
+  editIdx=null;cur.push(q);draw();renderPanel();return;
+ }
+ drag={k:'pan',x:e.clientX,y:e.clientY,ox:v.ox,oy:v.oy};svg.setPointerCapture(e.pointerId);
+});
+svg.addEventListener('pointermove',e=>{const p=toPx(e);
+ if(drag?.k==='pan'){v.ox=drag.ox+e.clientX-drag.x;v.oy=drag.oy+e.clientY-drag.y;draw();return}
+ if(drag?.k==='v'){const r=rooms[drag.i];r.pts[drag.j]=snapWall(p);draw();return}
+ cursor=step===3?snapAll(p):step===2?snapWall(p):null;draw();
+});
+svg.addEventListener('pointerup',()=>{if(drag?.k==='v')renderPanel();drag=null});
+svg.addEventListener('wheel',e=>{e.preventDefault();const b=svg.getBoundingClientRect();zoom(e.deltaY<0?1.12:1/1.12,e.clientX-b.left,e.clientY-b.top)},{passive:false});
+addEventListener('resize',draw);
+addEventListener('keydown',e=>{if(e.target.closest('input,select'))return;if(e.key==='Escape'){cur=[];draw();renderPanel()}if(e.key==='Enter'&&cur.length>=3)closeRoom()});
+function undo(){cur.pop();draw();renderPanel()}
+function closeRoom(){
+ if(cur.length<3)return;
+ if(Geom.selfIntersects(cur)){toast('Контур пересекает сам себя — поставьте точки по-другому',false);return}
+ const n=rooms.length,guess=m2(cur)<4?'wc':m2(cur)>18?'living':'living';
+ rooms.push({name:'Помещение '+(n+1),type:guess,color:COLORS[n%COLORS.length],pts:cur.map(p=>[...p]),ops:[]});cur=[];editIdx=n;render();
+ setTimeout(()=>{const i=$$('#panel .rl input')[n];if(i){i.focus();i.select()}},30);
+}
+function applyCal(){const mm=parseFloat(String($('#mm').value).replace(',','.'));if(!(mm>100)||!cal.b){toast('Укажите размер в миллиметрах',false);return}
+ cal.mm=mm;const px=Math.hypot(cal.b[0]-cal.a[0],cal.b[1]-cal.a[1]);ppm=px/(mm/1000);step=3;render();toast(`Масштаб: ${num(ppm,1)} пикселей на метр`)}
+
+// ---------- Панель ----------
+function renderSteps(){$('#steps').innerHTML=['1. Фото','2. Масштаб','3. Комнаты','4. Проект'].map((t,i)=>`<span class="${i+1===step?'on':i+1<step?'done':''}">${t}</span>`).join('')}
+function renderPanel(){
+ let h='';
+ if(step===1)h=`<div class="drop" onclick="$('#file').click()"><div style="font-size:40px">📷</div><b>Загрузить фото или скан планировки</b><div class="note">JPG или PNG. Фото остаётся в вашем браузере</div></div>
+  <div class="tip mt2"><img src="img/omik-idea.png" alt=""><div><b>Разберём пример?</b> Каркасный дом 11 × 8,5 м: 2 спальни, санузел, душевая, тамбур, кухня-гостиная.<div class="mt"><button class="btn sm o" onclick="loadExample()">Открыть пример</button></div></div></div>
+  <p class="note">Как это работает: вы задаёте масштаб по одному размеру с чертежа и обводите комнаты по углам. Точки притягиваются к тёмным линиям стен. Автоматическое распознавание стен нейросетью в прототип не подключено.</p>`;
+ if(step===2)h=`<h3>Масштаб</h3><p class="note" style="margin-top:-6px">Кликните по двум точкам известного размера на чертеже — например, по краям общей длины. Затем введите этот размер.</p>
+  <label class="fld mt">Размер между точками, мм<input id="mm" type="number" step="10" value="${cal.mm||''}" placeholder="например, 11000" ${cal.b?'':'disabled'} onkeydown="if(event.key==='Enter')applyCal()"></label>
+  <button class="btn o wide mt" onclick="applyCal()" ${cal.b?'':'disabled'}>Применить масштаб</button><button class="btn ghost wide mt" onclick="cal={a:null,b:null,mm:''};render()">Сбросить точки</button>
+  <button class="btn ghost wide" onclick="step=1;img=null;render()">← Другое фото</button>`;
+ if(step>=3){
+  const tot=rooms.reduce((s,r)=>s+m2(r.pts),0);
+  h=`${example?omikTip('ok','<b>Пример разобран.</b> Помещения обведены по осевым размерам чертежа: 11 000 × 6 000 мм отапливаемой части. Террасы не включены — это уличная зона. Нажмите на комнату, чтобы поправить вершины.','ok'):''}
+  <h3>Помещения · ${rooms.length}</h3><p class="note" style="margin-top:-6px">Масштаб ${num(ppm,1)} px/м (${num(cal.mm,0)} мм). <button class="btn ghost sm" style="padding:2px 6px" onclick="step=2;render()">изменить</button></p>
+  ${rooms.map((r,i)=>`<div class="rl" style="${editIdx===i?'background:var(--blue-l)':''}"><i style="background:${r.color}"></i><input value="${esc(r.name)}" onchange="rooms[${i}].name=this.value;draw()" onfocus="editIdx=${i};draw()"><select onchange="rooms[${i}].type=this.value">${Object.entries(RT).map(([k,t])=>`<option value="${k}" ${k===r.type?'selected':''}>${t.name}</option>`).join('')}</select><b style="white-space:nowrap">${Plan.f2(m2(r.pts))} м²</b><button class="xbtn" onclick="rooms.splice(${i},1);editIdx=null;render()">×</button></div>`).join('')}
+  ${cur.length?`<div class="banner mt" style="font-size:13px">Обводится новая комната: ${cur.length} точ. ${cur.length>=3?`<button class="btn sm" onclick="closeRoom()">Замкнуть</button>`:''}</div>`:`<p class="note mt">Чтобы добавить комнату, кликайте по её углам на чертеже.</p>`}
+  <div class="row" style="font-size:15px;border-top:1px solid var(--line);margin-top:10px;padding-top:12px"><span><b style="color:var(--ink)">Итого площадь</b></span><b>${Plan.f2(tot)} м²</b></div>
+  <label class="fld mt">Название проекта<input id="pt" value="${esc(target?target.title:example?'Дом 11 × 8,5 м по планировке':'Квартира по планировке')}"></label>
+  <button class="btn o wide mt" onclick="finish()" ${rooms.length?'':'disabled'}>${target?`Добавить в «${esc(target.title)}»`:'Создать проект'} → план и смета</button>`;
+ }
+ $('#panel').innerHTML=h;
+}
+function render(){renderSteps();renderPanel();draw()}
+// ---------- Экспорт в проект ----------
+function finish(){
+ const toM=p=>[Geom.r2(p[0]/ppm),Geom.r2(p[1]/ppm)];
+ let mx=Infinity,my=Infinity;rooms.forEach(r=>r.pts.forEach(p=>{const q=toM(p);mx=Math.min(mx,q[0]);my=Math.min(my,q[1])}));
+ const out=rooms.map(r=>{
+  let pts=r.pts.map(p=>{const q=toM(p);return[Geom.r2(q[0]-mx),Geom.r2(q[1]-my)]});
+  if(Geom.signedArea(pts)<0)pts.reverse();
+  const t=RT[r.type],room={id:uid(),name:r.name,type:r.type,shape:{kind:'poly',from:'photo'},pts,h:2.7,walls:pts.map(()=>({id:uid(),finish:t.walls,h:null})),openings:[],excl:[],floor:t.floor,ceil:t.ceil,waste:pts.length>4?15:10};
+  (r.ops||[]).forEach(o=>{if(room.walls[o.w])room.openings.push({id:uid(),kind:o.kind,wallId:room.walls[o.w].id,w:o.width,h:o.kind==='door'?2:1.4,off:o.off,sill:o.kind==='door'?0:0.85})});
+  return room;
+ });
+ const under={src:img.src,x:Geom.r2(-mx),y:Geom.r2(-my),w:img.w/ppm,h:img.h/ppm};
+ let p=target;
+ if(p){p.rooms.push(...out);p.underlay=under;log(p,`Добавлено ${out.length} помещений по фото планировки`)}
+ else{p=newProject({title:$('#pt').value.trim()||'Планировка',task:out[0].type,rooms:out,logText:`Проект создан по фото планировки: ${out.length} помещений`,source:'photo'});p.underlay=under;}
+ p.activeRoom=out[0].id;recalc(p);
+ try{if(target)save();else addProject(p)}catch(e){toast('Фото слишком большое для хранилища браузера — попробуйте изображение меньше',false);return}
+ location=`planner.html?project=${p.id}&from=photo`;
+}
+if(qp('example'))loadExample();else render();
+</script></body></html>

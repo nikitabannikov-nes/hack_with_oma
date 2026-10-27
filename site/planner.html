@@ -14,7 +14,7 @@
     <div class="ctool">
      <div class="grp"><button id="mEdit" class="on" title="Двигать вершины, проёмы и вычеты">✋ Редактировать</button><button id="mDraw" title="Нарисовать новый контур по точкам">✏️ Нарисовать</button></div>
      <div class="grp"><button onclick="zoom(1.2)" title="Увеличить">＋</button><button onclick="zoom(1/1.2)" title="Уменьшить">－</button><button onclick="center()" title="Центрировать план">⌖</button></div>
-     <button id="bSnap" class="on" title="Привязка к сетке 5 см и к осям">Привязка</button>
+     <button id="bSnap" class="on" title="Привязка к сетке 5 см и к осям">Привязка</button><button id="bAll" onclick="fitAll()" title="Показать все помещения">🏠 Весь план</button><button id="bUnder" onclick="showUnder=!showUnder;drawCanvas()" title="Показать фото планировки под планом">📷 Подложка</button>
      <span class="sp"></span>
      <button id="bDelV" style="display:none">🗑 Удалить вершину</button>
      <button id="bClose" style="display:none">✔ Замкнуть контур</button><button id="bUndo" style="display:none">↶ Точка</button><button id="bCancel" style="display:none">✕ Отмена</button>
@@ -44,7 +44,7 @@ if(qp('room')&&p.rooms.some(r=>r.id===qp('room')))p.activeRoom=qp('room');
 window.OMIK_CTX={page:'planner',projectId:p.id};
 chrome('planner');
 const R=()=>room(p);
-let v=null,mode='edit',selV=null,selWall=null,drawPts=[],cursor=null,snap=true,tab=qp('tab')||'shape',drag=null,lastLog=0;
+let showUnder=true,v=null,mode='edit',selV=null,selWall=null,drawPts=[],cursor=null,snap=true,tab=qp('tab')||'shape',drag=null,lastLog=0;
 const svg=$('#svg'),cv=$('#cv');
 const fromPid=qp('pid');
 
@@ -52,6 +52,7 @@ function banner(){
  let h='';
  if(fromPid&&P(fromPid)){const pr=P(fromPid);h+=`<div class="tip ok"><img src="img/omik-idea.png"><div><b>Считаем количество для «${esc(pr.name)}».</b> Товар уже закреплён в смете. Задайте форму и размеры помещения, затем вернитесь в смету: количество будет посчитано по реальной площади.<div class="mt"><a class="btn sm o" href="smeta.html?project=${p.id}&focus=${fromPid}">Рассчитать и вернуться в смету →</a></div></div></div>`}
  if(qp('from')==='omik')h+=`<div class="tip"><img src="img/omik-hi.png"><div><b>Омик создал план по вашим размерам.</b> Если комната не прямоугольная, выберите Г- или П-образную форму или нарисуйте контур. Расчёт обновится сам.</div></div>`;
+ if(qp('from')==='photo')h+=`<div class="tip ok"><img src="img/omik-happy.png"><div><b>Планировка перенесена: ${p.rooms.length} помещений, ${num(p.rooms.reduce((s,r)=>s+Geom.area(r.pts),0),1)} м².</b> Фото лежит подложкой — сверьте контуры. Другие комнаты показаны серым, клик по ним переключает помещение. Проверьте двери и окна и выберите отделку на вкладке «Отделка».<div class="mt"><a class="btn sm o" href="smeta.html?project=${p.id}">Смета на весь объект →</a></div></div></div>`;
  if(qp('from')==='smeta')h+=`<div class="tip"><img src="img/omik-think.png"><div><b>Измените геометрию — смета пересчитается.</b> Количества, которые вы правили вручную, не перезапишутся: смета покажет расхождение с расчётом.</div></div>`;
  $('#ban').innerHTML=h;
 }
@@ -72,6 +73,7 @@ function toPoly(r){if(r.shape.kind!=='poly'){r.shape={kind:'poly',from:r.shape.k
 // ---------- Холст ----------
 function size(){return[cv.clientWidth,cv.clientHeight]}
 function center(){const[W,H]=size();v=Plan.fit(R().pts.length?R().pts:[[0,0],[3,3]],W,H,70);drawCanvas()}
+function fitAll(){const[W,H]=size();v=Plan.fit(p.rooms.flatMap(r=>r.pts),W,H,50);drawCanvas()}
 function zoom(k,cx,cy){const[W,H]=size();cx=cx??W/2;cy=cy??H/2;const s=Math.max(15,Math.min(600,v.s*k)),kk=s/v.s;v.ox=cx-(cx-v.ox)*kk;v.oy=cy-(cy-v.oy)*kk;v.s=s;drawCanvas()}
 function world(e){const b=svg.getBoundingClientRect();return[(e.clientX-b.left-v.ox)/v.s,(e.clientY-b.top-v.oy)/v.s]}
 function snapPt(pt,ref){
@@ -83,14 +85,17 @@ function snapPt(pt,ref){
 function drawCanvas(){
  const[W,H]=size(),r=R(),val=Geom.validate(r);
  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
- svg.innerHTML=mode==='draw'?Plan.draw({pts:[],walls:[]},v,{W,H,drawPts,cursor}):Plan.draw(r,v,{W,H,interactive:true,selV,selWall,valid:val.ok,numbers:true,id:'c'});
+ const extra={under:p.underlay&&showUnder?p.underlay:null,ghosts:p.rooms.filter(x=>x.id!==r.id)};
+ svg.innerHTML=mode==='draw'?Plan.draw({pts:[],walls:[]},v,{W,H,drawPts,cursor,...extra}):Plan.draw(r,v,{W,H,interactive:true,selV,selWall,valid:val.ok,numbers:true,id:'c',...extra});
+ $('#bUnder').style.display=p.underlay?'':'none';$('#bUnder').classList.toggle('on',showUnder);$('#bAll').style.display=p.rooms.length>1?'':'none';
  $('#hint').textContent=mode==='draw'?(drawPts.length<3?`Кликайте по сетке, чтобы ставить вершины (${drawPts.length}). Привязка к осям помогает строить прямые углы.`:'Кликните по первой (оранжевой) точке или нажмите «Замкнуть контур».'):selV!=null?`Вершина ${selV+1}: перетащите или удалите. Колесо мыши — масштаб.`:'Тяните вершины и «+» на стенах, перетаскивайте проёмы и вычеты. Фон — сдвиг плана.';
  $('#bDelV').style.display=mode==='edit'&&selV!=null&&r.pts.length>3?'':'none';
  ['bClose','bUndo','bCancel'].forEach(id=>$('#'+id).style.display=mode==='draw'?'':'none');
  $('#bClose').disabled=drawPts.length<3;
 }
 svg.addEventListener('pointerdown',e=>{
- const r=R(),w=world(e),t=e.target.closest('[data-v],[data-m],[data-x],[data-o],[data-w]');
+ const r=R(),w=world(e),t=e.target.closest('[data-v],[data-m],[data-x],[data-o],[data-w],[data-g]');
+ if(mode==='edit'&&t?.dataset.g){p.activeRoom=t.dataset.g;selV=null;selWall=null;save();renderTabs();renderPanel();drawCanvas();drawResults();return}
  if(mode==='draw'){
   const pt=snapPt(w,[drawPts[drawPts.length-1],drawPts[0]]);
   if(drawPts.length>=3&&Geom.segLen(pt,drawPts[0])*v.s<14){closeDraw();return}
@@ -161,7 +166,7 @@ function renderPanel(){
  if(tab==='shape'){
   h+=`<div class="f2"><label class="fld">Название<input value="${esc(r.name)}" onchange="R().name=this.value||R().name;commit()"></label>
    <label class="fld">Тип<select onchange="setType(this.value)">${Object.entries(RT).map(([k,t])=>`<option value="${k}" ${k===r.type?'selected':''}>${t.name}</option>`).join('')}</select></label></div>
-   <div class="fld mt2">Форма помещения</div><div class="tpls mt">${Object.entries(Geom.TEMPLATES).map(([k,t])=>`<button class="${sh.kind===k?'on':''}" onclick="setTpl('${k}')">${Plan.tplIcon(k)}${t.name}</button>`).join('')}<button class="${sh.kind==='poly'?'on':''}" onclick="setMode('draw')"><svg viewBox="0 0 48 38"><polygon points="6,30 10,6 28,10 42,4 40,32 22,26" fill="#e8f0fd" stroke="#0057d6" stroke-width="2"/></svg>Произвольная</button></div>`;
+   <div class="fld mt2">Форма помещения</div><div class="tpls mt">${Object.entries(Geom.TEMPLATES).map(([k,t])=>`<button class="${sh.kind===k?'on':''}" onclick="setTpl('${k}')">${Plan.tplIcon(k)}${t.name}</button>`).join('')}<button onclick="location='import.html?project=${p.id}'"><svg viewBox="0 0 48 38"><rect x="6" y="6" width="36" height="26" rx="4" fill="#fff1de" stroke="#ff9a1a" stroke-width="2"/><circle cx="24" cy="19" r="7" fill="none" stroke="#ff9a1a" stroke-width="2"/></svg>По фото</button><button class="${sh.kind==='poly'?'on':''}" onclick="setMode('draw')"><svg viewBox="0 0 48 38"><polygon points="6,30 10,6 28,10 42,4 40,32 22,26" fill="#e8f0fd" stroke="#0057d6" stroke-width="2"/></svg>Произвольная</button></div>`;
   if(tp)h+=`<div class="f2 mt2">${tp.params.map(([k,l])=>`<label class="fld">${l}, м<input type="number" step="0.05" min="0.3" max="30" value="${sh.params[k]}" oninput="setParam('${k}',this.value)"></label>`).join('')}</div><p class="note" id="tplErr" style="color:var(--red)"></p>`;
   else h+=`<div class="banner mt2" style="font-size:13px">Свободный многоугольник: ${r.pts.length} вершин. Перетаскивайте вершины, добавляйте точки кнопкой «+» на стене, меняйте длины на вкладке «Стены» или координаты ниже.</div>`;
   h+=`<label class="fld mt2">Высота потолка, м<input type="number" step="0.05" min="1.8" max="6" value="${r.h}" onchange="R().h=+this.value;commit('Изменена высота потолка')"></label>
@@ -249,4 +254,5 @@ function drawResults(){
 }
 function renderAll(){renderTabs();renderPanel();drawCanvas();drawResults();chrome('planner')}
 banner();renderTabs();renderPanel();center();drawResults();
+if(qp('from')==='photo')fitAll();
 </script></body></html>
