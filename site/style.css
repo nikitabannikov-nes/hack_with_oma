@@ -1,0 +1,50 @@
+:root{--blue:#0057d6;--blue-d:#0b3a9e;--blue-l:#e8f0fd;--orange:#ff9a1a;--ink:#1a2233;--mute:#6b7488;--line:#e3e7ef;--bg:#f4f6fa;--ok:#18a058}
+*{box-sizing:border-box}
+body{margin:0;font-family:Montserrat,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.45}
+a{color:inherit;text-decoration:none}
+img.m{mix-blend-mode:multiply}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.top{background:var(--blue-d);color:#cfe0ff;font-size:12px}
+.top .wrap{display:flex;gap:22px;align-items:center;height:32px}
+.top .sp{flex:1}
+header.main{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+header.main .wrap{display:flex;align-items:center;gap:18px;height:68px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--blue);font-size:13px;line-height:1.1}
+.logo svg{height:30px}
+.cat{background:var(--blue);color:#fff;border-radius:10px;padding:11px 18px;font-weight:700;font-size:14px}
+.search{flex:1;display:flex;border:2px solid var(--blue);border-radius:10px;overflow:hidden}
+.search input{flex:1;border:0;padding:11px 14px;font:inherit;font-size:14px;outline:0}
+.search b{background:var(--blue);color:#fff;padding:0 18px;display:grid;place-items:center;font-size:14px}
+.hico{display:flex;gap:18px;font-size:13px;font-weight:600;color:var(--ink)}
+.hico a{display:flex;flex-direction:column;align-items:center;gap:2px}
+.hico i{font-style:normal;font-size:18px}
+.cnt{background:var(--orange);color:#fff;border-radius:9px;font-size:11px;padding:0 6px;margin-left:3px}
+nav.sub{background:#fff;border-bottom:1px solid var(--line)}
+nav.sub .wrap{display:flex;gap:22px;height:42px;align-items:center;font-size:13px;font-weight:600;overflow:auto;white-space:nowrap}
+nav.sub .hot{color:#e0341a}
+.crumbs{font-size:12px;color:var(--mute);padding:16px 0 8px}
+.crumbs a:hover{color:var(--blue)}
+.card{background:#fff;border-radius:16px;border:1px solid var(--line)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;padding:13px 22px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;background:var(--blue);color:#fff;transition:.15s}
+.btn:hover{background:var(--blue-d)}
+.btn.o{background:var(--orange);color:#fff}.btn.o:hover{background:#e8860a}
+.btn.g{background:#fff;color:var(--blue);border:2px solid var(--blue)}.btn.g:hover{background:var(--blue-l)}
+.btn.sm{padding:8px 14px;font-size:13px}
+.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:3px 8px;background:var(--blue-l);color:var(--blue)}
+.tag.or{background:#fff1de;color:#c76b00}.tag.gr{background:#e1f6ea;color:var(--ok)}
+.fab{position:fixed;right:22px;bottom:22px;z-index:30;display:flex;align-items:center;gap:10px;background:var(--blue);color:#fff;border-radius:40px;padding:8px 20px 8px 8px;font-weight:700;font-size:14px;box-shadow:0 8px 24px rgba(0,87,214,.4)}
+.fab img{width:46px;height:46px;border-radius:50%;background:#fff;object-fit:cover}
+.fab:hover{background:var(--blue-d)}
+footer{background:var(--blue-d);color:#b9ceF5;margin-top:60px;padding:34px 0;font-size:13px}
+footer .wrap{display:flex;gap:60px;flex-wrap:wrap}
+footer b{color:#fff;display:block;margin-bottom:8px}
+.note{font-size:12px;color:var(--mute)}
+.steps{display:flex;gap:8px;margin:6px 0 18px;font-size:13px;font-weight:600;flex-wrap:wrap}
+.steps span{padding:8px 14px;border-radius:20px;background:#fff;border:1px solid var(--line);color:var(--mute)}
+.steps span.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.steps span.done{color:var(--blue);border-color:var(--blue)}
+.modal-bg{position:fixed;inset:0;background:rgba(10,20,50,.55);display:none;place-items:center;z-index:50;padding:16px}
+.modal-bg.show{display:grid}
+.modal{background:#fff;border-radius:18px;width:100%;max-width:480px;padding:26px;position:relative;max-height:92vh;overflow:auto}
+.modal .x{position:absolute;right:16px;top:12px;border:0;background:none;font-size:26px;cursor:pointer;color:var(--mute)}
+@media(max-width:800px){.hico,.top .hide,.cat{display:none}}

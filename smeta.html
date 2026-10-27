@@ -1,0 +1,94 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ОМА Проект — смета</title><link rel="stylesheet" href="style.css">
+<style>
+.g{display:grid;grid-template-columns:1fr 340px;gap:20px}
+.card.p{padding:22px;margin-bottom:20px}
+h3{margin:0 0 14px}
+.dims{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.dims label{font-size:12px;color:var(--mute);font-weight:600;display:block}
+.dims input{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px;font:inherit;margin-top:3px}
+.plan{display:flex;gap:24px;align-items:center;margin-top:16px;flex-wrap:wrap}
+.areas{display:grid;gap:6px;font-size:14px}.areas b{color:var(--blue)}
+.slide{margin:6px 0 16px}.slide input{width:100%;accent-color:var(--blue)}
+.slide .v{display:flex;justify-content:space-between;font-size:13px;color:var(--mute)}.slide .v b{color:var(--ink);font-size:20px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tabs button{flex:1;border:2px solid var(--line);background:#fff;border-radius:12px;padding:12px;font:inherit;font-weight:700;cursor:pointer;text-align:left}
+.tabs button small{display:block;font-weight:500;color:var(--mute)}
+.tabs button.on{border-color:var(--blue);background:var(--blue-l)}
+.tabs button.fit{box-shadow:0 0 0 3px #bfe8cf}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;color:var(--mute);padding:6px 4px;border-bottom:1px solid var(--line)}
+td{padding:11px 4px;border-bottom:1px solid var(--line)}td.r,th.r{text-align:right}
+.alt{font-size:12px;color:var(--blue);font-weight:600;cursor:pointer;border:0;background:none}
+.sum{position:sticky;top:130px;padding:22px}
+.sum .tot{font-size:30px;font-weight:800;margin:6px 0}
+.sum .row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--mute)}
+.ba{position:relative;height:260px;border-radius:14px;overflow:hidden;user-select:none}
+.ba .room{position:absolute;inset:0;display:grid;place-items:center;font-size:15px;font-weight:700;color:#fff}
+.ba .before{place-items:center start;padding-left:18px}.ba .after{place-items:center end;padding-right:18px}.ba .before{background:repeating-linear-gradient(0deg,#cfc7b8 0 2px,#e4ddcf 2px 40px),#ddd}
+.ba .after{clip-path:inset(0 0 0 50%)}
+.ba .hand{position:absolute;top:0;bottom:0;left:50%;width:3px;background:#fff;box-shadow:0 0 8px rgba(0,0,0,.4)}
+.ba .hand::after{content:"↔";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:50%;width:34px;height:34px;display:grid;place-items:center;color:var(--blue);font-weight:800}
+.ba input{position:absolute;inset:0;width:100%;opacity:0;cursor:ew-resize}
+.omik{display:flex;gap:12px;align-items:flex-start;background:var(--blue-l);border-radius:14px;padding:12px 14px;font-size:13px;margin-bottom:20px}
+.omik img{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:none}
+@media(max-width:900px){.g{grid-template-columns:1fr}.dims{grid-template-columns:1fr 1fr}.sum{position:static}}
+</style></head><body><div id="chrome"></div>
+<div class="wrap"><div class="crumbs"><a href="index.html">Главная</a> / <a href="prorab.html">ОМА Прораб</a> / Смета</div>
+<div class="steps"><span class="done">✔ Задача</span><span class="done">✔ Планировка</span><span class="on">3 Смета</span><span>4 Корзина</span><span>5 Исполнение</span></div>
+<div class="omik"><img src="img/omik-avatar.png"><div><b>ОМИК:</b> количество считают формулы по вашим размерам, с запасом 10%. Я только подобрал позиции под бюджет.</div></div>
+<div class="g"><div>
+ <div class="card p"><h3>1. Планировка — ванная</h3>
+  <div class="dims"><div><label>Длина, м</label><input id="L" type="number" step=".1" value="2"></div><div><label>Ширина, м</label><input id="W" type="number" step=".1" value="2"></div><div><label>Высота, м</label><input id="H" type="number" step=".1" value="2.5"></div><div><label>Дверь, м²</label><input id="D" type="number" step=".1" value="1.6"></div></div>
+  <div class="plan"><svg id="sch" width="150" height="130" viewBox="0 0 150 130"></svg>
+  <div class="areas"><div>Пол: <b id="aF"></b></div><div>Стены (за вычетом двери): <b id="aW"></b></div><button class="btn g sm" style="margin-top:6px">Заказать замер</button></div></div>
+ </div>
+ <div class="card p"><h3>2. Смета по бюджету</h3>
+  <div class="slide"><div class="v"><span>Ваш бюджет на материалы</span><b id="bv"></b></div><input id="bud" type="range" min="500" max="2600" step="50" value="1200"></div>
+  <div class="tabs" id="tabs"></div>
+  <table><thead><tr><th>Материал</th><th class="r">Кол-во</th><th class="r">Цена</th><th class="r">Сумма</th><th></th></tr></thead><tbody id="rows"></tbody></table>
+ </div>
+ <div class="card p"><h3>3. До / после</h3>
+  <div class="ba" id="ba"><div class="room before">ВАШЕ ФОТО · ДО</div><div class="room after" id="aft">ПОСЛЕ</div><div class="hand" id="hd"></div><input type="range" min="0" max="100" value="50" id="sl"></div>
+  <p class="note">⚠ Визуализация ориентировочная: генерация не повторит точный оттенок плитки.</p>
+  <button class="btn g sm">📷 Загрузить фото комнаты</button>
+ </div>
+</div>
+<aside><div class="card sum"><div class="note">Итого по смете</div><div class="tot" id="tot"></div><span class="tag gr" id="fit"></span>
+ <div style="margin:14px 0" id="brk"></div>
+ <a class="btn o" style="width:100%" href="cart.html" onclick="save()">Добавить всё в корзину-проект</a></div></aside></div></div>
+<script src="common.js"></script><script>chrome()
+const $=id=>document.getElementById(id);
+const tiers={
+ eco:{n:'Эконом',c:'#8a93a6',tile:{w:'Плитка настенная «Белый кирпич» 30×60',f:'Керамогранит 30×30 серый',pw:24.9,pf:19.9},glue:['Клей Ceresit CM 9, 25 кг',15.2],grout:['Затирка Ceresit CE 33, 2 кг',9.9],prim:['Грунтовка Ceresit CT 17, 5 л',16.5],img:'linear-gradient(135deg,#c9ced8,#9aa3b5)'},
+ opt:{n:'Оптимум',c:'#0057d6',tile:{w:'Плитка настенная Kerama Marazzi «Метро» 30×60',f:'Керамогранит Cersanit 42×42',pw:38.9,pf:31.5},glue:['Клей Ceresit CM 11, 25 кг',21.5],grout:['Затирка Ceresit CE 40, 2 кг',16.8],prim:['Грунтовка Ceresit CT 17, 10 л',27.9],img:'linear-gradient(135deg,#7db0ff,#0057d6)'},
+ pre:{n:'Премиум',c:'#ff9a1a',tile:{w:'Плитка Italon «Мрамор» 30×90',f:'Керамогранит Italon 60×60 полированный',pw:84,pf:69},glue:['Клей Litokol X11, 25 кг',44],grout:['Затирка Litokol Starlike, 2 кг',38],prim:['Грунтовка Knauf Tiefengrund, 10 л',34],img:'linear-gradient(135deg,#ffd9a0,#ff9a1a)'}};
+let cur='opt',ov={};
+const geo=()=>{const L=+$('L').value,W=+$('W').value,H=+$('H').value,D=+$('D').value;return{F:L*W,Wl:Math.max(0,2*(L+W)*H-D)}};
+function items(k){const g=geo(),t=tiers[k],r=1.1;
+ const fl=g.F*r,wl=g.Wl*r,all=g.F+g.Wl;
+ return[
+ [t.tile.f,fl,'м²',t.tile.pf],[t.tile.w,wl,'м²',t.tile.pw],
+ [t.glue[0],Math.ceil(all*5/25),'меш.',t.glue[1]],
+ [t.grout[0],Math.ceil(all*.4/2),'уп.',t.grout[1]],
+ [t.prim[0],Math.ceil(all*.2/(/10/.test(t.prim[0])?10:5)),'шт.',t.prim[1]]]}
+const total=k=>items(k).reduce((s,i)=>s+(i[1]*i[3]),0);
+function draw(){
+ const g=geo(),B=+$('bud').value;$('bv').textContent=byn(B).replace('.00','');
+ $('aF').textContent=g.F.toFixed(1)+' м²';$('aW').textContent=g.Wl.toFixed(1)+' м²';
+ const L=+$('L').value,W=+$('W').value,s=Math.min(110/L,90/W);
+ $('sch').innerHTML=`<rect x="15" y="10" width="${L*s}" height="${W*s}" fill="#e8f0fd" stroke="#0057d6" stroke-width="3"/><rect x="${15+L*s/2-12}" y="${10+W*s-3}" width="24" height="6" fill="#ff9a1a"/><text x="${15+L*s/2}" y="${10+W*s/2+4}" text-anchor="middle" font-size="12" fill="#0b3a9e">${g.F.toFixed(1)} м²</text><text x="${15+L*s/2}" y="${W*s+30}" text-anchor="middle" font-size="10" fill="#6b7488">${L} м</text>`;
+ const best=Object.keys(tiers).filter(k=>total(k)<=B).pop();
+ $('tabs').innerHTML=Object.keys(tiers).map(k=>`<button data-k="${k}" class="${k===cur?'on':''} ${k===best?'fit':''}"><span style="color:${tiers[k].c}">●</span> ${tiers[k].n}<small>${byn(total(k)).replace('.00','')}${k===best?' · по бюджету':''}</small></button>`).join('');
+ $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{cur=b.dataset.k;ov={};draw()});
+ const it=items(cur);
+ $('rows').innerHTML=it.map((i,n)=>`<tr><td>${i[0]}<br><button class="alt" onclick="alt(${n})">↻ Подобрать аналог</button></td><td class="r">${i[2]==='м²'?i[1].toFixed(1):i[1]} ${i[2]}</td><td class="r">${byn(i[3])}</td><td class="r"><b>${byn(i[1]*i[3])}</b></td></tr>`).join('');
+ const T=total(cur);$('tot').textContent=byn(T);
+ $('fit').textContent=T<=B?'✔ В рамках бюджета':'Выше бюджета на '+byn(T-B).replace('.00','');$('fit').className='tag '+(T<=B?'gr':'or');
+ $('brk').innerHTML=`<div class="row"><span>Комплектация</span><b>${tiers[cur].n}</b></div><div class="row"><span>Запас материала</span><b>10%</b></div><div class="row"><span>Позиций</span><b>${it.length}</b></div>`;
+ $('aft').style.background=tiers[cur].img;$('aft').textContent='ПОСЛЕ · '+tiers[cur].n.toUpperCase();
+}
+function alt(n){alert('Подбираем аналог для позиции «'+items(cur)[n][0]+'»… (в демо — заглушка)')}
+function save(){localStorage.setItem('omaCartN','5');localStorage.setItem('omaTier',cur);localStorage.setItem('omaTotal',total(cur));localStorage.setItem('omaGeo',JSON.stringify(geo()))}
+['L','W','H','D','bud'].forEach(i=>$(i).oninput=draw);
+$('sl').oninput=e=>{$('aft').style.clipPath=`inset(0 0 0 ${e.target.value}%)`;$('hd').style.left=e.target.value+'%'};
+draw()</script></body></html>

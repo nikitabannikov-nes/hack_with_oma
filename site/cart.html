@@ -1,0 +1,66 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ОМА Проект — корзина</title><link rel="stylesheet" href="style.css">
+<style>
+.g{display:grid;grid-template-columns:1fr 340px;gap:20px}
+.blk{padding:20px;margin-bottom:16px}.blk h3{margin:0 0 10px;display:flex;justify-content:space-between}
+.ln{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;gap:10px}.ln:last-child{border:0}
+.sw{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.sw button{border:2px solid var(--line);background:#fff;border-radius:14px;padding:14px;font:inherit;text-align:left;cursor:pointer}
+.sw button b{display:block;font-size:15px}.sw button small{color:var(--mute)}
+.sw button.on{border-color:var(--blue);background:var(--blue-l)}
+.sum{position:sticky;top:130px;padding:22px}.sum .tot{font-size:30px;font-weight:800;margin:4px 0 14px}
+.sum .row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:var(--mute)}
+.mc{display:flex;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;align-items:center;cursor:pointer}
+.mc:hover,.mc.sel{border-color:var(--blue);background:var(--blue-l)}
+.av{width:46px;height:46px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:800;flex:none}
+.mc .pr{margin-left:auto;text-align:right;font-weight:800}
+.mc small{color:var(--mute)}
+.track{margin-top:14px}.track div{display:flex;gap:10px;align-items:center;padding:5px 0;font-size:13px;color:var(--mute)}
+.track i{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none}
+.track .d{color:var(--ink)}.track .d i{background:var(--ok);border-color:var(--ok)}
+.omik{display:flex;gap:12px;background:var(--blue-l);border-radius:14px;padding:12px 14px;font-size:13px;margin-bottom:16px;align-items:center}
+.omik img{width:48px;height:48px;border-radius:50%;object-fit:cover}
+@media(max-width:900px){.g{grid-template-columns:1fr}.sum{position:static}}
+</style></head><body><div id="chrome"></div>
+<div class="wrap"><div class="crumbs"><a href="index.html">Главная</a> / Корзина-проект</div>
+<div class="steps"><span class="done">✔ Задача</span><span class="done">✔ Смета</span><span class="on">4 Корзина</span><span>5 Исполнение</span></div>
+<h1 style="margin:0 0 14px">Проект «Ванная, 4 м²»</h1>
+<div class="g"><div>
+ <div class="blk card"><h3>Материалы <span id="mT"></span></h3><div id="mat"></div></div>
+ <div class="blk card"><h3>Работы <span id="wT"></span></h3><div id="wk"></div></div>
+ <div class="blk card"><h3>Доставка <span>0.00 BYN</span></h3><div class="ln"><span>Доставка материалов, завтра</span><span>бесплатно от 300 BYN</span></div></div>
+ <div class="blk card" id="toolBlk" style="display:none"><h3>Инструмент (аренда) <span id="tT"></span></h3><div class="ln"><span>Плиткорез электрический</span><span>35.00</span></div><div class="ln"><span>Миксер строительный</span><span>20.00</span></div><div class="ln"><span>Уровень лазерный</span><span>15.00</span></div>
+  <p class="note">Залог 120 BYN блокируется на карте лояльности, деньгами не берётся. К каждой работе из сметы — видеоинструкция.</p></div>
+ <div class="blk card"><h3>Кто делает ремонт?</h3>
+  <div class="sw"><button id="bM" class="on" onclick="mode('m')"><b>👷 С мастером ОМА</b><small>Оплата через ОМА, гарантия на работу</small></button><button id="bS" onclick="mode('s')"><b>🔧 Сам</b><small>Аренда инструмента + видеоинструкции</small></button></div>
+  <div id="mm"><button class="btn g" onclick="document.getElementById('mb').classList.add('show')">Выбрать мастера</button> <span id="chosen" class="note"></span>
+   <div class="track" id="trk"></div></div>
+  <div id="ss" style="display:none"><div class="omik" style="margin:0"><img src="img/omik-idea.png" style="mix-blend-mode:multiply;background:#fff"><div><b>Мастер отказался?</b> Сделайте сами — дадим <b>скидку 20% на аренду</b>. Подготовил набор для плитки.</div></div></div>
+ </div>
+</div>
+<aside><div class="card sum"><div class="note">Итого по проекту</div><div class="tot" id="tot"></div><div id="brk"></div>
+<button class="btn o" style="width:100%;margin-top:14px" onclick="pay()">Оформить заказ</button><p class="note" id="pn"></p></div></aside></div></div>
+<div class="modal-bg" id="mb" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal"><button class="x" onclick="document.getElementById('mb').classList.remove('show')">×</button>
+ <h2 style="margin:0 0 12px">Выберите мастера</h2>
+ <div class="mc" onclick="pick(this,'Иван П.')"><div class="av">ИП</div><div><b>Иван П.</b> <span class="tag gr">Проверен ОМА</span><br><small>★ 4.9 · 214 заказов · Центральный р-н</small></div><div class="pr">от 400 BYN<br><small>завтра</small></div></div>
+ <div class="mc" onclick="pick(this,'Сергей К.')"><div class="av" style="background:#ff9a1a">СК</div><div><b>Сергей К.</b> <span class="tag gr">Проверен ОМА</span><br><small>★ 4.8 · 168 заказов · Московский р-н</small></div><div class="pr">от 380 BYN<br><small>послезавтра</small></div></div>
+ <div class="mc" onclick="pick(this,'Андрей М.')"><div class="av" style="background:#0b3a9e">АМ</div><div><b>Андрей М.</b> <span class="tag gr">Проверен ОМА</span><br><small>★ 4.7 · 95 заказов · Фрунзенский р-н</small></div><div class="pr">от 420 BYN<br><small>завтра</small></div></div>
+</div></div>
+<script src="common.js"></script><script>chrome()
+const $=i=>document.getElementById(i);
+const mat=+localStorage.getItem('omaTotal')||1145.34,F=4;let m='m',master=null;
+const wk=[['Укладка плитки, пол 4 м²',120],['Укладка плитки, стены 18.4 м²',460],['Гидроизоляция',40]],work=620,tool=70;
+function draw(){
+ $('mT').textContent=byn(mat);$('mat').innerHTML=['Плитка (пол + стены)','Клей, затирка, грунтовка'].map((n,i)=>`<div class="ln"><span>${n}</span><span>${i?'':'с запасом 10%'}</span></div>`).join('')+`<div class="ln"><span class="note">Комплектация: ${{eco:'Эконом',opt:'Оптимум',pre:'Премиум'}[localStorage.getItem('omaTier')||'opt']}</span><a href="smeta.html" style="color:var(--blue);font-weight:600;font-size:13px">Изменить</a></div>`;
+ const wt=m==='m'?work:0;$('wT').textContent=m==='m'?byn(wt):'—';
+ $('wk').innerHTML=m==='m'?wk.map(w=>`<div class="ln"><span>${w[0]}</span><span>${byn(w[1])}</span></div>`).join(''):'<div class="ln"><span>Делаю сам</span><span>—</span></div>';
+ const tt=m==='s'?tool*.8:0;$('tT').textContent=m==='s'?byn(tt):'';$('toolBlk').style.display=m==='s'?'block':'none';
+ const T=mat+wt+tt;$('tot').textContent=byn(T);
+ $('brk').innerHTML=`<div class="row"><span>Материалы</span><span>${byn(mat)}</span></div><div class="row"><span>Работы</span><span>${byn(wt)}</span></div><div class="row"><span>Инструмент</span><span>${byn(tt)}</span></div>`+(m==='s'?'<div class="row"><span>Скидка на аренду</span><span>−20%</span></div>':'');
+ $('pn').textContent=m==='m'?'Деньги за работу хранит ОМА до подтверждения «Работа принята».':'Материалы вы покупаете в ОМА даже без мастера.';
+}
+function mode(x){m=x;$('bM').classList.toggle('on',x==='m');$('bS').classList.toggle('on',x==='s');$('mm').style.display=x==='m'?'block':'none';$('ss').style.display=x==='s'?'block':'none';draw()}
+function pick(e,n){master=n;$('mb').classList.remove('show');$('chosen').textContent='Мастер: '+n;
+ const s=['Мастер назначен','Выехал (примерно через 25 мин)','На месте','Работа сдана (с фото)','Принято клиентом → отзыв'];
+ $('trk').innerHTML=s.map((t,i)=>`<div class="${i===0?'d':''}"><i></i>${t}</div>`).join('')}
+function pay(){alert(m==='m'?'Заказ оформлен. Мастер '+(master||'будет назначен')+' получит уведомление. Следите в «Мои заказы».':'Заказ оформлен. Инструмент забронирован, видеоинструкции открыты.')}
+draw()</script></body></html>

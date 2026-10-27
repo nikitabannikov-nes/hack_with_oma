@@ -1,0 +1,57 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ОМА — смеситель Grohe</title><link rel="stylesheet" href="style.css">
+<style>
+.pg{display:grid;grid-template-columns:1fr 1fr 340px;gap:24px;margin-top:6px}
+.img{background:#fff;border:1px solid var(--line);border-radius:16px;height:420px;display:grid;place-items:center;font-size:150px}
+h1{font-size:24px;margin:0 0 10px}
+.spec{display:grid;gap:8px;font-size:14px;margin-top:14px}.spec div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:5px 0}.spec span{color:var(--mute)}
+.buy{padding:22px;height:fit-content}
+.price{font-size:34px;font-weight:800}.price s{font-size:16px;color:var(--mute);font-weight:500}
+.stock{color:var(--ok);font-size:13px;font-weight:600;margin:6px 0 16px}
+.buy .btn{width:100%;margin-bottom:10px}
+.inst{background:#fff1de;border:2px dashed var(--orange);border-radius:12px;padding:12px;margin-bottom:10px}
+.inst b{display:block}.inst small{color:#a85d00}
+.help{display:flex;gap:10px;align-items:center;font-size:13px;margin-top:14px;color:var(--blue);font-weight:600}
+.help img{width:34px;height:34px;border-radius:50%;object-fit:cover}
+.fld{margin:14px 0}.fld label{display:block;font-size:12px;font-weight:700;color:var(--mute);margin-bottom:4px}
+.fld input,.fld select{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit}
+.chk{display:flex;gap:10px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:14px;cursor:pointer;margin-bottom:10px}
+.chk input{accent-color:var(--blue);width:18px;height:18px}
+.line{display:flex;justify-content:space-between;font-size:20px;font-weight:800;margin:16px 0}
+.mast{display:flex;gap:10px;align-items:center;background:var(--blue-l);border-radius:12px;padding:10px;font-size:13px;margin-bottom:12px}
+.mast img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 22px;border-radius:12px;display:none;z-index:60;font-size:14px}
+@media(max-width:1000px){.pg{grid-template-columns:1fr}}
+</style></head><body><div id="chrome"></div>
+<div class="wrap"><div class="crumbs"><a href="index.html">Главная</a> / Сантехника / Смесители / Grohe Eurosmart</div>
+<div class="pg">
+ <div class="img">🚿</div>
+ <div><span class="tag">Артикул 33300003</span><h1 style="margin-top:8px">Смеситель для ванны Grohe Eurosmart хром</h1>
+  <div class="note">★★★★★ 4.8 · 126 отзывов · Гарантия 5 лет</div>
+  <div class="spec"><div><span>Тип</span>однорычажный</div><div><span>Монтаж</span>на борт ванны / настенный</div><div><span>Материал</span>латунь</div><div><span>Страна</span>Германия</div></div>
+  <div class="help"><img src="img/omik-think.png" style="object-fit:cover;mix-blend-mode:multiply;background:#fff"><a href="prorab.html">Не знаете, сколько нужно материалов? Спросите ОМИКа →</a></div>
+ </div>
+ <div class="card buy"><div class="price">189.00 BYN <s>215.00</s></div><div class="stock">● В наличии в 4 магазинах Минска</div>
+  <button class="btn o" onclick="toast('Добавлено в корзину')">В корзину</button>
+  <div class="inst"><b>🔧 Установить — от 45 BYN</b><small>Мастер «Проверен ОМА», фиксированная цена, гарантия на работу</small>
+  <button class="btn" style="margin:10px 0 0" onclick="openM()">Установить</button></div>
+  <div class="note">Доставка завтра · Самовывоз сегодня</div>
+ </div>
+</div></div>
+<div class="modal-bg" id="mb" onclick="if(event.target===this)closeM()"><div class="modal"><button class="x" onclick="closeM()">×</button>
+ <h2 style="margin:0 0 4px">Установка смесителя</h2><div class="note">Фиксированная цена — без сметы и сюрпризов</div>
+ <div class="mast"><img src="img/omik-ok.png" style="mix-blend-mode:multiply;background:#fff"><div><b>Мастер подберётся автоматически</b><br>Проверен ОМА · оплата через ОМА · гарантия 12 мес.</div></div>
+ <div class="line" style="margin:8px 0"><span style="font-size:15px;font-weight:600">Установка смесителя</span><span>45.00 BYN</span></div>
+ <div class="fld"><label>Дата</label><select id="dt"></select></div>
+ <div class="fld"><label>Время</label><select><option>09:00–12:00</option><option>12:00–15:00</option><option>15:00–18:00</option></select></div>
+ <label class="chk"><input type="checkbox" id="dm" onchange="calc()"><span>Демонтаж старого смесителя <b>+15.00 BYN</b></span></label>
+ <div class="line"><span>Работа</span><span id="wp">45.00 BYN</span></div>
+ <button class="btn o" style="width:100%" onclick="add()">Добавить в корзину</button></div></div>
+<div class="toast" id="ts"></div>
+<script src="common.js"></script><script>chrome()
+const sel=document.getElementById('dt');const days=['вс','пн','вт','ср','чт','пт','сб'];
+for(let i=1;i<=7;i++){const d=new Date(Date.now()+i*864e5);sel.add(new Option(d.getDate()+'.'+String(d.getMonth()+1).padStart(2,'0')+' ('+days[d.getDay()]+')'))}
+const openM=()=>document.getElementById('mb').classList.add('show'),closeM=()=>document.getElementById('mb').classList.remove('show');
+const calc=()=>document.getElementById('wp').textContent=byn(45+(document.getElementById('dm').checked?15:0));
+function toast(t){const e=document.getElementById('ts');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
+function add(){closeM();localStorage.setItem('omaCartN','2');document.getElementById('cn').style.display='inline';document.getElementById('cn').textContent=2;toast('Смеситель и установка добавлены в корзину')}
+</script></body></html>
