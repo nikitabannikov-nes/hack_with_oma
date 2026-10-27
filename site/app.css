@@ -205,7 +205,9 @@ nav.sub img{width:24px;height:24px;border-radius:50%;object-fit:cover}
 .hero .hchips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .hero .hchips a{background:#ffffff26;border-radius:18px;padding:6px 12px;font-size:13px;font-weight:600}
 .hero .hchips a:hover{background:#ffffff40}
-.hero img.omik{width:100%;margin-bottom:-38px;filter:drop-shadow(0 12px 30px #0004)}
+.hero .omik-wrap{position:relative;align-self:center;justify-self:center;width:100%;max-width:300px;display:grid;place-items:center}
+.hero .omik-wrap::before{content:"";position:absolute;width:92%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#ffffff3d 0,#ffffff14 55%,#fff0 72%)}
+.hero img.omik{position:relative;width:100%;height:auto;max-height:340px;object-fit:contain;filter:drop-shadow(0 14px 24px #00103a66)}
 .doors{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .door{padding:20px;display:flex;flex-direction:column;gap:8px;transition:.15s}
 .door:hover{border-color:var(--blue);box-shadow:var(--shadow)}
@@ -234,7 +236,7 @@ nav.sub img{width:24px;height:24px;border-radius:50%;object-fit:cover}
  .pl{grid-template-columns:minmax(0,1fr)}.canvas{height:440px}
  .g2{grid-template-columns:minmax(0,1fr)}.side{position:static}
  .doors{grid-template-columns:1fr 1fr}.flowline{grid-template-columns:1fr 1fr}
- .hero{grid-template-columns:minmax(0,1fr);padding:26px}.hero img.omik{width:180px;justify-self:center}.hero h1{font-size:28px}
+ .hero{grid-template-columns:minmax(0,1fr);padding:26px}.hero .omik-wrap{max-width:200px}.hero h1{font-size:28px}
 }
 @media(max-width:700px){
  .wrap{padding:0 16px}
