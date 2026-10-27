@@ -135,6 +135,8 @@ function addRequest(o){
 }
 const svc=id=>SERVICES.find(s=>s.id===id)||{name:'Услуга',price:0,unit:''};
 const master=id=>MASTERS.find(m=>m.id===id);
+// Аватар мастера: фото, а если не загрузилось — инициалы на цветном круге
+const mAv=m=>`<span class="av" style="background:${m.color}">${m.name.split(' ').map(x=>x[0]).join('')}${m.photo?`<img src="${m.photo}" alt="" onerror="this.remove()">`:''}</span>`;
 function svcEstimate(sv,p){if(sv.area&&p?.calc?.areas){const q=p.calc.areas[sv.area]||0;return{q,sum:q*sv.price}}return{q:1,sum:sv.price}}
 
 // ---------- Ссылка на смету ----------
