@@ -125,6 +125,12 @@ const MASTERS=[
  {id:'m7',name:'Виктор Н.',color:'#2a7f8f',cats:['measure','tile'],rating:4.7,jobs:58,district:'Советский',days:1,from:30,about:'Замеры, консультации, укладка плитки.'},
  {id:'m8',name:'Алексей Т.',color:'#8a6a1f',cats:['plumb'],rating:4.5,jobs:42,district:'Ленинский',days:1,from:40,about:'Быстрая установка сантехники.'}
 ];
+// Реальные товары с oma.by (oma-catalog.js): заменяют демо-позиции по id, дополнительные — наследуют поля от образца (like)
+const REAL=typeof module!=='undefined'?(()=>{try{return require('./oma-catalog.js')}catch(e){return null}})():root.OMA_REAL;
+if(REAL){
+ P.forEach(p=>{const r=REAL.byId[p.id];if(r)Object.assign(p,r,{spec:{...p.spec,...(r.spec||{})}})});
+ REAL.extra.forEach(x=>{const b=P.find(p=>p.id===x.like)||{};const{like,...o}=x;P.push({...b,...o,spec:{...(b.spec||{}),...(o.spec||{})}})});
+}
 const DATA={CATS,ROLES,PRODUCTS:P,KITS,SERVICES,SVC_CATS,MASTERS};
 if(typeof module!=='undefined')module.exports=DATA;else Object.assign(root,DATA);
 })(this);

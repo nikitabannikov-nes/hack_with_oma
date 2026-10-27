@@ -69,6 +69,7 @@ nav.sub img{width:24px;height:24px;border-radius:50%;object-fit:cover}
 .pc:hover{box-shadow:var(--shadow);border-color:#cdd8ee}
 .pimg{height:150px;display:grid;place-items:center;font-size:54px;border-bottom:1px solid var(--line)}
 .pimg.ic{background:linear-gradient(135deg,#f3f6fc,#e6edf9)}
+.pimg.ph{background:#fff;position:relative;overflow:hidden}.pimg.ph img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);object-fit:contain}
 .pimg span{font-size:34px;filter:drop-shadow(0 2px 4px #0002)}
 .pimg.big{height:380px;border-radius:16px;border:1px solid var(--line);font-size:120px}
 .pimg.sm{height:56px;width:56px;border-radius:10px;font-size:26px;border:1px solid var(--line);flex:none}

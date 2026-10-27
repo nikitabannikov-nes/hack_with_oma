@@ -175,6 +175,7 @@ function toast(t,ok=true){let e=$('#toast');if(!e){e=document.createElement('div
 
 // Изображение товара: для плитки и покрытий — образец рисунка, для остального — иконка
 function pimg(p,cls=''){
+ if(p.img)return`<div class="pimg ${cls} ph"><img src="${p.img}" alt="${esc(p.name)}" loading="lazy"></div>`;
  if(p.cat==='tile'||p.cat==='floor'&&p.color||p.cat==='paint'){
   const c=p.color||'#eee';let bg;
   if(p.cat==='paint')bg=`radial-gradient(circle at 30% 30%,#fff8 0 20%,transparent 21%),${c}`;

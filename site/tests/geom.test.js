@@ -25,17 +25,20 @@ t('расчёт ванной: плитка округляется до упак�
  const r=room(pts,{type:'bath',floor:'tile',walls:pts.map((_,i)=>({id:'w'+i,finish:'tile'})),openings:[{id:'o',wallId:'w2',kind:'door',w:0.7,h:2,off:0.6}]});
  const res=C.compute({rooms:[r],tier:'opt',pinned:{}});assert.ok(res.ok);
  const L=k=>res.lines.find(l=>l.role===k);
- // пол 3,4 м² ×1,1 = 3,74 ÷ 1,44 → 3 уп.
- assert.equal(L('tileFloor').qty,3);
- // стены 18,5 − 1,4 = 17,1 ×1,1 = 18,81 ÷ 1,44 → 14 уп.
- assert.equal(L('tileWall').qty,14);
- // клей C2TE 1,3 кг: пол 3,4×1,3×5 + стены 17,1×1,3×5 = 133,25 ×1,05 = 139,9 кг → 6 меш.
- assert.equal(L('glue').qty,6);
+ // количество считается от упаковки и нормы конкретного товара (реальные товары ОМА)
+ const pr=id=>C.byId(id),tf=pr(L('tileFloor').pid),tw=pr(L('tileWall').pid),gl=pr(L('glue').pid);
+ // пол 3,4 м² ×1,1 = 3,74 м² → целые упаковки
+ assert.equal(L('tileFloor').qty,Math.ceil(3.74/tf.pack.q-1e-9));
+ // стены 18,5 − 1,4 (дверь) = 17,1 ×1,1 = 18,81 м² → целые упаковки
+ assert.equal(L('tileWall').qty,Math.ceil(18.81/tw.pack.q-1e-9));
+ // клей: площадь × норма товара × слой по формату плитки + 5%, округление до мешков
+ const kg=(3.4*gl.spec.rate*C.glueLayer(tf.spec.size)+17.1*gl.spec.rate*C.glueLayer(tw.spec.size))*1.05;
+ assert.equal(L('glue').qty,Math.ceil(kg/gl.pack.q-1e-9));
  assert.ok(L('grout').qty>=1&&L('wp')&&L('wpTape'));
 });
 t('Г-образная комната: ламинат считается по реальной площади',()=>{
  const pts=G.fromTemplate('L',{A:4,B:3,a:1.5,b:1.2});const res=C.compute({rooms:[room(pts)],tier:'eco',pinned:{}});
- const lam=res.lines.find(l=>l.role==='laminate');near(res.areas.laminate,10.2);assert.equal(lam.qty,Math.ceil(10.2*1.1/2.4));
+ const lam=res.lines.find(l=>l.role==='laminate');near(res.areas.laminate,10.2);assert.equal(lam.qty,Math.ceil(10.2*1.1/C.byId(lam.pid).pack.q-1e-9));
 });
 t('выбранный пользователем товар сохраняется при смене комплектации',()=>{
  const pts=G.fromTemplate('rect',{L:2,W:2});const r=room(pts,{type:'bath',floor:'tile',walls:pts.map((_,i)=>({id:'w'+i,finish:'tile'}))});
