@@ -26,14 +26,20 @@ const Plan=(()=>{
   let s=`<defs><pattern id="tileP${o.id||''}" width="${Math.max(6,0.3*v.s)}" height="${Math.max(6,0.3*v.s)}" patternUnits="userSpaceOnUse" x="${v.ox}" y="${v.oy}"><path d="M0 0H${Math.max(6,0.3*v.s)}V${Math.max(6,0.3*v.s)}" fill="none" stroke="#c9d7f0" stroke-width="1"/></pattern>
    <pattern id="lamP${o.id||''}" width="${Math.max(10,1.2*v.s)}" height="${Math.max(4,0.2*v.s)}" patternUnits="userSpaceOnUse" x="${v.ox}" y="${v.oy}"><rect width="100%" height="100%" fill="#f5ead9"/><path d="M0 0H${Math.max(10,1.2*v.s)}" stroke="#e2cfb1"/></pattern>
    <pattern id="hatch${o.id||''}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#9aa3b5" stroke-width="2"/></pattern></defs>`;
+  // Пол выбранным материалом: формат плитки или доски в масштабе плана
+  const fm=o.floorMat;let fmFill=null;
+  if(fm&&room.floor!=='none'){const id='fm'+(o.id||''),pw=fm.size[0]*v.s,ph=fm.size[1]*v.s,line=/^#(f|e|d)/i.test(fm.color)?'#00000026':'#ffffff55';
+   if(Math.min(pw,ph)<3)fmFill=fm.color;
+   else if(fm.kind==='plank'){s+=`<defs><pattern id="${id}" width="${pw}" height="${2*ph}" patternUnits="userSpaceOnUse" x="${v.ox}" y="${v.oy}"><rect width="${pw}" height="${2*ph}" fill="${fm.color}"/><rect y="${ph}" width="${pw}" height="${ph}" fill="#0000000d"/><path d="M0 0H${pw}M0 ${ph}H${pw}M0 0V${ph}M${pw/2} ${ph}V${2*ph}" stroke="${line}" stroke-width="1" fill="none"/></pattern></defs>`;fmFill=`url(#${id})`}
+   else{s+=`<defs><pattern id="${id}" width="${pw}" height="${ph}" patternUnits="userSpaceOnUse" x="${v.ox}" y="${v.oy}"><rect width="${pw}" height="${ph}" fill="${fm.color}"/><path d="M0 0H${pw}M0 0V${ph}" stroke="${line}" stroke-width="1.2" fill="none"/></pattern></defs>`;fmFill=`url(#${id})`}}
   if(o.grid!==false)s+=grid(v,W,H);
   if(o.under){const u=o.under,[a,b]=T(v,[u.x,u.y]);s+=`<image href="${u.src}" x="${a}" y="${b}" width="${u.w*v.s}" height="${u.h*v.s}" opacity="${o.underOp??.4}" preserveAspectRatio="none" style="pointer-events:none"/>`}
   (o.ghosts||[]).forEach(g=>{if(!g.pts||g.pts.length<3)return;const gp=g.pts.map(q=>T(v,q)),c=T(v,Geom.labelPoint(g.pts));
    s+=`<g data-g="${g.id}" style="cursor:pointer"><polygon points="${gp.map(q=>q.join(',')).join(' ')}" fill="#dfe6f2" fill-opacity=".55" stroke="#9aa8c2" stroke-width="2"/><text x="${c[0]}" y="${c[1]+4}" text-anchor="middle" font-size="12" font-weight="700" fill="#5b6780">${esc(g.name)}</text></g>`});
   if(n>=3){
-   const fill=!ok?'#fde6e3':room.floor==='tile'?`url(#tileP${o.id||''})`:room.floor==='laminate'?`url(#lamP${o.id||''})`:'#f6f8fc';
+   const fill=!ok?'#fde6e3':fmFill?fmFill:room.floor==='tile'?`url(#tileP${o.id||''})`:room.floor==='laminate'?`url(#lamP${o.id||''})`:'#f6f8fc';
    s+=`<polygon points="${sp.map(p=>p.join(',')).join(' ')}" fill="${fill}" stroke="none"/>`;
-   if(room.floor==='tile'&&ok)s+=`<polygon points="${sp.map(p=>p.join(',')).join(' ')}" fill="#eef4ff" opacity=".55"/>`;
+   if(room.floor==='tile'&&ok&&!fmFill)s+=`<polygon points="${sp.map(p=>p.join(',')).join(' ')}" fill="#eef4ff" opacity=".55"/>`;
    // Вычитаемые области
    (room.excl||[]).forEach(x=>{const[a,b]=T(v,[x.x,x.y]);s+=`<g data-x="${x.id}" style="cursor:${o.interactive?'move':'default'}"><rect x="${a}" y="${b}" width="${x.w*v.s}" height="${x.h*v.s}" fill="url(#hatch${o.id||''})" stroke="#6b7488" stroke-width="1.5" opacity=".8"/>${o.labels!==false&&x.w*v.s>40?`<text x="${a+x.w*v.s/2}" y="${b+x.h*v.s/2+4}" text-anchor="middle" font-size="11" font-weight="700" fill="#1a2233" paint-order="stroke" stroke="#fff" stroke-width="3">${esc(x.name)}</text>`:''}</g>`});
    // Стены: тёмная линия + цвет отделки
@@ -84,9 +90,9 @@ const Plan=(()=>{
   if(o.scale!==false)s+=scaleBar(v,W,H);
   return s;
  }
- function mini(room,W=150,H=110,valid){
+ function mini(room,W=150,H=110,valid,floorMat){
   const v=fit(room.pts,W,H,14);
-  return`<svg class="mini" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-label="План помещения">${draw(room,v,{W,H,grid:false,labels:false,thin:true,scale:false,valid,id:'m'+room.id})}<text x="${W-6}" y="${H-6}" text-anchor="end" font-size="11" font-weight="800" fill="#0b3a9e">${f2(Geom.area(room.pts))} м²</text></svg>`;
+  return`<svg class="mini" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-label="План помещения">${draw(room,v,{W,H,grid:false,labels:false,thin:true,scale:false,valid,floorMat,id:'m'+room.id})}<text x="${W-6}" y="${H-6}" text-anchor="end" font-size="11" font-weight="800" fill="#0b3a9e">${f2(Geom.area(room.pts))} м²</text></svg>`;
  }
  function tplIcon(kind){
   const t=Geom.TEMPLATES[kind],pts=t.pts(Object.fromEntries(t.params.map(([k,,v])=>[k,v]))),v=fit(pts,48,38,4);

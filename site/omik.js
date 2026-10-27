@@ -27,11 +27,11 @@ const Omik=(()=>{
  const SVC_KW=[[/смесител|кран/,'svc_mixer'],[/унитаз/,'svc_wc'],[/раковин|тумб/,'svc_sink'],[/полотенцесуш/,'svc_rail'],[/вентилят|вытяжк/,'svc_fan'],[/замер/,'svc_measure'],[/ламинат/,'svc_lam'],[/покрас|краск/,'svc_paint'],[/потол/,'svc_ceil'],[/плитк|кафел/,'svc_tile_wall'],[/ванн/,'svc_bath']];
  const PROD_KW=/клей|затирк|смесител|краск|ламинат|грунт|гидроизол|унитаз|полотенцесуш|вентилятор|шпател|валик|плиткорез|свп|выравниван|плинтус|подложк|герметик|раковин|трап|крестик|уровень|миксер|керамогранит|плитк|светильник|ванн[ау](?![а-я])/;
  const FAQ=[
-  [/клей.*керамогранит|керамогранит.*клей|какой клей/,'Для керамогранита и плитки от 60 см нужен клей класса <b>C2</b> (усиленный), лучше C2TE. Для форматов 60×120 и тёплого пола — C2TE S1 (деформируемый). Клей C1 подходит для керамической плитки до ~45 см. В нашей смете Омик предупредит, если клей не подходит к формату.'],
+  [/клей.*керамогранит|керамогранит.*клей|какой клей|клей для плитк|плиточн.*кле/,()=>glueAnswer()],
   [/c1.*c2|c2.*c1|чем отлича.*кле/,'C1 — обычный клей, C2 — усиленный (выше адгезия). Буквы: <b>T</b> — плитка не сползает со стены, <b>E</b> — увеличенное открытое время, <b>S1</b> — деформируемый, для крупного формата и тёплого пола.'],
-  [/гидроизоляц.*нужн|нужн.*гидроизоляц|зачем гидроизол/,'Во влажных помещениях — да: обмазочная гидроизоляция по полу и на 20 см на стены, в душевой зоне — выше. Углы и стыки проклеивают лентой. В калькуляторе это включается галочкой «Влажное помещение».'],
+  [/гидроизоляц.*нужн|нужн.*гидроизоляц|зачем гидроизол/,()=>withProducts('Во влажных помещениях — да: обмазочная гидроизоляция по полу и на 20 см на стены, в душевой зоне — выше. Углы и стыки проклеивают лентой. В калькуляторе это включается галочкой «Влажное помещение».',PRODUCTS.filter(x=>x.roles.includes('wp')||x.roles.includes('wpTape')),'Из каталога ОМА:')],
   [/сколько слоев|слоев краск|в сколько слоев/,'Обычно 2 слоя по загрунтованной поверхности. Калькулятор считает расход по укрывистости конкретной краски (м²/л на слой) из её характеристик.'],
-  [/ламинат.*кухн|кухн.*ламинат|влагостойк.*ламинат/,'Для кухни и коридора берите влагостойкий ламинат 33 класса и выше. Вокруг мойки и у входа надёжнее керамогранит.'],
+  [/ламинат.*кухн|кухн.*ламинат|влагостойк.*ламинат/,()=>withProducts('Для кухни и коридора берите влагостойкий ламинат 33 класса и выше. Вокруг мойки и у входа надёжнее керамогранит.',PRODUCTS.filter(x=>x.roles.includes('laminate')&&/33|34/.test(x.name+JSON.stringify(x.props||''))),'Ламинат 33–34 класса в каталоге ОМА:')],
   [/запас|сколько брать сверху|на подрезку/,'Для прямой укладки обычно 10%, для сложной формы (Г-, П-образная, много углов) и диагонали — 15%. Запас меняется во вкладке «Отделка» планировщика, количество округляется до целых упаковок.'],
   [/сохнет|высыха|через сколько/,'Сроки зависят от конкретной смеси — смотрите техкарту на упаковке. Точные сроки я не придумываю: в демо у меня нет данных производителя по каждому товару.'],
   [/доставк/,'В демо доставка условная: при оформлении можно выбрать самовывоз или доставку. Реальные условия доставки ОМА в прототип не подключены.'],
@@ -39,6 +39,31 @@ const Omik=(()=>{
  ];
 
  // ---------- Ответы ----------
+ const NOTE='<p class="note" style="margin-top:6px">Справка Омика в демо-режиме — общие рекомендации, не замена инструкции производителя.</p>';
+ // Ссылка на карточку товара в каталоге
+ const plink=x=>`<a class="plink" href="product.html?id=${x.id}">${esc(x.name)}</a>`;
+ const pline=(x,extra='')=>`<li>${plink(x)} — <b>${byn(x.price)}</b>${extra?` · ${extra}`:''}</li>`;
+ function withProducts(text,list,title,n=3){
+  const L=[...list].sort((a,b)=>a.price-b.price).slice(0,n);if(!L.length)return[B(text+NOTE)];loadSt().last=L.map(x=>x.id);
+  return[B(`${text}<p style="margin-top:8px">${title}</p><ul class="plist">${L.map(x=>pline(x)).join('')}</ul>${NOTE}`,{pcs:L.map(x=>x.id)})];
+ }
+ // Клей под керамогранит: класс C2 и выше из каталога, с учётом плитки в текущем проекте
+ function glueAnswer(){
+  const G=PRODUCTS.filter(x=>x.roles.includes('glue')),c2=G.filter(x=>/^C2/i.test(x.spec.cls||'')).sort((a,b)=>a.price-b.price),c1=G.filter(x=>/^C[01]/i.test(x.spec.cls||'')).sort((a,b)=>a.price-b.price);
+  const p=proj(),tiles=p?p.est.lines.filter(l=>l.role==='tileFloor'||l.role==='tileWall').map(l=>P(l.pid)).filter(x=>x&&x.spec.size):[],big=tiles.length?Math.max(...tiles.map(x=>Math.max(...x.spec.size))):0;
+  const cur=p&&p.est.lines.find(l=>l.role==='glue'),curP=cur&&P(cur.pid);
+  const fit=x=>!big||x.spec.maxTile>=big,best=c2.filter(fit)[0]||c2[0];
+  let h='Для керамогранита нужен клей класса <b>C2</b> — усиленный, с высокой адгезией: керамогранит почти не впитывает воду, и обычный клей держит его хуже. Буква <b>T</b> — плитка не сползает со стены, <b>S1</b> — эластичный, для форматов 60×120 и больше и для тёплого пола.';
+  if(big)h+=`<p style="margin-top:6px">В вашем проекте «${esc(p.title)}» плитка до ${big} см${curP?`, в смете сейчас ${plink(curP)} (класс ${esc(curP.spec.cls)})${fit(curP)&&/^C2/i.test(curP.spec.cls)?' — подходит ✓':' — для такого формата не подходит'}`:''}.</p>`;
+  h+=`<p style="margin-top:8px">Подойдут из каталога ОМА:</p><ul class="plist">${c2.map(x=>pline(x,`класс ${esc(x.spec.cls)}, до ${x.spec.maxTile} см, расход ${num(x.spec.rate)} кг/м² на 1 мм${x===best?' · <b>рекомендую</b>':''}`)).join('')}</ul>`;
+  if(c1.length)h+=`<p class="note" style="margin-top:6px">Дешевле, но только для обычной керамической плитки небольшого формата: ${c1.slice(0,2).map(x=>`${plink(x)} (${esc(x.spec.cls)}, ${byn(x.price)})`).join(', ')}.</p>`;
+  loadSt().last=c2.slice(0,3).map(x=>x.id);
+  const opts=[];
+  if(p&&cur&&best&&curP&&curP.id!==best.id&&!(fit(curP)&&/^C2/i.test(curP.spec.cls)))opts.push({l:`Заменить в смете на ${best.name.split(',')[0].slice(0,40)}`,a:'pin',arg:`${p.id}:glue:${best.id}`,pri:true});
+  if(c2.length>1)opts.push({l:'Сравнить клеи',a:'say',arg:'Сравни их'});
+  opts.push({l:'Все клеи в каталоге',a:'go',arg:'catalog.html?q='+encodeURIComponent('клей для плитки')});
+  return[B(h+NOTE,{pcs:c2.slice(0,3).map(x=>x.id),opts})];
+ }
  const B=(html,o={})=>({who:'b',html,...o});
  function reply(text){
   const{t,o}=parse(text),s=loadSt(),sl=s.slots;
@@ -52,7 +77,7 @@ const Omik=(()=>{
   if(/аналог|подешевле|замен|похож|дешевле/.test(t))return analog(t);
   const svcHit=SVC_KW.find(([r])=>r.test(t));
   if(/мастер|установ|уложит|монтаж|бригад|кто (может|сделает)|вызвать|замерщик|замер/.test(t))return masterReply(svcHit?svcHit[1]:null);
-  const faq=FAQ.find(([r])=>r.test(t));if(faq)return[B(faq[1]+'<p class="note" style="margin-top:6px">Справка Омика в демо-режиме — общие рекомендации, не замена инструкции производителя.</p>')];
+  const faq=FAQ.find(([r])=>r.test(t));if(faq)return typeof faq[1]==='function'?faq[1](t):[B(faq[1]+NOTE)];
   const renov=o.room||o.L||o.area||o.shape||/ремонт|положит|уложить|поменять|сделать|обновить|переделать|покрасить|постелить|отделк/.test(t);
   if(renov&&(o.room||o.work||o.L||o.area)){s.slots={active:true};merge(s.slots,o,t);return renovation()}
   if(PROD_KW.test(t)||searchProducts(t,1).length&&t.length>3)return productReply(t,o);
@@ -119,7 +144,7 @@ const Omik=(()=>{
   if(!L.length)return[B('В демо-каталоге такого не нашёл. Попробуйте сформулировать иначе или откройте <a href="catalog.html">каталог</a>.')];
   loadSt().last=L.map(x=>x.id);
   const stm=L.find(x=>x.stm);
-  return[B(`Нашёл в каталоге ${L.length} ${L.length===1?'товар':'товара'}${stm?'. Есть вариант собственной марки ОМА — обычно дешевле при сопоставимых характеристиках':''}:`,{pcs:L.map(x=>x.id),opts:[L.length>1?{l:'Сравнить',a:'say',arg:'Сравни их'}:null,{l:'Показать все в каталоге',a:'go',arg:'catalog.html?q='+encodeURIComponent(t)}].filter(Boolean)})];
+  return[B(`Нашёл в каталоге ${L.length} ${L.length===1?'товар':'товара'}${stm?'. Есть вариант собственной марки ОМА — обычно дешевле при сопоставимых характеристиках':''}:<ul class="plist">${L.map(x=>pline(x,x.stm?'СТМ ОМА':'')).join('')}</ul>`,{pcs:L.map(x=>x.id),opts:[L.length>1?{l:'Сравнить',a:'say',arg:'Сравни их'}:null,{l:'Показать все в каталоге',a:'go',arg:'catalog.html?q='+encodeURIComponent(t)}].filter(Boolean)})];
  }
  function analog(t){
   const s=loadSt(),base=P(ctx().productId)||P(s.last[0]);
@@ -129,8 +154,8 @@ const Omik=(()=>{
  function analogOf(base){
   const A=analogs(base.id).slice(0,4);if(!A.length)return[B(`Для «${esc(base.name)}» аналогов в демо-каталоге нет.`)];
   loadSt().last=[base.id,...A.map(x=>x.id)].slice(0,3);
-  const rows=A.map(x=>{const d=x.price-base.price;return`<div class="row"><span>${esc(x.name)}${x.stm?' <span class="tag stm">СТМ</span>':''}</span><b style="color:${d<0?'var(--ok)':'var(--ink)'}">${d<0?'−':'+'}${byn(Math.abs(d))}</b></div>`}).join('');
-  return[B(`Аналоги для «${esc(base.name)}» (${byn(base.price)}):<div class="card-in">${rows}</div><p class="note" style="margin-top:6px">Сравнивайте характеристики: дешевле не всегда равноценно. Например, класс клея или стойкость краски к мытью.</p>`,{pcs:A.slice(0,3).map(x=>x.id),opts:[{l:'Сравнить характеристики',a:'say',arg:'Сравни их'}]})];
+  const rows=A.map(x=>{const d=x.price-base.price;return`<div class="row"><span>${plink(x)}${x.stm?' <span class="tag stm">СТМ</span>':''}</span><b style="color:${d<0?'var(--ok)':'var(--ink)'}">${d<0?'−':'+'}${byn(Math.abs(d))}</b></div>`}).join('');
+  return[B(`Аналоги для ${plink(base)} (${byn(base.price)}):<div class="card-in">${rows}</div><p class="note" style="margin-top:6px">Сравнивайте характеристики: дешевле не всегда равноценно. Например, класс клея или стойкость краски к мытью.</p>`,{pcs:A.slice(0,3).map(x=>x.id),opts:[{l:'Сравнить характеристики',a:'say',arg:'Сравни их'}]})];
  }
  function compare(){
   const ids=loadSt().last.slice(0,3).filter(P);
