@@ -35,7 +35,7 @@ function list(){
 function draw(){
  const base=replRole?PRODUCTS.filter(p=>p.roles.includes(replRole)):q?searchProducts(q):PRODUCTS;
  $('#cats').innerHTML=`<a href="#" class="${!cat?'on':''}" onclick="cat='';draw();return false">📦 Все товары<small>${base.length}</small></a>`+Object.entries(CATS).map(([k,c])=>{const n=base.filter(p=>p.cat===k).length;return n?`<a href="#" class="${cat===k?'on':''}" onclick="cat='${k}';draw();return false">${c.icon} ${c.name}<small>${n}</small></a>`:''}).join('');
- const L=list(),cur=replRole&&replP?replP.est.lines.find(l=>l.role===replRole)?.pid:null;
+ const L=list(),cur=replRole&&replP?(qp('from')||replP.est.lines.find(l=>l.role===replRole)?.pid):null;
  $('#cnt').textContent=`${L.length} товаров`;
  $('#grid').innerHTML=L.map(p=>{
   let act;
@@ -47,7 +47,13 @@ function draw(){
  cmpBar();
 }
 function addE(pid){const r=addLine(addTo,pid,1);save();toast(r.dup?'Этот товар уже есть в смете':r.replaced?'Товар закреплён в смете вместо типового, количество пересчитано':'📋 Добавлено в смету',!r.dup)}
-function choose(pid){replP.pinned[replRole]=pid;recalc(replP);touchEst(replP,`Замена: ${ROLES[replRole]} → ${P(pid).name}`);save();location='smeta.html?project='+replP.id+'&focus='+pid}
+function choose(pid){
+ // Отделочный материал меняем в тех помещениях, где стоял заменяемый товар; расходники — на весь проект
+ const from=qp('from'),rid=qp('room');
+ const rooms=Calc.MAT_ROLES.includes(replRole)?replP.rooms.filter(r=>rid?r.id===rid:roomRoles(r).includes(replRole)&&(!from||matOf(replP,r,replRole).id===from)):[];
+ if(rooms.length)setRoomMat(replP,rooms,replRole,pid);
+ else{replP.pinned[replRole]=pid;recalc(replP);touchEst(replP,`Замена: ${ROLES[replRole]} → ${P(pid).name}`)}
+ save();location='smeta.html?project='+replP.id+'&focus='+pid}
 function toggleCmp(id,on){cmp=on?[...new Set([...cmp,id])].slice(-4):cmp.filter(x=>x!==id);cmpBar()}
 function cmpBar(){const b=$('#cmpbar');b.style.display=cmp.length?'flex':'none';b.innerHTML=`<span>К сравнению: ${cmp.length}</span><button class="btn sm o" ${cmp.length<2?'disabled':''} onclick="showCmp()">Сравнить</button><button class="btn sm ghost" style="color:#fff" onclick="cmp=[];draw()">Очистить</button>`}
 function showCmp(){

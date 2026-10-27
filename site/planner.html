@@ -86,7 +86,7 @@ function drawCanvas(){
  const[W,H]=size(),r=R(),val=Geom.validate(r);
  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
  const extra={under:p.underlay&&showUnder?p.underlay:null,ghosts:p.rooms.filter(x=>x.id!==r.id)};
- svg.innerHTML=mode==='draw'?Plan.draw({pts:[],walls:[]},v,{W,H,drawPts,cursor,...extra}):Plan.draw(r,v,{W,H,interactive:true,selV,selWall,valid:val.ok,numbers:true,id:'c',...extra});
+ svg.innerHTML=mode==='draw'?Plan.draw({pts:[],walls:[]},v,{W,H,drawPts,cursor,...extra}):Plan.draw(r,v,{W,H,interactive:true,selV,selWall,valid:val.ok,numbers:true,id:'c',floorMat:floorLook(p,r),...extra});
  $('#bUnder').style.display=p.underlay?'':'none';$('#bUnder').classList.toggle('on',showUnder);$('#bAll').style.display=p.rooms.length>1?'':'none';
  $('#hint').textContent=mode==='draw'?(drawPts.length<3?`Кликайте по сетке, чтобы ставить вершины (${drawPts.length}). Привязка к осям помогает строить прямые углы.`:'Кликните по первой (оранжевой) точке или нажмите «Замкнуть контур».'):selV!=null?`Вершина ${selV+1}: перетащите или удалите. Колесо мыши — масштаб.`:'Тяните вершины и «+» на стенах, перетаскивайте проёмы и вычеты. Фон — сдвиг плана.';
  $('#bDelV').style.display=mode==='edit'&&selV!=null&&r.pts.length>3?'':'none';
@@ -201,7 +201,12 @@ function renderPanel(){
  if(tab==='fin'){
   const sug=r.pts.length>4||r.shape.kind==='poly'?15:10;
   h+=`<label class="fld">Пол<select onchange="R().floor=this.value;commit('Изменена отделка пола')"><option value="tile" ${r.floor==='tile'?'selected':''}>Плитка / керамогранит</option><option value="laminate" ${r.floor==='laminate'?'selected':''}>Ламинат</option><option value="none" ${r.floor==='none'?'selected':''}>Без отделки</option></select></label>
+  ${r.floor!=='none'?`<div class="surf"><span>Материал пола<b>${num(Geom.validate(r).ok?Geom.metrics(r).floorNet:0)} м²</b></span>${matPicker(p,r,r.floor==='tile'?'tileFloor':'laminate')}</div>`:''}
   <label class="fld mt">Потолок<select onchange="R().ceil=this.value;commit('Изменена отделка потолка')"><option value="paint" ${r.ceil==='paint'?'selected':''}>Покраска</option><option value="none" ${r.ceil==='none'?'selected':''}>Без отделки</option></select></label>
+  ${r.ceil==='paint'?`<div class="surf"><span>Краска потолка</span>${matPicker(p,r,'paintCeil')}</div>`:''}
+  ${r.walls.some(w=>w.finish==='tile')?`<div class="surf"><span>Плитка на стены</span>${matPicker(p,r,'tileWall')}</div>`:''}
+  ${r.walls.some(w=>w.finish==='paint')?`<div class="surf"><span>Краска для стен</span>${matPicker(p,r,'paintWall')}</div>`:''}
+  ${p.rooms.length>1&&roomRoles(r).length?`<button class="btn ghost sm mt" onclick="matAll()">Применить эти материалы ко всем помещениям</button>`:''}
   <label class="fld mt">Запас на подрезку плитки и ламината, %<input type="number" min="0" max="30" step="1" value="${r.waste}" onchange="R().waste=Math.max(0,Math.min(30,+this.value||0));commit('Изменён запас')"></label>
   ${r.waste<sug?`<p class="note">Для формы с ${r.pts.length} углами обычно берут запас ${sug}%: больше подрезки. <button class="btn ghost sm" onclick="R().waste=${sug};commit('Изменён запас')">Поставить ${sug}%</button></p>`:''}
   <label class="opts2 mt"><label><input type="checkbox" ${(r.wet??Calc.WET.includes(r.type))?'checked':''} onchange="R().wet=this.checked;commit('Изменена гидроизоляция')"><span><b>Влажное помещение</b><small>Добавит гидроизоляцию пола и 20 см стен, ленту в углы</small></span></label></label>
@@ -213,6 +218,9 @@ function renderPanel(){
 function setType(t){const r=R(),d=RT[t];r.type=t;if(Object.values(RT).some(x=>x.name===r.name))r.name=d.name;r.floor=d.floor;r.ceil=d.ceil;r.walls.forEach(w=>w.finish=d.walls);delete r.wet;commit('Изменён тип помещения');toast(`Отделка по умолчанию для «${d.name}» применена`)}
 // Шаблон строится от левого верхнего угла комнаты, чтобы она не прыгала по плану
 const tplPts=(kind,params,o)=>Geom.fromTemplate(kind,params).map(([x,y])=>[Geom.r2(x+(o.ox||0)),Geom.r2(y+(o.oy||0))]);
+// Материал поверхности помещения: меняет смету и рисунок пола на плане
+function onMat(rid,role,pid){const r=p.rooms.find(x=>x.id===rid);setRoomMat(p,[r],role,pid||null);save();renderAll();toast(pid?`${esc(r.name)}: ${esc(P(pid).name)}`:`${esc(r.name)}: по комплектации`)}
+function matAll(){const r=R();roomRoles(r).forEach(role=>{const pid=r.mat&&r.mat[role];const rs=p.rooms.filter(x=>roomRoles(x).includes(role));rs.forEach(x=>{x.mat=x.mat||{};if(pid)x.mat[role]=pid;else delete x.mat[role]})});recalc(p);touchEst(p,`Материалы «${r.name}» применены ко всем помещениям`);save();renderAll();toast('Материалы применены ко всем помещениям')}
 function setH(val){const x=parseFloat(String(val).replace(',','.'));if(!(x>0)){toast('Введите высоту потолка в метрах, например 2,7',false);renderPanel();return}R().h=Geom.r2(x);commit('Изменена высота потолка')}
 function setTpl(k){
  const r=R(),t=Geom.TEMPLATES[k],prev=r.shape;
@@ -243,7 +251,7 @@ function openAddRoom(){
  $('#nrTpl').innerHTML=Object.entries(Geom.TEMPLATES).map(([k,t])=>`<button class="${nr.kind===k?'on':''}" onclick="nr.kind='${k}';openAddRoom()">${Plan.tplIcon(k)}${t.name}</button>`).join('');
  $('#mRoom').classList.add('show');
 }
-function addRoom(){const r=makeRoom(nr.type,nr.kind);const all=p.rooms.flatMap(q=>q.pts);if(all.length){const dx=Geom.r2(Math.max(...all.map(q=>q[0]))+1-Math.min(...r.pts.map(q=>q[0]))),dy=Geom.r2(Math.min(...all.map(q=>q[1]))-Math.min(...r.pts.map(q=>q[1])));r.pts=r.pts.map(([x,y])=>[Geom.r2(x+dx),Geom.r2(y+dy)]);r.shape={...r.shape,ox:dx,oy:dy}}p.rooms.push(r);p.activeRoom=r.id;$('#mRoom').classList.remove('show');commit('Добавлено помещение: '+r.name);center()}
+function addRoom(){const r=makeRoom(nr.type,nr.kind);if(p.rooms.some(q=>q.name===r.name)){let k=2;while(p.rooms.some(q=>q.name===r.name+' '+k))k++;r.name+=' '+k}const all=p.rooms.flatMap(q=>q.pts);if(all.length){const dx=Geom.r2(Math.max(...all.map(q=>q[0]))+1-Math.min(...r.pts.map(q=>q[0]))),dy=Geom.r2(Math.min(...all.map(q=>q[1]))-Math.min(...r.pts.map(q=>q[1])));r.pts=r.pts.map(([x,y])=>[Geom.r2(x+dx),Geom.r2(y+dy)]);r.shape={...r.shape,ox:dx,oy:dy}}p.rooms.push(r);p.activeRoom=r.id;$('#mRoom').classList.remove('show');commit('Добавлено помещение: '+r.name);center()}
 
 // ---------- Результаты ----------
 function drawResults(){

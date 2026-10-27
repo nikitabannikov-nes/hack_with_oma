@@ -71,14 +71,15 @@ function recalc(p){
  p.calc={ok:res.ok,errors:res.errors,areas:res.areas,warn:res.warn,at:now()};
  if(!res.ok)return res; // при ошибке геометрии смета не меняется, а помечается
  const seen=new Set();
+ // Позиция сметы = роль + товар: у разных помещений могут быть разные плитка, краска, ламинат
  res.lines.forEach(c=>{
-  if(E.off[c.role])return;seen.add(c.role);
-  let l=E.lines.find(x=>x.role===c.role);
+  if(E.off[c.role])return;seen.add(c.role+'|'+c.pid);
+  let l=E.lines.find(x=>x.role===c.role&&x.pid===c.pid);
   if(!l){l={id:uid(),role:c.role,pid:c.pid,qty:c.qty,calcQty:c.qty,manual:false,ack:null,src:'calc'};E.lines.push(l)}
   l.pid=c.pid;l.calcQty=c.qty;l.basis=c.basis;l.approx=c.approx;l.gone=false;
   if(!l.manual)l.qty=c.qty;
  });
- E.lines.forEach(l=>{if(l.role&&!seen.has(l.role)&&!E.off[l.role]){l.gone=true;l.calcQty=0}});
+ E.lines.forEach(l=>{if(l.role&&!seen.has(l.role+'|'+l.pid)&&!E.off[l.role]){l.gone=true;l.calcQty=0}});
  E.lines=E.lines.filter(l=>!(l.gone&&!l.manual));
  return res;
 }
@@ -220,3 +221,40 @@ function seed(){
  S.projects.push(p);
  return S;
 }
+
+// ---------- Материалы помещения ----------
+const MAT_N={tileFloor:'Плитка на пол',laminate:'Ламинат',tileWall:'Плитка на стены',paintWall:'Краска для стен',paintCeil:'Краска для потолка'};
+const MAT_PLACE={tileFloor:'Пол',laminate:'Пол',tileWall:'Стены',paintWall:'Стены',paintCeil:'Потолок'};
+// Какие отделочные материалы нужны помещению по его отделке
+function roomRoles(r){const s=[];if(r.floor==='tile')s.push('tileFloor');if(r.floor==='laminate')s.push('laminate');
+ if(r.walls.some(w=>w.finish==='tile'))s.push('tileWall');if(r.walls.some(w=>w.finish==='paint'))s.push('paintWall');if(r.ceil==='paint')s.push('paintCeil');return s}
+const matOf=(p,r,role)=>Calc.pickFor(role,p.tier,p.pinned,r);
+function setRoomMat(p,rooms,role,pid){
+ rooms.forEach(r=>{r.mat=r.mat||{};if(pid)r.mat[role]=pid;else delete r.mat[role]});
+ recalc(p);touchEst(p,pid?`${rooms.map(r=>r.name).join(', ')}: ${MAT_N[role].toLowerCase()} — ${P(pid).name}`:`${rooms.map(r=>r.name).join(', ')}: ${MAT_N[role].toLowerCase()} по комплектации`);
+}
+// Цвет и формат материала для рисунка пола на плане
+function matLook(prod){
+ if(!prod)return null;
+ const n=(prod.name||'').toLowerCase();
+ const C=[[/венге/,'#4a3426'],[/орех/,'#7d5a3c'],[/вишн/,'#8a4b38'],[/тик|мербау/,'#8b5a3c'],[/графит|антрацит|черн/,'#4b4f55'],[/сер(ый|ая|ое)|grey|gray/,'#a9a8a3'],[/бел(ый|ая|ое)|white|снеж/,'#f1efea'],[/беж|песоч|крем|сливоч/,'#ddd0b8'],[/кашемир|светл/,'#d8c7ab'],[/бетон|цемент/,'#bdbab4'],[/мрамор|оникс|травертин/,'#e9e3d8'],[/зел[её]н/,'#6f9a83'],[/голуб|син/,'#9fb8d6'],[/дуб/,'#c49b6c'],[/сосн|бук|ясен|берез/,'#d9b88a']];
+ let color=prod.color||'#e5e1da';for(const[re,c]of C)if(re.test(n)){color=c;break}
+ let size=prod.spec&&prod.spec.size?prod.spec.size.map(x=>x/100):null;
+ // размер доски из названия: «1285х192х8мм» или «195x1380x8мм» — длина и ширина = два больших числа
+ if(!size&&prod.roles.includes('laminate')){const m=n.match(/(\d+)\s*[хx×*]\s*(\d+)\s*[хx×*]\s*(\d+)/);const d=m?[+m[1],+m[2],+m[3]].sort((a,b)=>b-a):null;size=d&&d[1]>=50?[d[0]/1000,d[1]/1000]:[1.2,0.19]}
+ return{color,size:size||[0.3,0.3],kind:prod.roles.includes('laminate')||prod.pattern==='wood'?'plank':'tile'};
+}
+// Выпадающий список материала для поверхности помещения; страница определяет onMat(roomId, role, pid)
+function matPicker(p,r,role){
+ const cur=matOf(p,r,role),own=!!(r.mat&&r.mat[role]),def=Calc.pick(role,p.tier,p.pinned);
+ const L=PRODUCTS.filter(x=>x.roles.includes(role)).sort((a,b)=>(a.priceM2||a.price)-(b.priceM2||b.price));
+ const price=x=>x.priceM2?byn(x.priceM2)+'/м²':byn(x.price);
+ return`<div class="matp"><span class="sw" style="${swatchCss(cur)}"></span><select onchange="onMat('${r.id}','${role}',this.value)">
+  <option value="" ${own?'':'selected'}>Как в комплектации: ${esc(def.name.slice(0,48))}</option>
+  ${L.map(x=>`<option value="${x.id}" ${own&&x.id===cur.id?'selected':''}>${esc(x.name.slice(0,60))} — ${price(x)}${x.stm?' · СТМ':''}</option>`).join('')}</select>
+  <a class="btn ghost sm" href="product.html?id=${cur.id}&project=${p.id}" title="Карточка товара">↗</a></div>`;
+}
+function swatchCss(prod){const l=matLook(prod);if(!l)return'';
+ if(prod.roles.some(r=>r.startsWith('paint')))return`background:${l.color}`;
+ return l.kind==='plank'?`background:repeating-linear-gradient(90deg,${l.color} 0 70%,#0002 70% 72%,${l.color} 72%),${l.color}`:`background:linear-gradient(#0000 calc(100% - 1px),#fff 0) 0 0/100% 50%,linear-gradient(90deg,#0000 calc(100% - 1px),#fff 0) 0 0/50% 100%,${l.color}`}
+function floorLook(p,r){const role=r.floor==='tile'?'tileFloor':r.floor==='laminate'?'laminate':null;return role?matLook(matOf(p,r,role)):null}

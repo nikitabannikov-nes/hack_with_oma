@@ -46,4 +46,22 @@ t('выбранный пользователем товар сохраняетс
 });
 t('клей C1 на крупный формат — предупреждение',()=>{const pts=G.fromTemplate('rect',{L:2,W:2});const r=room(pts,{type:'bath',floor:'tile'});const res=C.compute({rooms:[r],tier:'eco',pinned:{tileFloor:'tf_opt'}});assert.ok(res.warn.some(w=>w.role==='glue'))});
 t('ошибка геометрии не даёт ложную смету',()=>{const r=room([[0,0],[3,3],[3,0],[0,3]]);const res=C.compute({rooms:[r],tier:'opt'});assert.ok(!res.ok);assert.equal(res.lines.length,0)});
+t('разные материалы в разных помещениях — отдельные позиции, одинаковые — суммируются',()=>{
+ const r1=room(G.fromTemplate('rect',{L:4,W:3}),{id:'a',name:'Спальня'}),r2=room(G.fromTemplate('rect',{L:3,W:3}),{id:'b',name:'Детская'}),r3=room(G.fromTemplate('rect',{L:2,W:2}),{id:'c',name:'Кабинет'});
+ r2.mat={laminate:'lam_prem'};
+ const res=C.compute({rooms:[r1,r2,r3],tier:'eco',pinned:{}});const lam=res.lines.filter(l=>l.role==='laminate');
+ assert.equal(lam.length,2);
+ const eco=C.byId('lam_eco'),prem=C.byId('lam_prem');
+ // спальня и кабинет — один товар, округляется общей площадью
+ assert.equal(lam.find(l=>l.pid==='lam_eco').qty,Math.ceil((12+4)*1.1/eco.pack.q-1e-9));
+ assert.equal(lam.find(l=>l.pid==='lam_prem').qty,Math.ceil(9*1.1/prem.pack.q-1e-9));
+ // выбор помещения виден в разбивке по комнатам
+ assert.equal(res.per.find(x=>x.id==='b').mats.laminate.pid,'lam_prem');
+ // подложка и плинтус — на всю площадь ламината
+ assert.ok(res.lines.find(l=>l.role==='underlay'));
+});
+t('выбор помещения важнее комплектации и общего выбора',()=>{
+ const r=room(G.fromTemplate('rect',{L:2,W:2}),{type:'bath',floor:'tile'});r.mat={tileFloor:'tf_wood'};
+ const res=C.compute({rooms:[r],tier:'prem',pinned:{tileFloor:'tf_opt'}});assert.equal(res.lines.find(l=>l.role==='tileFloor').pid,'tf_wood');
+});
 console.log(`\n${n} тестов пройдено`);
