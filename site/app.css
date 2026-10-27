@@ -269,3 +269,7 @@ nav.sub img{width:24px;height:24px;border-radius:50%;object-fit:cover}
 .matp select{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit;font-size:13px;background:#fff}
 .surf{display:grid;grid-template-columns:110px minmax(0,1fr);gap:8px 12px;align-items:center;margin-top:8px;font-size:13px}
 .surf>span{color:var(--mute)}.surf>span b{display:block;color:var(--ink)}
+
+.m .b a.plink{color:var(--blue);font-weight:700;text-decoration:underline;text-decoration-color:#0057d655;text-underline-offset:2px}
+.m .b a.plink:hover{text-decoration-color:var(--blue)}
+.m .b .plist{margin:4px 0 0;padding-left:18px}.m .b .plist li{margin:4px 0}
