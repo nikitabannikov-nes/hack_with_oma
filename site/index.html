@@ -6,7 +6,7 @@
   <p>Опишите задачу Омику или начните с плана комнаты. Посчитаем материалы по реальной геометрии, подберём товары под бюджет и найдём мастера. Все модули работают с одним проектом, данные между ними не теряются.</p>
   <form class="ask" onsubmit="event.preventDefault();location='omik.html?q='+encodeURIComponent(this.q.value||'Хочу положить плитку в ванной, бюджет до 1500 BYN')"><input name="q" placeholder="Хочу положить плитку в ванной, бюджет до 1500 BYN"><button class="btn o">Спросить Омика</button></form>
   <div class="hchips"><a href="omik.html?q=Плитка в ванной 2,2 на 1,7, бюджет 1500">🛁 Плитка в ванной</a><a href="omik.html?q=Покрасить комнату 4 на 3">🎨 Покрасить комнату</a><a href="planner.html?new=1&task=living">🪵 Ламинат в Г-образной комнате</a><a href="import.html?example=1">📷 Планировка по фото</a><a href="product.html?id=mix_bath">🚿 Установить смеситель</a></div>
- </div><div class="omik-wrap"><img class="omik" src="img/omik-hero-cut.png" alt="Омик — бобр в каске ОМА"></div></section>
+ </div><div class="omik-wrap"><img class="omik" src="img/omik-hero-cut.png?v=2" alt="Омик — бобр в каске ОМА"></div></section>
  <div id="cont"></div>
  <h2>Начните с любого шага</h2>
  <div class="doors">
@@ -25,8 +25,6 @@
  </div>
  <h2>Популярное для ремонта ванной</h2>
  <div class="pgrid" id="pop"></div>
- <h2>Для мастеров</h2>
- <div class="card pad" style="display:grid;grid-template-columns:120px minmax(0,1fr) auto;gap:20px;align-items:center"><img src="img/omik-ok.png" alt="" style="width:110px"><div><h3 style="margin:0 0 4px">Смета клиенту — ссылкой</h3><p class="note" style="margin:0;font-size:14px">Мастер строит план и смету, отправляет ссылку в мессенджер. Клиент видит позиции и расчёт, согласует или просит изменения и сам заказывает материалы в ОМА. Любая правка после согласования приходит новой версией.</p></div><a class="btn" href="planner.html?new=1&task=bath&title=%D0%9E%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%20%D0%BA%D0%BB%D0%B8%D0%B5%D0%BD%D1%82%D0%B0">Составить смету</a></div>
 </div>
 <script src="oma-catalog.js?v=202610271921"></script><script src="data.js?v=202610271921"></script><script src="geom.js?v=202610271921"></script><script src="calc.js?v=202610271921"></script><script src="core.js?v=202610271921"></script><script src="plan.js?v=202610271921"></script><script src="omik.js?v=202610271921"></script><script>
 chrome('index');
