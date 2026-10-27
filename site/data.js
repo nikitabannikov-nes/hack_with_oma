@@ -116,14 +116,14 @@ const SERVICES=[
 ];
 const SVC_CATS={tile:'Плитка',paint:'Покраска',floor:'Полы',plumb:'Сантехника',elec:'Электрика',measure:'Замер'};
 const MASTERS=[
- {id:'m1',name:'Иван П.',color:'#0057d6',cats:['tile','plumb'],rating:4.9,jobs:214,district:'Центральный',days:1,from:35,about:'Плитка и сантехника, 12 лет опыта. Работаю с крупным форматом.'},
- {id:'m2',name:'Сергей К.',color:'#ff9a1a',cats:['tile','floor'],rating:4.8,jobs:168,district:'Московский',days:2,from:33,about:'Плитка, ламинат, выравнивание полов.'},
- {id:'m3',name:'Андрей М.',color:'#0b3a9e',cats:['plumb','elec'],rating:4.7,jobs:95,district:'Фрунзенский',days:1,from:45,about:'Сантехника и электрика: смесители, унитазы, вентиляция.'},
- {id:'m4',name:'Ольга Р.',color:'#18a058',cats:['paint'],rating:4.9,jobs:131,district:'Первомайский',days:3,from:7,about:'Покраска стен и потолков, подготовка поверхностей.'},
- {id:'m5',name:'Дмитрий Л.',color:'#7a4cc2',cats:['floor','paint'],rating:4.6,jobs:77,district:'Заводской',days:2,from:9,about:'Ламинат, плинтус, покраска.'},
- {id:'m6',name:'Павел С.',color:'#c4321b',cats:['tile','plumb','elec'],rating:4.8,jobs:203,district:'Партизанский',days:4,from:36,about:'Ремонт санузлов «под ключ».'},
- {id:'m7',name:'Виктор Н.',color:'#2a7f8f',cats:['measure','tile'],rating:4.7,jobs:58,district:'Советский',days:1,from:30,about:'Замеры, консультации, укладка плитки.'},
- {id:'m8',name:'Алексей Т.',color:'#8a6a1f',cats:['plumb'],rating:4.5,jobs:42,district:'Ленинский',days:1,from:40,about:'Быстрая установка сантехники.'}
+ {id:'m1',photo:'https://randomuser.me/api/portraits/men/32.jpg',name:'Иван П.',color:'#0057d6',cats:['tile','plumb'],rating:4.9,jobs:214,district:'Центральный',days:1,from:35,about:'Плитка и сантехника, 12 лет опыта. Работаю с крупным форматом.'},
+ {id:'m2',photo:'https://randomuser.me/api/portraits/men/45.jpg',name:'Сергей К.',color:'#ff9a1a',cats:['tile','floor'],rating:4.8,jobs:168,district:'Московский',days:2,from:33,about:'Плитка, ламинат, выравнивание полов.'},
+ {id:'m3',photo:'https://randomuser.me/api/portraits/men/52.jpg',name:'Андрей М.',color:'#0b3a9e',cats:['plumb','elec'],rating:4.7,jobs:95,district:'Фрунзенский',days:1,from:45,about:'Сантехника и электрика: смесители, унитазы, вентиляция.'},
+ {id:'m4',photo:'https://randomuser.me/api/portraits/women/44.jpg',name:'Ольга Р.',color:'#18a058',cats:['paint'],rating:4.9,jobs:131,district:'Первомайский',days:3,from:7,about:'Покраска стен и потолков, подготовка поверхностей.'},
+ {id:'m5',photo:'https://randomuser.me/api/portraits/men/67.jpg',name:'Дмитрий Л.',color:'#7a4cc2',cats:['floor','paint'],rating:4.6,jobs:77,district:'Заводской',days:2,from:9,about:'Ламинат, плинтус, покраска.'},
+ {id:'m6',photo:'https://randomuser.me/api/portraits/men/75.jpg',name:'Павел С.',color:'#c4321b',cats:['tile','plumb','elec'],rating:4.8,jobs:203,district:'Партизанский',days:4,from:36,about:'Ремонт санузлов «под ключ».'},
+ {id:'m7',photo:'https://randomuser.me/api/portraits/men/22.jpg',name:'Виктор Н.',color:'#2a7f8f',cats:['measure','tile'],rating:4.7,jobs:58,district:'Советский',days:1,from:30,about:'Замеры, консультации, укладка плитки.'},
+ {id:'m8',photo:'https://randomuser.me/api/portraits/men/86.jpg',name:'Алексей Т.',color:'#8a6a1f',cats:['plumb'],rating:4.5,jobs:42,district:'Ленинский',days:1,from:40,about:'Быстрая установка сантехники.'}
 ];
 // Реальные товары с oma.by (oma-catalog.js): заменяют демо-позиции по id, дополнительные — наследуют поля от образца (like)
 const REAL=typeof module!=='undefined'?(()=>{try{return require('./oma-catalog.js')}catch(e){return null}})():root.OMA_REAL;
