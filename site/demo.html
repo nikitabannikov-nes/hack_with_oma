@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Демо для питча — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610292000"><link rel="stylesheet" href="app.css?v=202610292000"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610292000">
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Демо для питча — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610300100"><link rel="stylesheet" href="app.css?v=202610300100"><link rel="stylesheet" href="ui-icons.css?v=202610300100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300100">
 <style>
 .dm{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start;margin-bottom:30px}
 .dm .card{padding:20px 22px;margin-bottom:14px}
@@ -20,7 +20,7 @@
   <div class="card"><h3 style="margin-top:0">Шаги и что говорить</h3><ol id="steps"></ol></div>
   <aside class="side">
    <div class="card">
-    <button class="btn o wide" onclick="if(confirm('Начать демо? Создастся новый демо-проект, корзина и вход по номеру сбросятся.'))demoStart()">▶ Начать демо</button>
+    <button class="btn o wide" onclick="if(confirm('Начать демо? Создастся новый демо-проект, корзина и вход по номеру сбросятся.'))demoStart()">Начать демо</button>
     <p class="note" style="margin:10px 0 0">Ваши проекты не удаляются — демо-квартира добавится к ним. Плашку можно закрыть крестиком в любой момент.</p>
    </div>
    <div class="card"><h3 style="margin-top:0">Главные мысли</h3><ul>
@@ -37,7 +37,7 @@
   </aside>
  </div>
 </div>
-<script src="oma-catalog.js?v=202610292000"></script><script src="oma-menu.js?v=202610292000"></script><script src="oma-social.js?v=202610292000"></script><script src="oma-crops.js?v=202610292000"></script><script src="oma-furniture.js?v=202610292000"></script><script src="data.js?v=202610292000"></script><script src="geom.js?v=202610292000"></script><script src="calc.js?v=202610292000"></script><script src="core.js?v=202610292000"></script><script src="plan.js?v=202610292000"></script><script src="omik.js?v=202610292000"></script>
+<script src="oma-catalog.js?v=202610300100"></script><script src="oma-menu.js?v=202610300100"></script><script src="oma-social.js?v=202610300100"></script><script src="oma-crops.js?v=202610300100"></script><script src="oma-furniture.js?v=202610300100"></script><script src="data.js?v=202610300100"></script><script src="geom.js?v=202610300100"></script><script src="calc.js?v=202610300100"></script><script src="core.js?v=202610300100"></script><script src="plan.js?v=202610300100"></script><script src="omik.js?v=202610300100"></script>
 <script>
 chrome('demo',{noCtx:true});
 $('#steps').innerHTML=DEMO_STEPS.map(([url,t,say],i)=>`<li><b>${esc(t)}</b><p>${esc(say)}</p>${url.includes('{pid}')?'':`<a href="${url}">${url}</a>`}</li>`).join('');

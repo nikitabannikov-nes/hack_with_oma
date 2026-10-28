@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Каталог — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610292000"><link rel="stylesheet" href="app.css?v=202610292000"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610292000">
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Каталог — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610300100"><link rel="stylesheet" href="app.css?v=202610300100"><link rel="stylesheet" href="ui-icons.css?v=202610300100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300100">
 <style>.cl{display:grid;grid-template-columns:240px minmax(0,1fr);gap:20px;align-items:start}.cats{padding:10px;position:sticky;top:84px}.cats a{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:10px;font-size:14px;font-weight:600}.cats a.on,.cats a:hover{background:var(--blue-l);color:var(--blue)}.cats a small{margin-left:auto;color:var(--mute);font-weight:500}.flt{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}.flt select{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:13px;background:#fff}.flt label.ck{display:flex;gap:6px;align-items:center;font-size:13px;font-weight:600;background:#fff;border:1px solid var(--line);border-radius:10px;padding:7px 10px;cursor:pointer}.pc .cmpck{font-size:12px;color:var(--mute);display:flex;gap:6px;align-items:center;cursor:pointer}.pc.cur{border-color:var(--ok);box-shadow:0 0 0 2px #bfe8cf}@media(max-width:800px){.cl{grid-template-columns:1fr}.cats{position:static;display:flex;overflow:auto;gap:4px}.cats a{white-space:nowrap}.cats a small{display:none}}</style></head><body><div id="chrome"></div>
 <div class="wrap">
  <div class="crumbs"><a href="index.html">Главная</a> / Каталог</div>
@@ -12,7 +12,7 @@
 </div>
 <div class="cmpbar" id="cmpbar" style="display:none"></div>
 <div class="modal-bg" id="mCmp" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal" style="max-width:900px"><button class="x" onclick="$('#mCmp').classList.remove('show')">×</button><h2 style="margin:0 0 12px">Сравнение товаров</h2><div id="cmpT" style="overflow:auto"></div></div></div>
-<script src="oma-catalog.js?v=202610292000"></script><script src="oma-menu.js?v=202610292000"></script><script src="oma-social.js?v=202610292000"></script><script src="oma-furniture.js?v=202610292000"></script><script src="data.js?v=202610292000"></script><script src="geom.js?v=202610292000"></script><script src="calc.js?v=202610292000"></script><script src="oma-crops.js?v=202610292000"></script><script src="core.js?v=202610292000"></script><script src="plan.js?v=202610292000"></script><script src="omik.js?v=202610292000"></script><script>
+<script src="oma-catalog.js?v=202610300100"></script><script src="oma-menu.js?v=202610300100"></script><script src="oma-social.js?v=202610300100"></script><script src="oma-furniture.js?v=202610300100"></script><script src="data.js?v=202610300100"></script><script src="geom.js?v=202610300100"></script><script src="calc.js?v=202610300100"></script><script src="oma-crops.js?v=202610300100"></script><script src="core.js?v=202610300100"></script><script src="plan.js?v=202610300100"></script><script src="omik.js?v=202610300100"></script><script>
 chrome('catalog');
 const q=qp('q')||'',addTo=getProject(qp('add')),replRole=qp('replace'),replP=getProject(qp('project'));
 let cat=qp('cat')||'',cmp=(qp('cmp')||'').split(',').filter(P);
@@ -34,19 +34,19 @@ function list(){
 }
 function draw(){
  const base=replRole?PRODUCTS.filter(p=>p.roles.includes(replRole)):q?searchProducts(q):PRODUCTS;
- $('#cats').innerHTML=`<a href="#" class="${!cat?'on':''}" onclick="cat='';draw();return false">📦 Все товары<small>${base.length}</small></a>`+Object.entries(CATS).map(([k,c])=>{const n=base.filter(p=>p.cat===k).length;return n?`<a href="#" class="${cat===k?'on':''}" onclick="cat='${k}';draw();return false">${c.icon} ${c.name}<small>${n}</small></a>`:''}).join('');
+ $('#cats').innerHTML=`<a href="#" class="${!cat?'on':''}" onclick="cat='';draw();return false"><i class="ui ui-box"></i>Все товары<small>${base.length}</small></a>`+Object.entries(CATS).map(([k,c])=>{const n=base.filter(p=>p.cat===k).length;return n?`<a href="#" class="${cat===k?'on':''}" onclick="cat='${k}';draw();return false">${ui(c.icon)}${c.name}<small>${n}</small></a>`:''}).join('');
  const L=list(),cur=replRole&&replP?(qp('from')||replP.est.lines.find(l=>l.role===replRole)?.pid):null;
  $('#cnt').textContent=`${L.length} товаров`;
  $('#grid').innerHTML=L.map(p=>{
   let act;
   if(replRole&&replP)act=p.id===cur?`<button class="btn sm" disabled>Сейчас в смете</button>`:`<button class="btn sm o" onclick="choose('${p.id}')">Выбрать</button>`;
-  else if(addTo)act=`<button class="btn sm o" onclick="addE('${p.id}')">＋ В смету</button><button class="btn sm g" onclick="quickCart('${p.id}')">🛒</button>`;
+  else if(addTo)act=`<button class="btn sm o" onclick="addE('${p.id}')">＋ В смету</button><button class="btn sm g" onclick="quickCart('${p.id}')"><i class="ui ui-cart"></i></button>`;
   const html=pcard(p,act?{actions:act}:{});
   return html.replace('<div class="pc-b">',`<div class="pc-b"><label class="cmpck"><input type="checkbox" ${cmp.includes(p.id)?'checked':''} onchange="toggleCmp('${p.id}',this.checked)"> Сравнить</label>`).replace('class="card pc"',`class="card pc ${p.id===cur?'cur':''}"`);
  }).join('')||`<div class="empty card" style="grid-column:1/-1"><img src="img/omik-think.png" alt=""><p>Ничего не нашлось. Попробуйте другой запрос или <a href="#" onclick="OmikWidget.open('${esc(q)}');return false" style="color:var(--blue);font-weight:700">спросите Омика</a>.</p></div>`;
  cmpBar();
 }
-function addE(pid){const r=addLine(addTo,pid,1);save();toast(r.dup?'Этот товар уже есть в смете':r.replaced?'Товар закреплён в смете вместо типового, количество пересчитано':'📋 Добавлено в смету',!r.dup)}
+function addE(pid){const r=addLine(addTo,pid,1);save();toast(r.dup?'Этот товар уже есть в смете':r.replaced?'Товар закреплён в смете вместо типового, количество пересчитано':'<i class="ui ui-list"></i>Добавлено в смету',!r.dup)}
 function choose(pid){
  // Отделочный материал меняем в тех помещениях, где стоял заменяемый товар; расходники — на весь проект
  const from=qp('from'),rid=qp('room');

@@ -12,6 +12,8 @@ const now=()=>Date.now(),DAY=864e5;
 const fmtDate=t=>new Date(t).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 const fmtDay=t=>new Date(t).toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'short'});
 const P=id=>Calc.byId(id);
+// Линейная иконка из ui-icons.css по ключу: ui('cart') → <i class="ui ui-cart"></i>
+const ui=(k,cls='')=>k?`<i class="ui ui-${k}${cls?' '+cls:''}"></i>`:'';
 const TIERS=Calc.TIERS,RT=Calc.ROOM_TYPES;
 
 // ---------- Хранилище ----------
@@ -62,7 +64,7 @@ function addProject(p){load().projects.unshift(p);S.active=p.id;save();return p}
 function getProject(id){return load().projects.find(p=>p.id===id)}
 function activeProject(){const s=load();return getProject(qp('project'))||getProject(s.active)||null}
 function setActive(p){load().active=p.id;persist()}
-// Закрыть текущий проект: он остаётся в «Моих проектах», сайт просто перестаёт работать в его контексте
+// Закрыть текущий проект: он остаётся в аккаунте, сайт просто перестаёт работать в его контексте
 function closeProject(){
  load().active=null;persist();
  if(/(planner|smeta)\.html/.test(location.pathname)){location='projects.html';return}
@@ -189,7 +191,7 @@ const HICO={search:'<svg viewBox="0 0 24 24"><path d="M10.5 3a7.5 7.5 0 0 1 5.96
  cart:'<svg viewBox="0 0 24 24"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM1 2v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7.42a.25.25 0 0 1-.22-.37L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 20 4H5.21l-.94-2z"/></svg>'};
 // Быстрые ссылки ОМА + наши модули (выделены фиолетовым)
 const QUICK=[['red','Все акции','/sales/',1],['darkblue2','Супер цены','/sales/super-tseny/'],['red','Топ продаж','/sales/top-prodazh/'],['darkorange','Оплата частями','/buyers/payment/#credit']];
-const NAV=[['omik','Омик','omik.html'],['planner','Калькулятор','planner.html'],['projects','Мои проекты','projects.html']];
+const NAV=[['omik','Омик','omik.html'],['planner','Калькулятор','planner.html']];
 // Подкатегория ОМА есть в нашем демо-каталоге → ведём в каталог, иначе — на oma.by
 function inCatalog(name){
  const stem=String(name).toLowerCase().replace(/ё/g,'е').split(/[^a-zа-я0-9]+/).find(w=>w.length>3);
@@ -220,7 +222,7 @@ function chrome(active,o={}){
    <a class="oma-logo" href="index.html" aria-label="ОМА"></a>
    <form class="oma-search" onsubmit="event.preventDefault();location='catalog.html?q='+encodeURIComponent(this.q.value)"><input name="q" placeholder="Ламинат" value="${esc(active==='catalog'?qp('q')||'':'')}"><button aria-label="Найти">${HICO.search}</button></form>
    <div class="oma-acts">
-    <a class="oma-act" href="projects.html">${HICO.user}<span class="t"><small>Мои</small><b>Проекты</b></span><span class="cnt" data-b="proj"></span></a>
+    <a class="oma-act" href="projects.html">${HICO.user}<span class="t">${currentUser()?`<small>${esc((currentUser().name||"").split(" ")[0]||"Мой")}</small>`:""}<b>Аккаунт</b></span></a>
     <a class="oma-act" href="cart.html">${HICO.cart}<span class="t"><b>Корзина</b></span><span class="cnt" data-b="cart"></span></a>
    </div>
   </div></div>
@@ -229,9 +231,9 @@ function chrome(active,o={}){
    <nav class="oma-quick">${QUICK.map(([c,t,h,f])=>`<a class="${c}" href="${OMA}${h}" target="_blank" rel="noopener">${f?ico('fire'):''}${t}</a>`).join('')}${NAV.map(([k,t,h])=>`<a class="ours ${k===active?'on':''}" href="${h}">${k==='omik'?'<img src="img/omik-avatar.png" alt="">':''}${t}</a>`).join('')}</nav>
   </div>${onIndex?'':`<div class="oma-drop" id="omaDrop" onmouseleave="toggleDrop(false)">${sideMenu()}</div>`}</div></div>
  </header>
- ${p?`<div class="ctx"><div class="wrap"><span class="ctx-l">Текущий проект:</span><a class="ctx-p" href="projects.html">${RT[p.task]?.icon||'📁'} <b>${esc(p.title)}</b></a>
+ ${p?`<div class="ctx"><div class="wrap"><span class="ctx-l">Текущий проект:</span><a class="ctx-p" href="projects.html">${ui(RT[p.task]?.icon||'folder')}<b>${esc(p.title)}</b></a>
   <span class="ctx-s">${num(floorArea(p),1)} м² · ${p.est.lines.length} поз. · ${byn(estTotal(p))}</span><span class="sp"></span>
-  <a href="planner.html?project=${p.id}" class="${active==='planner'?'on':''}">📐 План</a><a href="smeta.html?project=${p.id}" class="${active==='smeta'?'on':''}">📋 Смета</a><button class="ctx-x" onclick="closeProject()" title="Закрыть проект" aria-label="Закрыть проект">×</button></div></div>`:''}`;
+  <a href="planner.html?project=${p.id}" class="${active==='planner'?'on':''}"><i class="ui ui-plan"></i>План</a><a href="smeta.html?project=${p.id}" class="${active==='smeta'?'on':''}"><i class="ui ui-list"></i>Смета</a><button class="ctx-x" onclick="closeProject()" title="Закрыть проект" aria-label="Закрыть проект">×</button></div></div>`:''}`;
  if(!$('footer'))document.body.insertAdjacentHTML('beforeend',footerHtml());
  updateBadges();
  demoGuide();
@@ -246,7 +248,7 @@ function footerHtml(){
    <div class="f-pay">${['pay-visa','pay-mastercard','pay-belcart','pay-google-pay','pay-apple-pay','pay-halva'].map(x=>ico(x)).join('')}</div></div>
   <div class="f-cols">
    <div><span class="f-h">Покупателям</span>${ext('Форма обратной связи','/buyers/')}${ext('Доставка','/buyers/delivery/')}${ext('Самовывоз','/buyers/samovyvoz/')}${ext('Способы оплаты','/buyers/payment/')}${ext('Оплата частями','/buyers/payment/#credit')}${ext('Полезные статьи','/buyers/helpful/')}${ext('Возврат и гарантия','/buyers/warranty/')}${ext('Программа лояльности','/buyers/discount/balans/#card-info')}</div>
-   <div><span class="f-h">Ремонт с ОМА</span><a class="ours" href="omik.html">Омик — помощник по ремонту</a><a class="ours" href="planner.html">Калькулятор ремонта 2D и 3D</a><a class="ours" href="planner.html?view=3d">3D-планировка с мебелью</a><a class="ours" href="import.html">Планировка по фото</a><a class="ours" href="catalog.html">Каталог и смета</a><a class="ours" href="masters.html">Мастера ОМА</a><a class="ours" href="instrukcii.html">Сделать самому: прокат и инструкции</a><a class="ours" href="projects.html">Мои проекты</a><a class="ours" href="demo.html">▶ Демо для питча</a>
+   <div><span class="f-h">Ремонт с ОМА</span><a class="ours" href="omik.html">Омик — помощник по ремонту</a><a class="ours" href="planner.html">Калькулятор ремонта 2D и 3D</a><a class="ours" href="planner.html?view=3d">3D-планировка с мебелью</a><a class="ours" href="import.html">Планировка по фото</a><a class="ours" href="catalog.html">Каталог и смета</a><a class="ours" href="masters.html">Мастера ОМА</a><a class="ours" href="instrukcii.html">Сделать самому: прокат и инструкции</a><a class="ours" href="projects.html">Аккаунт</a><a class="ours" href="demo.html">Демо для питча</a>
     <span class="f-h" style="margin-top:22px">Компания ОМА</span>${ext('О компании','/about/')}${ext('Новости','/news/')}${ext('Работа в ОМА','/about/rabota-v-oma/')}${ext('Отзывы об ОМА','/reviews/')}</div>
   </div>
   <div><div class="f-awards">${medals.map(([m,y])=>`<div><img src="${OMA}/local/images/awards/${m}.png" alt="" loading="lazy">${y}</div>`).join('')}</div>
@@ -272,9 +274,9 @@ function pimg(p,cls=''){
   else if(p.pattern==='marble')bg=`linear-gradient(115deg,#0000 30%,#9a8f8040 31% 32%,#0000 33% 60%,#9a8f8030 61% 61.6%,#0000 62%),linear-gradient(#0000 calc(100% - 2px),#fff 0) 0 0/100% 50%,linear-gradient(90deg,#0000 calc(100% - 2px),#fff 0) 0 0/50% 100%,${c}`;
   else if(p.pattern==='concrete')bg=`radial-gradient(#0000000d 1px,#0000 1.5px) 0 0/7px 7px,linear-gradient(#0000 calc(100% - 2px),#fff 0) 0 0/100% 50%,linear-gradient(90deg,#0000 calc(100% - 2px),#fff 0) 0 0/50% 100%,${c}`;
   else bg=`linear-gradient(#0000 calc(100% - 2px),#d8d8d8 0) 0 0/100% 33.3%,linear-gradient(90deg,#0000 calc(100% - 2px),#d8d8d8 0) 0 0/33.3% 100%,${c}`;
-  return`<div class="pimg ${cls}" style="background:${bg}">${p.cat==='paint'?'<span>🎨</span>':''}</div>`;
+  return`<div class="pimg ${cls}" style="background:${bg}">${p.cat==='paint'?'<span><i class="ui ui-paint"></i></span>':''}</div>`;
  }
- return`<div class="pimg ${cls} ic">${p.icon||CATS[p.cat]?.icon||'📦'}</div>`;
+ return`<div class="pimg ${cls} ic">${ui(CATS[p.cat]?.icon||'box','solo')}</div>`;
 }
 const priceTag=p=>p.priceM2?`<b>${byn(p.price)}</b><small> / ${p.unit} · ${byn(p.priceM2)} за м²</small>`:`<b>${byn(p.price)}</b><small> / ${p.unit}</small>`;
 const badges=p=>`${p.stm?'<span class="tag stm">СТМ ОМА</span>':''}${p.tier&&TIERS[p.tier]?`<span class="tag t-${p.tier}">${TIERS[p.tier]}</span>`:''}`;
@@ -291,10 +293,10 @@ function pcard(p,o={}){
   <div class="pc-bonus"><span>+${(p.price/100).toFixed(2).replace('.',',')} бонусов</span> за покупку</div>
   <div class="pc-a">${o.actions||`<button class="btn" onclick="quickCart('${p.id}')">${ico('icon__cart-add')}В корзину</button><button class="btn g" onclick="quickEst('${p.id}')">＋ В смету проекта</button>`}</div></div></div>`;
 }
-function quickCart(pid){cartAdd(pid,1);toast(`🛒 «${esc(P(pid).name)}» в корзине`)}
+function quickCart(pid){cartAdd(pid,1);toast(`«${esc(P(pid).name)}» в корзине`)}
 function quickEst(pid){
  const p=ensureProject(P(pid).cat==='plumb'?'bath':'bath');const r=addLine(p,pid,1);save();
- toast(r.dup?'Этот товар уже есть в смете — количество можно изменить там':r.replaced?`Товар закреплён в смете вместо типового · <a href="smeta.html?project=${p.id}">открыть</a>`:`📋 Добавлено в смету «${esc(p.title)}» · <a href="smeta.html?project=${p.id}">открыть</a>`,!r.dup);
+ toast(r.dup?'Этот товар уже есть в смете — количество можно изменить там':r.replaced?`Товар закреплён в смете вместо типового · <a href="smeta.html?project=${p.id}">открыть</a>`:`<i class="ui ui-list"></i>Добавлено в смету «${esc(p.title)}» · <a href="smeta.html?project=${p.id}">открыть</a>`,!r.dup);
 }
 // ---------- Кто делает работу: мастер ОМА → прокат инструмента → инструкция ----------
 // p.doer: null (не выбрано) | 'master' | 'self' | 'later'; p.rental: {items:{id:сутки}, status:'draft'|'booked', at}
@@ -391,7 +393,7 @@ function demoStart(){
  const p=demoProject();demoSet({step:0,pid:p.id});location=demoUrl(0);
 }
 const demoUrl=i=>DEMO_STEPS[i][0].replace('{pid}',demoState()?.pid||'');
-function demoGo(i){const d=demoState();if(!d)return;if(i<0)return;if(i>=DEMO_STEPS.length){demoSet(null);toast('Демо пройдено 🎉');$('#demoG')?.remove();return}d.step=i;demoSet(d);
+function demoGo(i){const d=demoState();if(!d)return;if(i<0)return;if(i>=DEMO_STEPS.length){demoSet(null);toast('Демо пройдено');$('#demoG')?.remove();return}d.step=i;demoSet(d);
  // к шагу с корзиной кладём в неё смету и мебель, если выступающий не успел нажать «Всё в корзину»
  const p=getProject(d.pid);if(p&&DEMO_STEPS[i][0].startsWith('cart')&&!load().cart.some(x=>x.projectId===p.id))cartSyncProject(p);
  location=demoUrl(i)}

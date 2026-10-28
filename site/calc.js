@@ -7,11 +7,11 @@ const f2=n=>(Math.round(n*100)/100).toString().replace('.',',');
 const TIERS={eco:'Эконом',opt:'Оптимум',prem:'Премиум'};
 const WET=['bath','wc'];
 const ROOM_TYPES={
- bath:{name:'Ванная',floor:'tile',walls:'tile',ceil:'paint',icon:'🛁'},
- wc:{name:'Санузел',floor:'tile',walls:'tile',ceil:'paint',icon:'🚽'},
- kitchen:{name:'Кухня',floor:'tile',walls:'paint',ceil:'paint',icon:'🍳'},
- living:{name:'Комната',floor:'laminate',walls:'paint',ceil:'paint',icon:'🛋'},
- hall:{name:'Коридор',floor:'laminate',walls:'paint',ceil:'paint',icon:'🚪'}
+ bath:{name:'Ванная',floor:'tile',walls:'tile',ceil:'paint',icon:'bath'},
+ wc:{name:'Санузел',floor:'tile',walls:'tile',ceil:'paint',icon:'wc'},
+ kitchen:{name:'Кухня',floor:'tile',walls:'paint',ceil:'paint',icon:'kitchen'},
+ living:{name:'Комната',floor:'laminate',walls:'paint',ceil:'paint',icon:'sofa'},
+ hall:{name:'Коридор',floor:'laminate',walls:'paint',ceil:'paint',icon:'door'}
 };
 // Толщина клеевого слоя по большей стороне плитки (типовые рекомендации, ориентировочно)
 const glueLayer=size=>{const m=Math.max(...size);return m<=20?3:m<=40?4:m<=60?5:m<=90?7:8};

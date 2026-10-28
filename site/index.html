@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Гипермаркет ОМА — ремонт с Омиком</title><link rel="stylesheet" href="style.css?v=202610292000"><link rel="stylesheet" href="app.css?v=202610292000"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610292000"></head><body><div id="chrome"></div>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Гипермаркет ОМА — ремонт с Омиком</title><link rel="stylesheet" href="style.css?v=202610300100"><link rel="stylesheet" href="app.css?v=202610300100"><link rel="stylesheet" href="ui-icons.css?v=202610300100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300100"></head><body><div id="chrome"></div>
 <main class="wrap">
  <section class="bb">
   <div id="side"></div>
@@ -10,10 +10,6 @@
     <button class="arr l" onclick="event.preventDefault();slide(-1)" aria-label="Назад">‹</button><button class="arr r" onclick="event.preventDefault();slide(1)" aria-label="Вперёд">›</button>
     <div class="dots" id="dots"></div>
    </div>
-   <form class="ask1" onsubmit="event.preventDefault();location='omik.html?q='+encodeURIComponent(this.q.value.trim()||'Плитка в ванной 2,2 на 1,7, бюджет 1500')">
-    <img src="img/omik-avatar.png" alt=""><input name="q" aria-label="Задача для Омика" placeholder="Плитка в ванной 2,2 на 1,7, до 1500"><button class="btn o">Посчитать</button>
-    <div class="ask1-ch"><a href="omik.html?q=Плитка в ванной 2,2 на 1,7, бюджет 1500">🛁 Плитка в ванной</a><a href="omik.html?q=Где посчитать ламинат?">🪵 Ламинат в комнату</a><a href="omik.html?q=Покрасить комнату 4 на 3">🎨 Покраска стен</a><a href="import.html">📷 Планировка по фото</a></div>
-   </form>
    <div class="grid3">
     <a class="bgi" href="import.html"><div><b>Планировка по фото</b><span>Сфотографируйте план квартиры — комнаты распознаются автоматически</span></div><img src="img/plan-example.jpg" alt=""></a>
     <a class="bgi" href="planner.html?new=1&task=living"><div><b>Материалы для каждой комнаты</b><span>Свой пол, стены и потолок в каждом помещении — пол на плане меняется сразу</span></div><img src="img/omik-idea.png" alt="" style="object-fit:contain;background:#eef4fb"></a>
@@ -22,13 +18,18 @@
   </div>
  </section>
 
-
-
- <div class="tools4">
-  <a class="tl" href="omik.html"><span class="ic"><img src="img/omik-avatar.png" alt=""></span><b>Омик — AI-прораб</b><span>Уточнит задачу, посчитает материалы до упаковки и соберёт корзину.</span><em>Написать Омику →</em></a>
-  <a class="tl" href="planner.html?new=1"><span class="ic">📐</span><b>Калькулятор ремонта</b><span>План в 2D, квартира с мебелью в 3D. Любая форма комнаты или весь дом по фото.</span><em>Построить план →</em></a>
-  <a class="tl" href="catalog.html"><span class="ic">📋</span><b>Материалы и смета</b><span>Три комплектации, аналоги, сравнение — по товарам ОМА.</span><em>Открыть каталог →</em></a>
- </div>
+ <section class="askbig" aria-label="Расчёт ремонта с Омиком">
+  <img class="askbig-pic" src="img/omik-hero-cut.png" alt="Омик — помощник по ремонту ОМА">
+  <div class="askbig-b">
+   <span class="askbig-l">Ремонт с Омиком</span>
+   <h2>Что ремонтируем?</h2>
+   <p>Напишите задачу своими словами — Омик посчитает материалы до целой упаковки, подберёт их под бюджет и соберёт корзину.</p>
+   <form class="askbig-f" onsubmit="event.preventDefault();location='omik.html?q='+encodeURIComponent(this.q.value.trim()||'Плитка в ванной 2,2 на 1,7, бюджет 1500')">
+    <input name="q" aria-label="Задача для Омика" placeholder="Например: плитка в ванной 2,2 на 1,7, бюджет 1500"><button class="btn o">Посчитать</button>
+   </form>
+   <div class="askbig-ch"><a href="omik.html?q=Плитка в ванной 2,2 на 1,7, бюджет 1500"><i class="ui ui-bath"></i>Плитка в ванной</a><a href="omik.html?q=Где посчитать ламинат?"><i class="ui ui-floor"></i>Ламинат в комнату</a><a href="omik.html?q=Покрасить комнату 4 на 3"><i class="ui ui-paint"></i>Покраска стен</a><a href="import.html"><i class="ui ui-camera"></i>Планировка по фото</a><a href="planner.html?new=1"><i class="ui ui-plan"></i>Свой план в 2D и 3D</a></div>
+  </div>
+ </section>
 
  <section class="sel"><a class="sel-h" href="https://www.oma.by/sales/podborka--mesyatsa/" target="_blank" rel="noopener" aria-label="Подборка месяца"></a><div class="pgrid" id="pick"></div><a class="sel-more" href="catalog.html">Смотреть все ›</a></section>
 
@@ -41,7 +42,7 @@
 
  <section class="promo6" id="promo6"></section>
 </main>
-<script src="oma-catalog.js?v=202610292000"></script><script src="oma-menu.js?v=202610292000"></script><script src="oma-social.js?v=202610292000"></script><script src="oma-furniture.js?v=202610292000"></script><script src="data.js?v=202610292000"></script><script src="geom.js?v=202610292000"></script><script src="calc.js?v=202610292000"></script><script src="oma-crops.js?v=202610292000"></script><script src="core.js?v=202610292000"></script><script src="plan.js?v=202610292000"></script><script src="omik.js?v=202610292000"></script><script>
+<script src="oma-catalog.js?v=202610300100"></script><script src="oma-menu.js?v=202610300100"></script><script src="oma-social.js?v=202610300100"></script><script src="oma-furniture.js?v=202610300100"></script><script src="data.js?v=202610300100"></script><script src="geom.js?v=202610300100"></script><script src="calc.js?v=202610300100"></script><script src="oma-crops.js?v=202610300100"></script><script src="core.js?v=202610300100"></script><script src="plan.js?v=202610300100"></script><script src="omik.js?v=202610300100"></script><script>
 chrome('index',{noCtx:true});
 $('#side').outerHTML=sideMenu();
 // слайдер баннеров

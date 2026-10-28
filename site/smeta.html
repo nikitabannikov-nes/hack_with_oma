@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Смета — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610292000"><link rel="stylesheet" href="app.css?v=202610292000"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610292000">
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Смета — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610300100"><link rel="stylesheet" href="app.css?v=202610300100"><link rel="stylesheet" href="ui-icons.css?v=202610300100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300100">
 <style>.fl{display:grid;grid-template-columns:56px minmax(0,1fr) auto 100px;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}.fl .pimg{width:56px;height:56px}.fl>b{text-align:right}@media(max-width:600px){.fl{grid-template-columns:48px 1fr auto}.fl>b{grid-column:2/-1;text-align:left}}.who{display:flex;gap:4px;background:#f2f5f9;border-radius:12px;padding:3px}.who button{border:0;background:none;border-radius:9px;padding:8px 12px;font:inherit;font-size:14px;cursor:pointer;color:var(--ink)}.who button.on{background:#fff;color:var(--blue);font-weight:600;box-shadow:0 1px 3px rgba(0,26,52,.15)}#doer .tip{margin:12px 0}.rent{display:grid;gap:8px}.rr{display:grid;grid-template-columns:minmax(0,1fr) auto 90px;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px 10px}.rr.off{opacity:.6}.rr label{display:flex;gap:10px;align-items:center;cursor:pointer;min-width:0}.rr img{width:56px;height:56px;object-fit:contain;flex:none;background:#fff;border-radius:8px}.rr small{display:block;color:var(--mute);font-size:12px}.rr>b{text-align:right}.rr .qty input{width:44px}.guides{display:flex;gap:8px;flex-wrap:wrap}@media(max-width:600px){.rr{grid-template-columns:1fr auto}.rr>b{grid-column:1/-1;text-align:left}.who{width:100%}.who button{flex:1;padding:8px 6px}}.flash{animation:fl 2.4s}@keyframes fl{0%,40%{background:#fff1c2}}.rooms{display:flex;gap:14px;flex-wrap:wrap}.rm{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px 14px 10px 10px}.rm .note b{color:var(--ink)}</style></head><body><div id="chrome"></div>
 <div class="wrap" id="app"></div>
 <div class="modal-bg" id="mShare" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal">
@@ -9,7 +9,7 @@
  <a class="btn o wide" id="openC" href="#" target="_self">Открыть как получатель →</a>
  <p class="note">Демо без сервера: согласование, сделанное в этом браузере, сразу видно в проекте. На другом устройстве получатель увидит смету и сможет оформить заказ, но статус вернётся к вам только с подключённым сервером.</p>
 </div></div>
-<script src="oma-catalog.js?v=202610292000"></script><script src="oma-menu.js?v=202610292000"></script><script src="oma-social.js?v=202610292000"></script><script src="oma-furniture.js?v=202610292000"></script><script src="data.js?v=202610292000"></script><script src="geom.js?v=202610292000"></script><script src="calc.js?v=202610292000"></script><script src="oma-crops.js?v=202610292000"></script><script src="core.js?v=202610292000"></script><script src="plan.js?v=202610292000"></script><script src="omik.js?v=202610292000"></script><script>
+<script src="oma-catalog.js?v=202610300100"></script><script src="oma-menu.js?v=202610300100"></script><script src="oma-social.js?v=202610300100"></script><script src="oma-furniture.js?v=202610300100"></script><script src="data.js?v=202610300100"></script><script src="geom.js?v=202610300100"></script><script src="calc.js?v=202610300100"></script><script src="oma-crops.js?v=202610300100"></script><script src="core.js?v=202610300100"></script><script src="plan.js?v=202610300100"></script><script src="omik.js?v=202610300100"></script><script>
 let p=activeProject();
 if(!p){location='planner.html?new=1';throw 0}
 setActive(p);
@@ -29,11 +29,11 @@ function renderSmeta(){
  const cartStale=load().cart.some(matInCart)&&p.cartRev!==E.rev;
  const inCart=load().cart.some(matInCart);
  const [stT,stC]=ST[E.status]||ST.draft;
- let h=`<div class="crumbs"><a href="index.html">Главная</a> / <a href="projects.html">Мои проекты</a> / Смета</div>
+ let h=`<div class="crumbs"><a href="index.html">Главная</a> / <a href="projects.html">Аккаунт</a> / Смета</div>
  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
   <div><h1 style="margin-bottom:4px"><span contenteditable="true" spellcheck="false" onblur="rename(this.textContent)" title="Нажмите, чтобы переименовать">${esc(p.title)}</span></h1>
   <p class="lead" style="margin:0 0 14px"><span class="st ${stC}">${stT}</span> · версия ${E.version}${E.dirty?' (есть неотправленные изменения)':''} · обновлено ${fmtDate(p.updated)}</p></div>
-  <div class="seg"><a class="btn sm g" href="planner.html?project=${p.id}&from=smeta">📐 Изменить геометрию</a><a class="btn sm g" href="catalog.html?add=${p.id}">＋ Добавить товар</a></div></div>`;
+  <div class="seg"><a class="btn sm g" href="planner.html?project=${p.id}&from=smeta"><i class="ui ui-plan"></i>Изменить геометрию</a><a class="btn sm g" href="catalog.html?add=${p.id}">＋ Добавить товар</a></div></div>`;
  // Баннеры
  if(!c.ok)h+=omikTip('warn',`<b>Смета не пересчитана: в плане ошибка.</b><br>${(c.errors||[]).map(esc).join('<br>')}<div class="mt"><a class="btn sm" href="planner.html?project=${p.id}&from=smeta">Исправить план</a></div>`,'bad');
  if(E.status==='changes')h+=omikTip('think',`<b>Получатель просит изменения:</b> «${esc(E.comment)}». Поправьте смету и отправьте новую версию по той же ссылке.`,'warn');
@@ -42,13 +42,16 @@ function renderSmeta(){
  if(focus&&P(focus)){const fl=E.lines.find(l=>l.pid===focus);if(fl)h+=omikTip('happy',`<b>«${esc(P(focus).name)}»: ${fl.qty} ${P(focus).unit}</b> — посчитано по плану${fl.basis?`: ${esc(fl.basis)}`:''}. Остальные материалы подобраны под этот товар.`,'ok')}
  (c.warn||[]).forEach(w=>{const alt=PRODUCTS.find(x=>x.roles.includes(w.role)&&x.spec.maxTile>=Math.max(...Object.values(p.est.lines).filter(l=>l.role&&l.role.startsWith('tile')).map(l=>Math.max(...P(l.pid).spec.size))));h+=omikTip('warn',`<b>Проверка совместимости:</b> ${esc(w.text)}${alt?` <button class="btn sm mt" onclick="pin('${w.role}','${alt.id}')">Заменить на «${esc(alt.name)}»</button>`:''}`,'warn')});
  h+=`<div class="g2"><div>`;
- // Позиции
- const groups={};E.lines.forEach(l=>{const pr=P(l.pid);if(!pr)return;(groups[pr.cat]=groups[pr.cat]||[]).push(l)});
- const offs=Object.keys(E.off).filter(k=>E.off[k]);
- h+=`<div class="card pad"><h3>Материалы · ${E.lines.length} позиций</h3><div class="est"><div class="ln h"><span></span><span>Товар и расчёт</span><span class="r">Количество</span><span class="r">Цена</span><span class="r">Сумма</span><span></span></div>`;
- Object.keys(SEC).filter(k=>groups[k]).forEach(k=>{h+=`<div class="sec">${SEC[k]}</div>`+groups[k].map(lineHTML).join('')});
- if(!E.lines.length)h+=`<div class="empty"><img src="img/omik-think.png" alt=""><p>В смете пока пусто. Задайте отделку в плане или добавьте товары.</p></div>`;
- h+=`</div>${offs.length?`<div class="chips mt"><span class="note" style="align-self:center">Убрано из расчёта:</span>${offs.map(k=>`<button onclick="unoff('${esc(k)}')">↺ ${esc(offName(k))}</button>`).join('')}</div>`:''}</div>`;
+ // Помещения
+ // Помещения: геометрия и материалы каждого помещения
+ h+=`<div class="card pad"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px"><h3 style="margin:0">Помещения и материалы</h3><a class="btn ghost sm" href="planner.html?project=${p.id}&from=smeta">Изменить план →</a></div>
+  <p class="note" style="margin:0 0 6px">Материалы выбираются для каждого помещения отдельно. Одинаковые товары в разных помещениях суммируются в общий список закупки.</p>
+  ${p.rooms.map(r=>{const v=Geom.validate(r);let m=null;if(v.ok)m=Geom.metrics(r);const roles=roomRoles(r);
+  return`<div style="display:grid;grid-template-columns:130px minmax(0,1fr);gap:16px;padding:14px 0;border-top:1px solid var(--line)"><a href="planner.html?project=${p.id}&room=${r.id}&tab=fin&from=smeta">${Plan.mini(r,130,96,v.ok,floorLook(p,r))}</a>
+   <div><b>${ui(RT[r.type]?.icon)}${esc(r.name)}</b> <span class="note">${v.ok?`пол ${num(m.floorNet)} м² · стены ${num(m.wallNet)} м² · h ${num(r.h)} м`:'<span style="color:var(--red)">ошибка геометрии</span>'}</span>
+   ${roles.length?roles.map(role=>`<div class="surf"><span>${MAT_PLACE[role]}<b>${MAT_N[role]}</b></span>${matPicker(p,r,role)}</div>`).join(''):'<p class="note">Отделка не выбрана — задайте её в плане.</p>'}
+   ${p.rooms.length>1&&roles.length?`<button class="btn ghost sm" style="margin-top:6px" onclick="matAll('${r.id}')">Такие же материалы во все помещения</button>`:''}</div></div>`}).join('')}
+  ${c.ok?`<p class="note" style="margin-bottom:0">Объёмы: ${areaSummary(p)||'нет отделки'}${c.areas.wp?` · гидроизоляция ${num(c.areas.wp,1)} м²`:''}</p>`:''}</div>`;
  // Комплектации
  const diffs={eco:'Клей C1, цементная затирка, краска класса 4',opt:'Клей C2TE, влагостойкая затирка, моющаяся краска',prem:'Клей S1, эпоксидная затирка, крупный формат'};
  h+=`<div class="card pad"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px"><h3 style="margin:0">Комплектация</h3>
@@ -56,16 +59,13 @@ function renderSmeta(){
   <div class="tiers">${['eco','opt','prem'].map(k=>`<button class="${p.tier===k?'on':''} ${fit===k?'fit':''}" onclick="setTier('${k}')">${TIERS[k]}<small>${tt[k]!=null?byn(tt[k]):'—'}${fit===k?' · в бюджете':''}</small><em>${diffs[k]}</em></button>`).join('')}</div>
   ${Object.keys(p.pinned).length?`<p class="note" style="margin-bottom:0">Ваш выбор сохраняется при смене комплектации: ${Object.entries(p.pinned).map(([r,id])=>`<b>${esc(P(id)?.name)}</b> <button class="btn ghost sm" style="padding:2px 6px" onclick="unpin('${r}')">сбросить</button>`).join(' · ')}</p>`:''}
   ${p.budget&&!fit?`<p class="note" style="color:var(--red);margin-bottom:0">Ни одна комплектация не помещается в ${byn(p.budget)}. <button class="btn ghost sm" onclick="OmikWidget.open('Как удешевить смету?')">Спросить Омика, как сэкономить</button></p>`:''}</div>`;
- // Помещения
- // Помещения: геометрия и материалы каждого помещения
- h+=`<div class="card pad"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px"><h3 style="margin:0">Помещения и материалы</h3><a class="btn ghost sm" href="planner.html?project=${p.id}&from=smeta">Изменить план →</a></div>
-  <p class="note" style="margin:0 0 6px">Материалы выбираются для каждого помещения отдельно. Одинаковые товары в разных помещениях суммируются в общий список закупки.</p>
-  ${p.rooms.map(r=>{const v=Geom.validate(r);let m=null;if(v.ok)m=Geom.metrics(r);const roles=roomRoles(r);
-  return`<div style="display:grid;grid-template-columns:130px minmax(0,1fr);gap:16px;padding:14px 0;border-top:1px solid var(--line)"><a href="planner.html?project=${p.id}&room=${r.id}&tab=fin&from=smeta">${Plan.mini(r,130,96,v.ok,floorLook(p,r))}</a>
-   <div><b>${RT[r.type]?.icon||''} ${esc(r.name)}</b> <span class="note">${v.ok?`пол ${num(m.floorNet)} м² · стены ${num(m.wallNet)} м² · h ${num(r.h)} м`:'<span style="color:var(--red)">ошибка геометрии</span>'}</span>
-   ${roles.length?roles.map(role=>`<div class="surf"><span>${MAT_PLACE[role]}<b>${MAT_N[role]}</b></span>${matPicker(p,r,role)}</div>`).join(''):'<p class="note">Отделка не выбрана — задайте её в плане.</p>'}
-   ${p.rooms.length>1&&roles.length?`<button class="btn ghost sm" style="margin-top:6px" onclick="matAll('${r.id}')">Такие же материалы во все помещения</button>`:''}</div></div>`}).join('')}
-  ${c.ok?`<p class="note" style="margin-bottom:0">Объёмы: ${areaSummary(p)||'нет отделки'}${c.areas.wp?` · гидроизоляция ${num(c.areas.wp,1)} м²`:''}</p>`:''}</div>`;
+ // Позиции
+ const groups={};E.lines.forEach(l=>{const pr=P(l.pid);if(!pr)return;(groups[pr.cat]=groups[pr.cat]||[]).push(l)});
+ const offs=Object.keys(E.off).filter(k=>E.off[k]);
+ h+=`<div class="card pad"><h3>Материалы · ${E.lines.length} позиций</h3><div class="est"><div class="ln h"><span></span><span>Товар и расчёт</span><span class="r">Количество</span><span class="r">Цена</span><span class="r">Сумма</span><span></span></div>`;
+ Object.keys(SEC).filter(k=>groups[k]).forEach(k=>{h+=`<div class="sec">${SEC[k]}</div>`+groups[k].map(lineHTML).join('')});
+ if(!E.lines.length)h+=`<div class="empty"><img src="img/omik-think.png" alt=""><p>В смете пока пусто. Задайте отделку в плане или добавьте товары.</p></div>`;
+ h+=`</div>${offs.length?`<div class="chips mt"><span class="note" style="align-self:center">Убрано из расчёта:</span>${offs.map(k=>`<button onclick="unoff('${esc(k)}')">↺ ${esc(offName(k))}</button>`).join('')}</div>`:''}</div>`;
  // Сопутствующие
  const works=new Set();const a=c.areas||{};if(a.tileWall||a.tileFloor)works.add('tile');if(a.paintWall||a.paintCeil)works.add('paint');if(a.laminate)works.add('floor');if(a.wp)works.add('wet');
  const kit=[...works].flatMap(w=>KITS[w]).filter((id,i,arr)=>arr.indexOf(id)===i&&!E.lines.some(l=>l.pid===id)).map(P).filter(Boolean).slice(0,6);
@@ -74,22 +74,19 @@ function renderSmeta(){
  const svcs=SERVICES.filter(s=>s.area&&a[s.area]>0).map(s=>({s,q:a[s.area],sum:a[s.area]*s.price}));
  E.lines.filter(l=>P(l.pid)?.service&&!P(l.pid).roles.length).forEach(l=>{const s=svc(P(l.pid).service);svcs.push({s,q:l.qty,sum:l.qty*s.price,pid:l.pid})});
  const wsum=svcs.reduce((x,y)=>x+y.sum,0);
- // Мебель и сантехника, расставленные в 3D: отдельным блоком, в корзину — вместе с материалами
+ // Мебель и сантехника из 3D в смете не показываются, в корзину кладутся вместе с материалами
  const fl=furnLines(p),ftot=furnTotal(p);
- h+=`<div class="card pad"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Мебель и сантехника из 3D${fl.length?` · ${fl.reduce((s,l)=>s+l.qty,0)} шт.`:''}</h3><a class="btn sm g" href="planner.html?project=${p.id}&view=3d">🛋 ${fl.length?'Изменить расстановку':'Расставить в 3D'}</a></div>
-  ${fl.length?`<div class="mt">${fl.map(l=>{const x=P(l.pid);return`<div class="fl"><a href="product.html?id=${x.id}&project=${p.id}">${pimg(x,'sm')}</a><span><a href="product.html?id=${x.id}&project=${p.id}">${esc(x.name)}</a>${x.real?'':' <span class="tag demo">демо</span>'}</span><span>${l.qty} шт.</span><b>${byn(l.sum)}</b></div>`}).join('')}<div class="row" style="font-size:15px;border-top:1px solid var(--line);margin-top:6px;padding-top:10px"><span><b style="color:var(--ink)">Итого мебель</b></span><b>${byn(ftot)}</b></div></div>`
-  :'<p class="note" style="margin-bottom:0">Расставьте мебель и сантехнику в 3D — они появятся здесь и попадут в корзину вместе с материалами.</p>'}</div>`;
  h+=doerCard(svcs,wsum);
  // История
  h+=`<div class="card pad"><h3>История проекта</h3><div class="tl">${[...p.history].reverse().slice(0,12).map(x=>`<div><time>${fmtDate(x.at)}</time><span>${esc(x.text)}</span></div>`).join('')}</div></div>`;
  h+=`</div><aside class="card side"><div class="note">Материалы ОМА · ${TIERS[p.tier]}</div><div class="tot">${byn(tot)}</div>
   ${p.budget?`<span class="tag ${tot<=p.budget?'gr':'or'}">${tot<=p.budget?'✓ В рамках бюджета':'Выше бюджета на '+byn(tot-p.budget)}</span>`:''}
   <div style="margin:12px 0 16px"><div class="row"><span>Позиций</span><b>${E.lines.length}</b></div>${ftot?`<div class="row"><span>Мебель из 3D</span><b>${byn(ftot)}</b></div><div class="row"><span><b>Всего с мебелью</b></span><b>${byn(tot+ftot)}</b></div>`:''}<div class="row"><span>Площадь помещений</span><b>${num(floorArea(p),1)} м²</b></div>${p.doer==='self'?(p.rental?.status==='booked'?`<div class="row"><span>Прокат инструмента</span><b>${byn(rentalSum(p).sum)}</b></div>`:`<div class="row"><span>Работы</span><b>сами</b></div>`):`<div class="row"><span>Работы (справочно)</span><b>${byn(wsum)}</b></div>`}${E.lines.some(stale)?`<div class="row" style="color:#c76b00"><span>Требуют решения</span><b style="color:#c76b00">${E.lines.filter(stale).length}</b></div>`:''}</div>
-  ${cartStale?`<div class="banner warn" style="font-size:13px;padding:10px 12px">В корзине старая версия этой сметы.</div><button class="btn o wide" onclick="toCart()">Обновить корзину</button>`:inCart?`<a class="btn o wide" href="cart.html">Перейти в корзину →</a>`:`<button class="btn o wide" onclick="toCart()" ${!E.lines.length?'disabled':''}>🛒 Всё в корзину</button>`}
-  <button class="btn ghost wide mt" onclick="share()">🔗 ${E.status==='draft'?'Отправить смету по ссылке':'Ссылка на смету'}</button>
-  <button class="btn ghost wide mt" onclick="copyP()">⧉ Повторить для другого объекта</button>
+  ${cartStale?`<div class="banner warn" style="font-size:13px;padding:10px 12px">В корзине старая версия этой сметы.</div><button class="btn o wide" onclick="toCart()">Обновить корзину</button>`:inCart?`<a class="btn o wide" href="cart.html">Перейти в корзину →</a>`:`<button class="btn o wide" onclick="toCart()" ${!E.lines.length?'disabled':''}><i class="ui ui-cart"></i>Всё в корзину</button>`}
+  <button class="btn ghost wide mt" onclick="share()"><i class="ui ui-link"></i>${E.status==='draft'?'Отправить смету по ссылке':'Ссылка на смету'}</button>
+  <button class="btn ghost wide mt" onclick="copyP()"><i class="ui ui-copy"></i>Повторить для другого объекта</button>
   <p class="note">Количества считает калькулятор по плану и нормам товаров. Если вы меняете количество вручную, пересчёт его не перезапишет.</p></aside></div>
- <div class="mbar"><div><small>Материалы · ${E.lines.length} поз.${p.budget?(tot<=p.budget?' · ✓ в бюджете':' · выше бюджета'):''}</small><b>${byn(tot)}</b></div>${inCart&&!cartStale?`<a class="btn o" href="cart.html">В корзину →</a>`:`<button class="btn o" onclick="toCart()" ${!E.lines.length?'disabled':''}>🛒 ${cartStale?'Обновить корзину':'Всё в корзину'}</button>`}</div>`;
+ <div class="mbar"><div><small>Материалы · ${E.lines.length} поз.${p.budget?(tot<=p.budget?' · ✓ в бюджете':' · выше бюджета'):''}</small><b>${byn(tot)}</b></div>${inCart&&!cartStale?`<a class="btn o" href="cart.html">В корзину →</a>`:`<button class="btn o" onclick="toCart()" ${!E.lines.length?'disabled':''}><i class="ui ui-cart"></i>${cartStale?'Обновить корзину':'Всё в корзину'}</button>`}</div>`;
  $('#app').innerHTML=h;
  if(location.hash==='#doer'&&!renderSmeta.done){renderSmeta.done=1;setTimeout(()=>$('#doer')?.scrollIntoView({block:'start'}),50)}
  if(focus){const el=document.querySelector(`[data-pid="${focus}"]`);if(el){el.classList.add('flash');el.scrollIntoView({block:'center'})}focus=null}
@@ -97,13 +94,13 @@ function renderSmeta(){
 // Кто делает работу: мастер ОМА → если нет, прокат инструмента → инструкция. На каждом шаге можно отказаться
 function doerCard(svcs,wsum){
  const who=p.doer,works=projectWorks(p),rent=rentalFor(p),R=rentalState(p),{sum,dep}=rentalSum(p),booked=R.status==='booked';
- const seg=`<div class="who">${[['master','👷 Мастер ОМА'],['self','🛠 Сделаю сам'],['later','Решу потом']].map(([k,t])=>`<button class="${who===k?'on':''}" onclick="doer('${k}')">${t}</button>`).join('')}</div>`;
+ const seg=`<div class="who">${[['master','<i class="ui ui-worker"></i>Мастер ОМА'],['self','<i class="ui ui-tool"></i>Сделаю сам'],['later','Решу потом']].map(([k,t])=>`<button class="${who===k?'on':''}" onclick="doer('${k}')">${t}</button>`).join('')}</div>`;
  const workList=svcs.length?`<div class="mt">${svcs.map(x=>`<div class="row" style="font-size:14px"><span>${x.s.name}${x.pid?` — ${esc(P(x.pid).name)}`:''} · ${num(x.q,1)} ${x.s.unit} × ${byn(x.s.price)}</span><b>${byn(x.sum)}</b></div>`).join('')}<div class="row" style="font-size:15px;border-top:1px solid var(--line);margin-top:6px;padding-top:10px"><span><b style="color:var(--ink)">Итого работы (справочно)</b></span><b>${byn(wsum)}</b></div></div>`:'<p class="note">Нет работ по расчёту.</p>';
- const guides=works.length?`<div class="guides">${works.map(w=>`<a class="btn sm g" href="instrukcii.html?project=${p.id}&work=${w}">📖 ${WORKS[w].name}: инструкция</a>`).join('')}</div>`:'';
+ const guides=works.length?`<div class="guides">${works.map(w=>`<a class="btn sm g" href="instrukcii.html?project=${p.id}&work=${w}"><i class="ui ui-book"></i>${WORKS[w].name}: инструкция</a>`).join('')}</div>`:'';
  let h=`<div class="card pad" id="doer"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Кто будет делать работу?</h3>${seg}</div>`;
  if(!who||who==='master'){
   if(!who)h+=`<p class="note" style="margin:10px 0 0">Мастер ОМА сделает под ключ. Хотите сами — подберём прокат инструмента и дадим пошаговую инструкцию по вашему проекту.</p>`;
-  h+=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px"><b>Работы мастера <span class="tag demo">ориентировочно, демо</span></b><a class="btn sm" href="masters.html?project=${p.id}">👷 Выбрать мастера</a></div>${workList}
+  h+=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px"><b>Работы мастера <span class="tag demo">ориентировочно, демо</span></b><a class="btn sm" href="masters.html?project=${p.id}"><i class="ui ui-worker"></i>Выбрать мастера</a></div>${workList}
    <p class="note" style="margin-bottom:0">Работы оплачиваются мастеру по договорённости. В прототипе цены и мастера демонстрационные.</p>`;
  }else if(who==='self'){
   if(!rent.length)h+=`<p class="mt" style="margin-bottom:8px">Для этих работ специальный инструмент не нужен.</p>${guides}`;
@@ -126,7 +123,7 @@ function rentOn(id,on){const R=rentalState(p),r=RENTAL.find(x=>x.id===id);R.item
 function rentDays(id,d,v){const R=rentalState(p);R.items[id]=Math.max(1,Math.min(30,v!=null?+v||1:(R.items[id]||1)+d));save();renderSmeta()}
 function R_skip(on){rentalState(p).skip=on;log(p,on?'Прокат не нужен — инструмент свой':'Решили взять инструмент в прокат');save();renderSmeta()}
 // бронь — это заказ: нужен белорусский номер, пункт проката перезвонит. Регистрация не нужна
-function book(){gate('phone',c=>{if(bookRental(p,c)){toast(`🔧 Прокат забронирован — подтвердим по номеру ${phoneFmt(c.phone)}`);renderSmeta()}},'Пункт проката ОМА перезвонит, чтобы подтвердить бронь.')}
+function book(){gate('phone',c=>{if(bookRental(p,c)){toast(`Прокат забронирован — подтвердим по номеру ${phoneFmt(c.phone)}`);renderSmeta()}},'Пункт проката ОМА перезвонит, чтобы подтвердить бронь.')}
 function unbook(){rentalState(p).status='draft';save();renderSmeta()}
 function lineHTML(l){
  const pr=P(l.pid),st=stale(l),pinned=l.role&&p.pinned[l.role]===l.pid;
@@ -157,7 +154,7 @@ function pin(role,pid){p.pinned[role]=pid;recalc(p);touchEst(p,`Выбран т�
 function unpin(role){delete p.pinned[role];recalc(p);touchEst(p,'Сброшен выбор товара');save();renderSmeta()}
 function addKit(pid){addLine(p,pid,1);save();renderSmeta();toast('Добавлено в смету')}
 function rename(t){t=t.trim();if(t&&t!==p.title){p.title=t;log(p,'Проект переименован');save();renderSmeta()}}
-function toCart(){cartSyncProject(p);toast(`🛒 Смета в корзине: ${p.est.lines.length+furnLines(p).length} позиций · <a href="cart.html">открыть корзину</a>`);renderSmeta()}
+function toCart(){cartSyncProject(p);toast(`Смета в корзине: ${p.est.lines.length+furnLines(p).length} позиций · <a href="cart.html">открыть корзину</a>`);renderSmeta()}
 function share(){
  const E=p.est;
  if(E.status==='draft'||E.dirty){if(E.dirty)E.version++;E.dirty=false;E.status='sent';E.versions.push({version:E.version,at:now(),lines:JSON.parse(JSON.stringify(E.lines)),total:estTotal(p)});log(p,`Смета v${E.version} отправлена по ссылке`);save()}

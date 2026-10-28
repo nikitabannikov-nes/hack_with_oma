@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Калькулятор ремонта 2D и 3D — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610292000"><link rel="stylesheet" href="app.css?v=202610292000"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610292000"><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Калькулятор ремонта 2D и 3D — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610300100"><link rel="stylesheet" href="app.css?v=202610300100"><link rel="stylesheet" href="ui-icons.css?v=202610300100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300100"><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <style>
 /* ---------- Редактор помещений: три колонки — список, холст, инспектор ---------- */
 .pe{--pe-r:18px;--pe-soft:#f2f5f9;--pe-bd:#e3e8ef;padding-bottom:40px}
@@ -164,7 +164,7 @@
      <span class="tset" id="t3" hidden><button id="b3All" title="Показать всю квартиру">Вся квартира</button><span class="sep"></span><span class="tset" id="t3x"></span></span>
     </div>
     <div class="zoomer"><button onclick="zoom(1.2)" title="Увеличить"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M4 10h12"/></svg></button><button onclick="zoom(1/1.2)" title="Уменьшить"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12"/></svg></button><button onclick="center()" title="Центрировать помещение"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="5.5"/><path d="M10 1.5v4M10 14.5v4M1.5 10h4M14.5 10h4"/></svg></button></div>
-    <div class="drawbar"><button id="bDelV" style="display:none">Удалить вершину</button><button id="bUndo" style="display:none">↶ Точка</button><button id="bCancel" style="display:none">Отмена</button><button id="bClose" style="display:none">✔ Замкнуть контур</button></div>
+    <div class="drawbar"><button id="bDelV" style="display:none">Удалить вершину</button><button id="bUndo" style="display:none">↶ Точка</button><button id="bCancel" style="display:none">Отмена</button><button id="bClose" style="display:none"><i class="ui ui-check"></i>Замкнуть контур</button></div>
     <div class="legend"><span><i style="background:#0057d6"></i>плитка</span><span><i style="background:#ff9a1a"></i>покраска</span><span><i style="background:#9aa3b5"></i>без отделки</span><span><i style="background:#3aa0e8"></i>окно</span><span>⌒ дверь</span><span><i style="background:repeating-linear-gradient(45deg,#9aa3b5 0 2px,#fff 2px 4px)"></i>вычет</span></div>
    </div>
    <div class="pe-sum" id="sum"></div>
@@ -181,7 +181,7 @@
  <div class="fld mt2">Форма</div><div class="tpls mt" id="nrTpl"></div>
  <button class="btn o wide mt2" onclick="addRoom()">Добавить</button>
 </div></div>
-<script src="oma-catalog.js?v=202610292000"></script><script src="oma-menu.js?v=202610292000"></script><script src="oma-social.js?v=202610292000"></script><script src="oma-furniture.js?v=202610292000"></script><script src="data.js?v=202610292000"></script><script src="geom.js?v=202610292000"></script><script src="calc.js?v=202610292000"></script><script src="oma-crops.js?v=202610292000"></script><script src="core.js?v=202610292000"></script><script src="plan.js?v=202610292000"></script><script src="omik.js?v=202610292000"></script><script>
+<script src="oma-catalog.js?v=202610300100"></script><script src="oma-menu.js?v=202610300100"></script><script src="oma-social.js?v=202610300100"></script><script src="oma-furniture.js?v=202610300100"></script><script src="data.js?v=202610300100"></script><script src="geom.js?v=202610300100"></script><script src="calc.js?v=202610300100"></script><script src="oma-crops.js?v=202610300100"></script><script src="core.js?v=202610300100"></script><script src="plan.js?v=202610300100"></script><script src="omik.js?v=202610300100"></script><script>
 // ---------- Проект и помещение ----------
 let p=null;
 // Новый проект: без явного типа помещения — нейтральная «Комната» и название «Новый проект», а не молчаливая «Ванная»
@@ -371,7 +371,7 @@ const TABS=[['shape','Форма'],['walls','Стены'],['open','Проёмы 
 function renderTabs(){
  const tot=p.rooms.reduce((s,r)=>s+(Geom.validate(r).ok?Geom.area(r.pts):0),0);
  $('#rhead').innerHTML=`<b>Помещения</b><span>${p.rooms.length} · ${num(tot,1)} м²</span>`;
- $('#rtabs').innerHTML=p.rooms.map(r=>{const ok=Geom.validate(r).ok;return`<button class="ri ${picked&&r.id===p.activeRoom?'on':''} ${ok?'':'err'}" onclick="selRoom('${r.id}')"><span class="ri-ic">${RT[r.type]?.icon||'▢'}</span><span class="ri-t"><b>${esc(r.name)}</b><small>${ok?num(Geom.area(r.pts),1)+' м² · '+esc(RT[r.type]?.name||''):'ошибка контура'}</small></span></button>`}).join('')+`<button class="ri-add" onclick="openAddRoom(true)">＋ Добавить помещение</button>`;
+ $('#rtabs').innerHTML=p.rooms.map(r=>{const ok=Geom.validate(r).ok;return`<button class="ri ${picked&&r.id===p.activeRoom?'on':''} ${ok?'':'err'}" onclick="selRoom('${r.id}')"><span class="ri-ic">${ui(RT[r.type]?.icon||'plan','solo')}</span><span class="ri-t"><b>${esc(r.name)}</b><small>${ok?num(Geom.area(r.pts),1)+' м² · '+esc(RT[r.type]?.name||''):'ошибка контура'}</small></span></button>`}).join('')+`<button class="ri-add" onclick="openAddRoom(true)">＋ Добавить помещение</button>`;
 }
 function selRoom(id){p.activeRoom=id;picked=true;selV=null;selWall=null;save();if(view3d){allMode=false;P3?.setFocus(id);mark3dAll()}renderAll();center()}
 function renderPanel(){
@@ -399,7 +399,7 @@ function renderPanel(){
  }
  if(tab==='open'){
   const wopt=sel=>r.pts.map((q,i)=>`<option value="${r.walls[i].id}" ${r.walls[i].id===sel?'selected':''}>Стена ${i+1} · ${Plan.f2(Geom.segLen(q,r.pts[(i+1)%r.pts.length]))} м</option>`).join('');
-  h+=`<h3 style="font-size:15px">Двери и окна</h3>${r.openings.map(o=>`<div class="card" style="padding:12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center"><b>${o.kind==='door'?'🚪 Дверь':'🪟 Окно'}</b><button class="xbtn" onclick="R().openings=R().openings.filter(x=>x.id!=='${o.id}');commit('Удалён проём')">×</button></div>
+  h+=`<h3 style="font-size:15px">Двери и окна</h3>${r.openings.map(o=>`<div class="card" style="padding:12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center"><b>${o.kind==='door'?'<i class="ui ui-door"></i>Дверь':'<i class="ui ui-window"></i>Окно'}</b><button class="xbtn" onclick="R().openings=R().openings.filter(x=>x.id!=='${o.id}');commit('Удалён проём')">×</button></div>
    <div class="f2 mt"><label class="fld" style="grid-column:1/-1">Стена<select onchange="setO('${o.id}','wallId',this.value)">${wopt(o.wallId)}</select></label>
    <label class="fld">Ширина, м<input type="number" step="0.05" value="${o.w}" onchange="setO('${o.id}','w',+this.value)"></label><label class="fld">Высота, м<input type="number" step="0.05" value="${o.h}" onchange="setO('${o.id}','h',+this.value)"></label>
    <label class="fld">От начала стены, м<input type="number" step="0.05" value="${o.off}" onchange="setO('${o.id}','off',+this.value)"></label>${o.kind==='window'?`<label class="fld">Подоконник, м<input type="number" step="0.05" value="${o.sill||0}" onchange="setO('${o.id}','sill',+this.value)"></label>`:''}</div></div>`).join('')||'<p class="note">Проёмов нет.</p>'}
@@ -461,7 +461,7 @@ function delRoom(){if(!confirm('Удалить помещение?'))return;p.ro
 let nr={type:'living',kind:'rect'};
 function openAddRoom(fresh){
  if(fresh)$('#nrName').value='';$('#nrName').placeholder=`Своё название или «${RT[nr.type].name}»`;
- $('#nrType').innerHTML=Object.entries(RT).map(([k,t])=>`<button class="${nr.type===k?'on':''}" onclick="nr.type='${k}';openAddRoom()">${t.icon} ${t.name}</button>`).join('');
+ $('#nrType').innerHTML=Object.entries(RT).map(([k,t])=>`<button class="${nr.type===k?'on':''}" onclick="nr.type='${k}';openAddRoom()">${ui(t.icon)}${t.name}</button>`).join('');
  $('#nrTpl').innerHTML=Object.entries(Geom.TEMPLATES).map(([k,t])=>`<button class="${nr.kind===k?'on':''}" onclick="nr.kind='${k}';openAddRoom()">${Plan.tplIcon(k)}${t.name}</button>`).join('');
  if(!$('#mRoom').classList.contains('show')){$('#mRoom').classList.add('show');setTimeout(()=>$('#nrName').focus(),30)}
 }
@@ -486,7 +486,7 @@ function drawResults(){
  const others=p.rooms.filter(x=>x.id!==r.id);
  const pe=p.calc||{},tot=estTotal(p);
  $('#sum').innerHTML=`<div class="pe-price"><span>Материалы${others.length?` · ${p.rooms.length} помещения`:''} · ${TIERS[p.tier]}</span><b>${pe.ok?byn(tot):'—'}</b><small>${pe.ok?`${p.est.lines.length} позиций · ${areaSummary(p)}`:'есть ошибки геометрии'}</small></div>
-  <div class="pe-acts"><button class="btn g" type="button" onclick="setView('3d')">🛋 Расставить мебель в 3D</button><a class="btn g" href="masters.html?project=${p.id}">👷 Нужен мастер</a><a class="btn o ${pe.ok?'':'dis'}" ${pe.ok?`href="smeta.html?project=${p.id}${fromPid?'&focus='+fromPid:''}"`:'onclick="toast(\'Сначала исправьте геометрию\',false)"'}>Подобрать материалы → смета</a></div>`;
+  <div class="pe-acts"><button class="btn g" type="button" onclick="setView('3d')"><i class="ui ui-sofa"></i>Расставить мебель в 3D</button><a class="btn g" href="masters.html?project=${p.id}"><i class="ui ui-worker"></i>Нужен мастер</a><a class="btn o ${pe.ok?'':'dis'}" ${pe.ok?`href="smeta.html?project=${p.id}${fromPid?'&focus='+fromPid:''}"`:'onclick="toast(\'Сначала исправьте геометрию\',false)"'}>Подобрать материалы → смета</a></div>`;
  h+=`<p class="note pe-foot">Проект сохраняется автоматически. Количества считает алгоритм по геометрии и нормам расхода товаров.</p>`;
  $('#res').innerHTML=h;
 }
@@ -502,7 +502,7 @@ async function setView(v){
   if(mode==='draw')setMode('edit');
   const focus=allMode||!picked?'all':p.activeRoom;
   if(!P3){
-   try{const m=await import('./p3d/embed.js?v=202610292000');P3=m.mount({host:$('#st3d'),tools:$('#t3x'),panel:$('#panel'),project:p,focus,activeRoom:()=>p.activeRoom})}
+   try{const m=await import('./p3d/embed.js?v=202610300100');P3=m.mount({host:$('#st3d'),tools:$('#t3x'),panel:$('#panel'),project:p,focus,activeRoom:()=>p.activeRoom})}
    catch(e){console.error(e);toast('3D-вид не загрузился — проверьте интернет',false);return setView('2d')}
   }else{P3.refresh();P3.setFocus(focus)}
   P3.setActive(true);mark3dAll();

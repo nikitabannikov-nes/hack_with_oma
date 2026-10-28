@@ -1,22 +1,64 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Мои проекты — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610292000"><link rel="stylesheet" href="app.css?v=202610292000"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610292000"></head><body><div id="chrome"></div>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Аккаунт — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610300100"><link rel="stylesheet" href="app.css?v=202610300100"><link rel="stylesheet" href="ui-icons.css?v=202610300100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300100"></head><body><div id="chrome"></div>
+<style>
+.acc{display:grid;grid-template-columns:280px minmax(0,1fr);gap:20px;align-items:start;margin-bottom:30px}
+.acc-me{padding:22px;text-align:center;position:sticky;top:84px}
+.acc-av{width:72px;height:72px;border-radius:50%;margin:0 auto 10px;display:grid;place-items:center;background:var(--blue-l);color:var(--blue);font-size:34px}
+.acc-me h2{font-size:20px;margin:0 0 2px}.acc-me .note{margin:0 0 14px}
+.acc-nav{display:grid;gap:2px;margin:14px -8px 0;text-align:left}
+.acc-nav a{display:flex;align-items:center;gap:2px;padding:10px 12px;border-radius:10px;color:var(--ink);font-weight:500}
+.acc-nav a b{margin-left:auto;font-weight:600;color:var(--mute);font-size:13px}
+.acc-nav a.on{background:var(--blue-l);color:var(--blue)}.acc-nav a .ui{color:var(--blue)}
+.acc-h{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px}.acc-h h2{margin:0;font-size:24px}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;align-items:center;padding:16px 18px;margin-bottom:10px}
+.row2 h3{margin:0;font-size:16px}.row2 .meta{font-size:13px;color:var(--mute);display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
+.row2 .r{text-align:right}.row2 .r b{display:block;font-size:17px;white-space:nowrap}
+@media(max-width:900px){.acc{grid-template-columns:minmax(0,1fr)}.acc-me{position:static}.acc-nav{grid-template-columns:repeat(2,1fr)}}
+</style>
 <div class="wrap">
- <div class="crumbs"><a href="index.html">Главная</a> / Мои проекты</div>
- <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><div><h1>Мои проекты</h1><p class="lead">Каждый проект хранит план, смету, корзину и заявки. Откройте любой модуль — данные подхватятся.</p></div>
-  <div class="seg"><a class="btn o" href="planner.html?new=1">＋ Новый проект</a><a class="btn g" href="omik.html">Спросить Омика</a></div></div>
- <div id="list"></div>
+ <div class="crumbs"><a href="index.html">Главная</a> / Аккаунт</div>
+ <h1>Аккаунт</h1>
+ <div class="acc"><aside class="card acc-me" id="me"></aside><div id="tab"></div></div>
 </div>
-<script src="oma-catalog.js?v=202610292000"></script><script src="oma-menu.js?v=202610292000"></script><script src="oma-social.js?v=202610292000"></script><script src="oma-furniture.js?v=202610292000"></script><script src="data.js?v=202610292000"></script><script src="geom.js?v=202610292000"></script><script src="calc.js?v=202610292000"></script><script src="oma-crops.js?v=202610292000"></script><script src="core.js?v=202610292000"></script><script src="plan.js?v=202610292000"></script><script src="omik.js?v=202610292000"></script><script>
+<script src="oma-catalog.js?v=202610300100"></script><script src="oma-menu.js?v=202610300100"></script><script src="oma-social.js?v=202610300100"></script><script src="oma-furniture.js?v=202610300100"></script><script src="data.js?v=202610300100"></script><script src="geom.js?v=202610300100"></script><script src="calc.js?v=202610300100"></script><script src="oma-crops.js?v=202610300100"></script><script src="core.js?v=202610300100"></script><script src="plan.js?v=202610300100"></script><script src="omik.js?v=202610300100"></script><script>
 const ST={draft:['Черновик',''],sent:['Отправлена по ссылке','or'],changes:['Просят изменения','red'],approved:['Согласована','gr'],ordered:['Заказ оформлен','bl']};
+const TABS={projects:['folder','Проекты'],orders:['box','Заказы'],requests:['worker','Заявки мастерам'],rental:['tool','Прокат']};
+const tab=()=>TABS[location.hash.slice(1)]?location.hash.slice(1):'projects';
+const plural=(n,a,b,c)=>n%10===1&&n%100!==11?a:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?b:c;
 function draw(){
  chrome('projects');
- const s=load(),L=[...s.projects].sort((a,b)=>b.updated-a.updated);
- $('#list').innerHTML=L.map(p=>{const[t,c]=ST[p.est.status]||ST.draft,inCart=s.cart.some(i=>i.projectId===p.id),reqs=s.requests.filter(r=>r.projectId===p.id),act=s.active===p.id;
-  return`<div class="card prj" style="${act?'border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-l)':''}">${p.rooms[0]?Plan.mini(p.rooms[0],150,110,Geom.validate(p.rooms[0]).ok):''}
-  <div><h3>${esc(p.title)} ${act?'<span class="tag">текущий</span>':''}</h3><div class="meta"><span class="st ${c}">${t}</span><span>${p.rooms.length} помещ. · ${num(floorArea(p),1)} м²</span><span>${p.est.lines.length} поз. · <b style="color:var(--ink)">${byn(estTotal(p))}</b></span><span>${TIERS[p.tier]}</span></div>
-   <div class="meta mt">${inCart?'<span>🛒 в корзине</span>':''}${reqs.length?`<span>👷 заявок: ${reqs.length} (${reqs.map(r=>REQ_ST[r.status].toLowerCase()).join(', ')})</span>`:''}${p.order?`<span>📦 заказ ${p.order}</span>`:''}<span>обновлён ${fmtDate(p.updated)}</span>${p.source==='omik'?'<span>создан Омиком</span>':''}</div></div>
-  <div class="acts"><a class="btn sm" href="smeta.html?project=${p.id}">📋 Смета</a><a class="btn sm g" href="planner.html?project=${p.id}">📐 План</a><a class="btn sm g" href="masters.html?project=${p.id}">👷 Мастер</a>${inCart?`<a class="btn sm g" href="cart.html">🛒 Корзина</a>`:''}<button class="btn sm ghost" onclick="dup('${p.id}')">⧉ Повторить</button><button class="btn sm ghost" style="color:var(--red)" onclick="delP('${p.id}')">Удалить</button></div></div>`}).join('')||`<div class="card empty"><img src="img/omik-hi.png" alt=""><h2>Проектов пока нет</h2><p class="note">Начните с плана комнаты или напишите Омику.</p><a class="btn o" href="planner.html?new=1">Новый проект</a></div>`;
+ const s=load(),u=currentUser(),rent=s.projects.filter(p=>p.rental?.status==='booked');
+ const cnt={projects:s.projects.length,orders:s.orders.length,requests:s.requests.length,rental:rent.length};
+ $('#me').innerHTML=`<div class="acc-av">${ui('user','solo')}</div>${u?`<h2>${esc(u.name||'Покупатель ОМА')}</h2><p class="note">${phoneFmt(u.phone)}</p><button class="btn ghost sm" onclick="logout()">Выйти</button>`
+  :`<h2>Гость</h2><p class="note">Проекты и сметы сохраняются в этом браузере. Войдите по номеру телефона, чтобы оплачивать заказы.</p><button class="btn o wide" onclick="gate('account',()=>draw(),'Вход в аккаунт ОМА.')">Войти по номеру</button>`}
+  <nav class="acc-nav">${Object.entries(TABS).map(([k,[ic,t]])=>`<a href="#${k}" class="${tab()===k?'on':''}">${ui(ic)}${t}<b>${cnt[k]||''}</b></a>`).join('')}</nav>`;
+ $('#tab').innerHTML=({projects,orders,requests,rental})[tab()](s,rent);
 }
+function projects(s){
+ const L=[...s.projects].sort((a,b)=>b.updated-a.updated);
+ return`<div class="acc-h"><h2>Проекты</h2><div class="seg"><a class="btn o sm" href="planner.html?new=1">${ui('plus')}Новый проект</a><a class="btn g sm" href="omik.html">Посчитать с Омиком</a></div></div>`+(L.map(p=>{const[t,c]=ST[p.est.status]||ST.draft,inCart=s.cart.some(i=>i.projectId===p.id),act=s.active===p.id;
+  return`<div class="card prj" style="${act?'border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-l)':''}">${p.rooms[0]?Plan.mini(p.rooms[0],150,110,Geom.validate(p.rooms[0]).ok,floorLook(p,p.rooms[0])):''}
+  <div><h3>${esc(p.title)} ${act?'<span class="tag">текущий</span>':''}</h3><div class="meta"><span class="st ${c}">${t}</span><span>${p.rooms.length} помещ. · ${num(floorArea(p),1)} м²</span><span>${p.est.lines.length} поз. · <b style="color:var(--ink)">${byn(estTotal(p))}</b></span><span>${TIERS[p.tier]}</span></div>
+   <div class="meta mt">${inCart?'<span>в корзине</span>':''}${p.order?`<span>заказ ${p.order}</span>`:''}<span>обновлён ${fmtDate(p.updated)}</span>${p.source==='omik'?'<span>посчитан Омиком</span>':''}</div></div>
+  <div class="acts"><a class="btn sm" href="smeta.html?project=${p.id}">${ui('list')}Смета</a><a class="btn sm g" href="planner.html?project=${p.id}">${ui('plan')}План</a><button class="btn sm ghost" onclick="dup('${p.id}')">${ui('copy')}Повторить</button><button class="btn sm ghost" style="color:var(--red)" onclick="delP('${p.id}')">Удалить</button></div></div>`}).join('')
+  ||empty('Проектов пока нет','Напишите Омику, что ремонтируете, — он посчитает материалы и сохранит проект здесь.','omik.html','Посчитать с Омиком'));
+}
+function orders(s){
+ return`<div class="acc-h"><h2>Заказы</h2></div>`+(s.orders.map(o=>`<div class="card row2"><div><h3>Заказ ${esc(o.no)}</h3><div class="meta"><span>${fmtDate(o.at)}</span><span>${o.items} ${plural(o.items,'позиция','позиции','позиций')}</span><span>${o.delivery==='delivery'?'доставка':'самовывоз'}${o.date?' · '+fmtDay(o.date):''}</span>${(o.projects||[]).map(getProject).filter(Boolean).map(p=>`<a href="smeta.html?project=${p.id}">${esc(p.title)}</a>`).join('')}</div></div><div class="r"><b>${byn(o.total)}</b><span class="st bl">оформлен · демо</span></div></div>`).join('')
+  ||empty('Заказов пока нет','Соберите смету и положите её в корзину — заказ появится здесь.','cart.html','Открыть корзину'));
+}
+function requests(s){
+ return`<div class="acc-h"><h2>Заявки мастерам</h2><a class="btn g sm" href="masters.html">Все мастера</a></div>`+(s.requests.map(r=>{const p=r.projectId&&getProject(r.projectId);return`<div class="card row2"><div><h3>${esc(svc(r.service).name)} · ${esc(r.id)}</h3><div class="meta"><span>${fmtDate(r.created)}</span>${r.date?`<span>выезд ${fmtDay(r.date)}${r.slot?' '+esc(r.slot):''}</span>`:''}${p?`<a href="smeta.html?project=${p.id}">${esc(p.title)}</a>`:''}</div></div><div class="r">${r.estimate?`<b>≈ ${byn(r.estimate)}</b>`:''}<span class="st ${r.status>=3?'gr':'or'}">${REQ_ST[r.status]}</span></div></div>`}).join('')
+  ||empty('Заявок нет','Если не хотите делать сами — мастер ОМА уложит по объёмам из вашего плана.','masters.html','Найти мастера'));
+}
+function rental(s,rent){
+ return`<div class="acc-h"><h2>Прокат инструмента</h2></div>`+(rent.map(p=>{const{sum,dep}=rentalSum(p),it=Object.entries(p.rental.items).filter(([,d])=>d>0).map(([id,d])=>{const r=RENTAL.find(x=>x.id===id);return r?`${esc(r.name)} — ${d} сут.`:''}).filter(Boolean);
+  return`<div class="card row2"><div><h3>${esc(p.title)}</h3><div class="meta"><span>забронирован ${fmtDate(p.rental.at)}</span>${it.map(x=>`<span>${x}</span>`).join('')}</div></div><div class="r"><b>${byn(sum)}</b><span class="note">залог ${byn(dep)}</span><a class="btn ghost sm mt" href="smeta.html?project=${p.id}#doer">Изменить</a></div></div>`}).join('')
+  ||empty('Брони нет','Плиткорез, миксер и лазерный уровень выгоднее взять на пару дней. Подберите прокат в смете.','projects.html#projects','К проектам'));
+}
+const empty=(h,t,href,btn)=>`<div class="card empty"><img src="img/omik-hi.png" alt=""><h2>${h}</h2><p class="note">${t}</p><a class="btn o" href="${href}">${btn}</a></div>`;
+function logout(){const s=load();delete s.user;save();draw()}
 function dup(id){const n=copyProject(getProject(id));toast('Проект скопирован: поменяйте геометрию под новый объект');location='planner.html?project='+n.id+'&from=smeta'}
 function delP(id){if(!confirm('Удалить проект?'))return;const s=load();s.projects=s.projects.filter(p=>p.id!==id);s.cart=s.cart.filter(i=>i.projectId!==id);if(s.active===id)s.active=null;save();draw()}
+addEventListener('hashchange',draw);
 draw();
 </script></body></html>
