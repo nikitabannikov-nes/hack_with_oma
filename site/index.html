@@ -22,16 +22,7 @@
   </div>
  </section>
 
- <div id="cont"></div>
 
- <section class="omik-sec">
-  <img src="img/omik-hero.png" alt="Омик — бобр в каске ОМА">
-  <div><h2>Что хотите сделать?</h2>
-   <p>Опишите задачу Омику или начните с плана комнаты. Посчитаем материалы по реальной геометрии до целых упаковок, подберём товары ОМА под бюджет и соберём корзину.</p>
-   <form class="omik-ask" onsubmit="event.preventDefault();location='omik.html?q='+encodeURIComponent(this.q.value||'Хочу положить плитку в ванной, бюджет до 1500 BYN')"><input name="q" placeholder="Хочу положить плитку в ванной, бюджет до 1500 BYN"><button class="btn o">Спросить Омика</button></form>
-   <div class="omik-chips"><a href="omik.html?q=Плитка в ванной 2,2 на 1,7, бюджет 1500">🛁 Плитка в ванной</a><a href="omik.html?q=Покрасить комнату 4 на 3">🎨 Покрасить комнату</a><a href="planner.html?new=1&task=living">🪵 Ламинат в Г-образной комнате</a><a href="import.html">📷 Планировка по фото</a></div>
-  </div>
- </section>
 
  <div class="tools4">
   <a class="tl" href="omik.html"><span class="ic"><img src="img/omik-avatar.png" alt=""></span><b>Омик — AI-прораб</b><span>Уточнит задачу, посчитает материалы до упаковки и соберёт корзину.</span><em>Написать Омику →</em></a>
@@ -58,9 +49,6 @@ const slides=$$('.slide');let cur=0;
 $('#dots').innerHTML=slides.map((_,i)=>`<i class="${i?'':'on'}" onclick="event.preventDefault();slide(${i}-cur)"></i>`).join('');
 function slide(d){slides[cur].classList.remove('on');$$('#dots i')[cur].classList.remove('on');cur=(cur+d+slides.length)%slides.length;slides[cur].classList.add('on');$$('#dots i')[cur].classList.add('on');}
 try{const r=makeRoom('living');r.pts=Geom.fromTemplate('L',{A:5,B:4,a:2,b:1.6});$('#bnrPlan').innerHTML=Plan.mini(r,344,250,true)}catch(e){$('#bnrPlan').remove()}
-// продолжить проект
-const s=load(),ps=[...s.projects].sort((a,b)=>b.updated-a.updated).slice(0,2);
-if(ps.length)$('#cont').innerHTML=`<h2 style="margin-top:0">Продолжить проект</h2><div class="doors cont2">${ps.map(p=>`<div class="card door" style="flex-direction:row;align-items:center;gap:16px">${p.rooms[0]?Plan.mini(p.rooms[0],120,90,Geom.validate(p.rooms[0]).ok):''}<div style="flex:1;min-width:0"><h3 style="margin:0">${esc(p.title)}</h3><p>${num(floorArea(p),1)} м² · ${p.est.lines.length} поз. · ${byn(estTotal(p))}<br>обновлён ${fmtDate(p.updated)}</p><div class="seg mt"><a class="btn sm" href="smeta.html?project=${p.id}">Смета</a><a class="btn sm g" href="planner.html?project=${p.id}">План</a></div></div></div>`).join('')}</div>`;
 // подборки товаров ОМА
 $('#pick').innerHTML=['lam_opt','tf_prem','glue_opt','pw_opt','mixer_d','x_lam1','tw_prem','primer_opt','cutter','skirt_prem'].map(P).filter(Boolean).map(x=>pcard(x)).join('');
 $('#bath').innerHTML=['tw_opt','tf_opt','glue_stm','grout_opt','wp_opt','mix_bath','wc','rail','clips','trowel8'].map(P).filter(Boolean).map(x=>pcard(x)).join('');
