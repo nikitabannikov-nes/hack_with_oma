@@ -3,8 +3,9 @@
 const KEY='omaProject.v2';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const num=(n,d=2)=>(+n).toLocaleString('ru-RU',{maximumFractionDigits:d}).replace(/ /g,' ');
-const byn=n=>(Math.round(n*100)/100).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2}).replace(/ /g,' ')+' BYN';
+// Неразрывные пробелы: «1 500,00 BYN» не переносится посередине
+const num=(n,d=2)=>(+n).toLocaleString('ru-RU',{maximumFractionDigits:d}).replace(/\s/g,'\u00a0');
+const byn=n=>(Math.round(n*100)/100).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2}).replace(/\s/g,'\u00a0')+'\u00a0BYN';
 const qp=k=>new URLSearchParams(location.search).get(k);
 const uid=()=>Math.random().toString(36).slice(2,9);
 const now=()=>Date.now(),DAY=864e5;

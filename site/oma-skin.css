@@ -245,3 +245,7 @@ footer.oma-f .wrap{display:grid;grid-template-columns:24% 48.6% 27.4%;gap:0}
 body:has(.promo6) footer.oma-f{margin-top:0}
 .doors.cont2{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:30px}
 @media(max-width:800px){.doors.cont2{grid-template-columns:minmax(0,1fr)}}
+/* Финиш-ревью 390 px: текст баннера не уходит под бобра, фокус поля Омика виден, подвал с отступами */
+.ask1:focus-within{box-shadow:0 0 0 4px #005ead33}
+@media(max-width:800px){.bnr p{max-width:60%}.bnr img.pers{height:160px}.ask1-ch a{padding:8px 12px}footer.oma-f .wrap{padding:0 16px}}
+@media(max-width:800px){.slider .dots{bottom:auto;top:16px;left:auto;right:16px}}

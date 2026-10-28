@@ -313,3 +313,11 @@ nav.sub img{width:24px;height:24px;border-radius:50%;object-fit:cover}
  body:has(.mbar){padding-bottom:76px}
  body:has(.mbar) .fab{bottom:86px}
 }
+/* Финиш-ревью: суммы и итог не переносятся, главная кнопка чата — фирменный градиент, тач-цели */
+.m .card-in .row.tot span,.m .card-in .row.tot b{white-space:nowrap}
+.m .opts button,.m .opts a{min-height:40px}
+.m .opts .pri{background:var(--g-or,var(--orange));border:0;padding:9px 18px;font-size:14px}
+.m .opts .pri:hover{background:var(--g-or,var(--orange));filter:brightness(1.05);color:#fff}
+.mbar small{white-space:nowrap}
+@media(min-width:1001px){.side{padding-bottom:76px}}
+@media(max-width:800px){.qty button{width:36px;height:36px}.ctx-l{display:none}}

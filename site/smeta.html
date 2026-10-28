@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Смета — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610290100"><link rel="stylesheet" href="app.css?v=202610290100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610290100">
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Смета — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610290200"><link rel="stylesheet" href="app.css?v=202610290200"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610290200">
 <style>.flash{animation:fl 2.4s}@keyframes fl{0%,40%{background:#fff1c2}}.rooms{display:flex;gap:14px;flex-wrap:wrap}.rm{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px 14px 10px 10px}.rm .note b{color:var(--ink)}</style></head><body><div id="chrome"></div>
 <div class="wrap" id="app"></div>
 <div class="modal-bg" id="mShare" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal">
@@ -9,7 +9,7 @@
  <a class="btn o wide" id="openC" href="#" target="_self">Открыть как получатель →</a>
  <p class="note">Демо без сервера: согласование, сделанное в этом браузере, сразу видно в проекте. На другом устройстве получатель увидит смету и сможет оформить заказ, но статус вернётся к вам только с подключённым сервером.</p>
 </div></div>
-<script src="oma-catalog.js?v=202610290100"></script><script src="oma-menu.js?v=202610290100"></script><script src="oma-social.js?v=202610290100"></script><script src="data.js?v=202610290100"></script><script src="geom.js?v=202610290100"></script><script src="calc.js?v=202610290100"></script><script src="core.js?v=202610290100"></script><script src="plan.js?v=202610290100"></script><script src="omik.js?v=202610290100"></script><script>
+<script src="oma-catalog.js?v=202610290200"></script><script src="oma-menu.js?v=202610290200"></script><script src="oma-social.js?v=202610290200"></script><script src="data.js?v=202610290200"></script><script src="geom.js?v=202610290200"></script><script src="calc.js?v=202610290200"></script><script src="core.js?v=202610290200"></script><script src="plan.js?v=202610290200"></script><script src="omik.js?v=202610290200"></script><script>
 let p=activeProject();
 if(!p){location='planner.html?new=1';throw 0}
 setActive(p);
@@ -79,11 +79,11 @@ function renderSmeta(){
  h+=`</div><aside class="card side"><div class="note">Материалы ОМА · ${TIERS[p.tier]}</div><div class="tot">${byn(tot)}</div>
   ${p.budget?`<span class="tag ${tot<=p.budget?'gr':'or'}">${tot<=p.budget?'✓ В рамках бюджета':'Выше бюджета на '+byn(tot-p.budget)}</span>`:''}
   <div style="margin:12px 0 16px"><div class="row"><span>Позиций</span><b>${E.lines.length}</b></div><div class="row"><span>Площадь помещений</span><b>${num(floorArea(p),1)} м²</b></div><div class="row"><span>Работы (справочно)</span><b>${byn(wsum)}</b></div>${E.lines.some(stale)?`<div class="row" style="color:#c76b00"><span>Требуют решения</span><b style="color:#c76b00">${E.lines.filter(stale).length}</b></div>`:''}</div>
-  ${cartStale?`<div class="banner warn" style="font-size:13px;padding:10px 12px">В корзине старая версия этой сметы.</div><button class="btn o wide" onclick="toCart()">Обновить корзину</button>`:inCart?`<a class="btn o wide" href="cart.html">Перейти в корзину →</a>`:`<button class="btn o wide" onclick="toCart()" ${!E.lines.length?'disabled':''}>🛒 Добавить всё в корзину</button>`}
-  <button class="btn wide mt" onclick="share()">🔗 ${E.status==='draft'?'Отправить смету по ссылке':'Ссылка на смету'}</button>
+  ${cartStale?`<div class="banner warn" style="font-size:13px;padding:10px 12px">В корзине старая версия этой сметы.</div><button class="btn o wide" onclick="toCart()">Обновить корзину</button>`:inCart?`<a class="btn o wide" href="cart.html">Перейти в корзину →</a>`:`<button class="btn o wide" onclick="toCart()" ${!E.lines.length?'disabled':''}>🛒 Всё в корзину</button>`}
+  <button class="btn ghost wide mt" onclick="share()">🔗 ${E.status==='draft'?'Отправить смету по ссылке':'Ссылка на смету'}</button>
   <button class="btn ghost wide mt" onclick="copyP()">⧉ Повторить для другого объекта</button>
   <p class="note">Количества считает калькулятор по плану и нормам товаров. Если вы меняете количество вручную, пересчёт его не перезапишет.</p></aside></div>
- <div class="mbar"><div><small>Материалы · ${E.lines.length} поз.${p.budget?(tot<=p.budget?' · в бюджете ✓':' · выше бюджета'):''}</small><b>${byn(tot)}</b></div>${inCart&&!cartStale?`<a class="btn o" href="cart.html">В корзину →</a>`:`<button class="btn o" onclick="toCart()" ${!E.lines.length?'disabled':''}>🛒 ${cartStale?'Обновить корзину':'Всё в корзину'}</button>`}</div>`;
+ <div class="mbar"><div><small>Материалы · ${E.lines.length} поз.${p.budget?(tot<=p.budget?' · ✓ в бюджете':' · выше бюджета'):''}</small><b>${byn(tot)}</b></div>${inCart&&!cartStale?`<a class="btn o" href="cart.html">В корзину →</a>`:`<button class="btn o" onclick="toCart()" ${!E.lines.length?'disabled':''}>🛒 ${cartStale?'Обновить корзину':'Всё в корзину'}</button>`}</div>`;
  $('#app').innerHTML=h;
  if(focus){const el=document.querySelector(`[data-pid="${focus}"]`);if(el){el.classList.add('flash');el.scrollIntoView({block:'center'})}focus=null}
 }

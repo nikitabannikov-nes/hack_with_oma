@@ -1,12 +1,12 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Корзина — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610290100"><link rel="stylesheet" href="app.css?v=202610290100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610290100"></head><body><div id="chrome"></div>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Корзина — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610290200"><link rel="stylesheet" href="app.css?v=202610290200"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610290200"></head><body><div id="chrome"></div>
 <div class="wrap" id="app"></div>
-<script src="oma-catalog.js?v=202610290100"></script><script src="oma-menu.js?v=202610290100"></script><script src="oma-social.js?v=202610290100"></script><script src="data.js?v=202610290100"></script><script src="geom.js?v=202610290100"></script><script src="calc.js?v=202610290100"></script><script src="core.js?v=202610290100"></script><script src="plan.js?v=202610290100"></script><script src="omik.js?v=202610290100"></script><script>
+<script src="oma-catalog.js?v=202610290200"></script><script src="oma-menu.js?v=202610290200"></script><script src="oma-social.js?v=202610290200"></script><script src="data.js?v=202610290200"></script><script src="geom.js?v=202610290200"></script><script src="calc.js?v=202610290200"></script><script src="core.js?v=202610290200"></script><script src="plan.js?v=202610290200"></script><script src="omik.js?v=202610290200"></script><script>
 const DATES=[1,2,3].map(d=>now()+d*DAY);
 let o={delivery:'pickup',date:0,address:'',name:'',phone:''},done=null;
 function draw(){
  chrome('cart');
  const s=load();
- if(done)return success();
+ if(done){$('#toast')?.classList.remove('show');return success()}
  if(!s.cart.length){$('#app').innerHTML=`<div class="crumbs"><a href="index.html">Главная</a> / Корзина</div><div class="card empty mt2"><img src="img/omik-think.png" alt=""><h2>Корзина пуста</h2><p class="note">Соберите смету в калькуляторе или добавьте товары из каталога.</p><a class="btn" href="planner.html">📐 Рассчитать ремонт</a> <a class="btn g" href="catalog.html">Каталог</a></div>`;return}
  const groups={};s.cart.forEach((i,ix)=>{const k=i.projectId||'_';(groups[k]=groups[k]||[]).push({...i,ix})});
  const tot=cartTotal(),ship=o.delivery==='delivery'&&tot<300?25:0;
@@ -26,7 +26,8 @@ function draw(){
   <div class="fld mt2">Когда</div><div class="seg mt">${DATES.map((d,i)=>`<button class="${o.date===i?'on':''}" onclick="o.date=${i};draw()">${fmtDay(d)}</button>`).join('')}</div>
   <div class="f2 mt2"><label class="fld">Имя<input value="${esc(o.name)}" oninput="o.name=this.value" placeholder="Как к вам обращаться" autocomplete="name"></label><label class="fld">Телефон<input value="${esc(o.phone)}" oninput="o.phone=this.value" placeholder="+375 29 123-45-67" type="tel" inputmode="tel" autocomplete="tel"></label></div></div>`;
  h+=`</div><aside class="card side"><div class="note">Итого</div><div class="tot">${byn(tot+ship)}</div><div style="margin:10px 0 16px"><div class="row"><span>Товары, ${s.cart.length} поз.</span><b>${byn(tot)}</b></div><div class="row"><span>${o.delivery==='delivery'?'Доставка':'Самовывоз'}</span><b>${ship?byn(ship):'бесплатно'}</b></div></div>
-  <button class="btn o wide" id="pay" onclick="order()">Оформить заказ (демо)</button><p class="note">⚠ Демонстрационное оформление: оплата не проводится, данные карты не запрашиваются, заказ в ОМА не уходит.</p></aside></div>`;
+  <button class="btn o wide" id="pay" onclick="order()">Оформить заказ (демо)</button><p class="note">⚠ Демонстрационное оформление: оплата не проводится, данные карты не запрашиваются, заказ в ОМА не уходит.</p></aside></div>
+  <div class="mbar"><div><small>Итого · ${s.cart.length} поз.</small><b>${byn(tot+ship)}</b></div><button class="btn o" onclick="order()">Оформить заказ</button></div>`;
  $('#app').innerHTML=h;
 }
 const C=()=>load().cart;
