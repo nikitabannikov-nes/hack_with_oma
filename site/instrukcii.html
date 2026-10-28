@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Как сделать самому — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610292000"><link rel="stylesheet" href="app.css?v=202610292000"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610292000">
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Как сделать самому — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610301000"><link rel="stylesheet" href="app.css?v=202610301000"><link rel="stylesheet" href="ui-icons.css?v=202610301000"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610301000">
 <style>
 .ins{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start;margin-bottom:30px}
 .ins .card{padding:20px 22px;margin-bottom:14px}
@@ -19,12 +19,26 @@
 .bad li{margin:4px 0}
 .side{position:sticky;top:12px}
 .side .row{display:flex;justify-content:space-between;gap:10px;font-size:14px;margin:4px 0}
-@media(max-width:900px){.ins{grid-template-columns:minmax(0,1fr)}.side{position:static}}
-@media print{#chrome,footer,.side,.wtabs,.noprint,#omikW{display:none!important}.ins{display:block}.card{box-shadow:none;border:1px solid #ccc}}
+.lead2{display:grid;grid-template-columns:72px minmax(0,1fr);gap:16px;align-items:center;background:var(--g-blue);color:#fff;border-radius:16px;padding:18px 22px;margin:0 0 14px}
+.lead2 img{width:72px;height:72px;border-radius:50%;background:#fff;object-fit:cover}
+.lead2 small{display:block;opacity:.8;font-size:13px;margin-bottom:2px}.lead2 p{margin:0;font-size:16px;line-height:1.45}.lead2 p b{color:#fff}
+.lead2 .bar{height:8px;border-radius:4px;background:#ffffff33;margin:12px 0 10px;overflow:hidden}.lead2 .bar i{display:block;height:100%;background:#ff970d;border-radius:4px;transition:width .3s}
+.lead2 .acts{display:flex;gap:8px;flex-wrap:wrap}.lead2 .btn.g{background:#ffffff1f;color:#fff;border-color:#ffffff55}
+.cps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.cp{display:grid;grid-template-columns:40px minmax(0,1fr);gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:#fff;line-height:1.5}
+.cp .ck{width:36px;height:36px;border-radius:50%;border:2px solid #c9d3df;background:#fff;color:#fff;display:grid;place-items:center;cursor:pointer;font-weight:700;color:var(--mute);font-size:15px}
+.cp .ck:hover{border-color:var(--blue);color:var(--blue)}
+.cp.now{border:2px solid var(--blue);box-shadow:0 6px 18px #005ead1f}.cp.now .ck{border-color:var(--blue);color:var(--blue)}
+.cp .tag{margin-bottom:4px}.cp small{display:block;color:var(--ok);font-size:12px;margin-top:4px}
+.cp.done{background:#f6faf7;border-color:#cfe6d6}.cp.done .ck{background:var(--ok);border-color:var(--ok);color:#fff}.cp.done .tx{color:#5b6a63}.cp.done .tx b{color:#3d4a44}
+.omik-here{height:520px;display:flex;overflow:hidden;padding:0!important}.omik-here>div{flex:1;min-width:0}
+body:has(.omik-here) .fab{display:none}
+@media(max-width:900px){.ins{grid-template-columns:minmax(0,1fr)}.side{position:static}.lead2{grid-template-columns:48px minmax(0,1fr)}.lead2 img{width:48px;height:48px}}
+@media print{#chrome,footer,.side,.wtabs,.noprint,.lead2 .acts,#omikW{display:none!important}.ins{display:block}.card{box-shadow:none;border:1px solid #ccc}}
 </style></head>
 <body><div id="chrome"></div>
 <div class="wrap" id="app"></div>
-<script src="oma-catalog.js?v=202610292000"></script><script src="oma-menu.js?v=202610292000"></script><script src="oma-social.js?v=202610292000"></script><script src="oma-crops.js?v=202610292000"></script><script src="oma-furniture.js?v=202610292000"></script><script src="data.js?v=202610292000"></script><script src="geom.js?v=202610292000"></script><script src="calc.js?v=202610292000"></script><script src="core.js?v=202610292000"></script><script src="plan.js?v=202610292000"></script><script src="omik.js?v=202610292000"></script>
+<script src="oma-catalog.js?v=202610301000"></script><script src="oma-menu.js?v=202610301000"></script><script src="oma-social.js?v=202610301000"></script><script src="oma-crops.js?v=202610301000"></script><script src="oma-furniture.js?v=202610301000"></script><script src="data.js?v=202610301000"></script><script src="geom.js?v=202610301000"></script><script src="calc.js?v=202610301000"></script><script src="core.js?v=202610301000"></script><script src="plan.js?v=202610301000"></script><script src="omik.js?v=202610301000"></script>
 <script>
 const p=qp('project')?getProject(qp('project')):activeProject();
 if(p)setActive(p);
@@ -76,6 +90,19 @@ const GUIDE={
   bad:['Краска на непрогрунтованную стену — пятна','Сквозняк и солнце при сушке — полосы','Один толстый слой вместо двух тонких']}},
 };
 
+// Чекпоинты: что отмечено и когда. С проектом — в самом проекте, без него — в этом браузере
+const GK='omaGuide.v1';
+function marks(){if(p){p.guide=p.guide||{};return p.guide[work]=p.guide[work]||{}}let all={};try{all=JSON.parse(localStorage.getItem(GK))||{}}catch(e){}return all[work]||{}}
+function saveMarks(m){if(p){p.guide[work]=m;save()}else{let all={};try{all=JSON.parse(localStorage.getItem(GK))||{}}catch(e){}all[work]=m;localStorage.setItem(GK,JSON.stringify(all))}}
+const steps=()=>GUIDE[work]().steps;
+const curStep=m=>steps().findIndex((_,i)=>!m[i]);
+function mark(i,on){const m=marks(),was=!!m[i];if(on===was)return;if(on)m[i]=now();else delete m[i];saveMarks(m);
+ if(p&&on)log(p,`${WORKS[work].name}: шаг ${i+1} готов`);if(p&&on&&curStep(m)<0)log(p,`${WORKS[work].name}: все шаги выполнены`);render()}
+function tick(i){mark(i,!marks()[i]);if(marks()[i])Omik.note()}
+// для Омика на этой странице
+window.GUIDE_API={state(){const m=marks(),L=steps();return{name:WORKS[work].name,n:L.length,done:L.filter((_,i)=>m[i]).length,cur:curStep(m),steps:L}},
+ done(i){mark(i,true)},undo(){const m=marks(),k=Math.max(-1,...Object.keys(m).map(Number));if(k>=0)mark(k,false);return k}};
+
 function render(){
  const g=GUIDE[work](),W=WORKS[work],rent=RENTAL.filter(r=>r.works.includes(work)),R=p?rentalState(p):null,booked=R?.status==='booked';
  // купить — только то, чего нет в смете и что не берут в прокат (плиткорез дешевле взять на пару дней)
@@ -84,27 +111,36 @@ function render(){
  const sv=SERVICES.filter(s=>s.cat===(work==='floor'?'floor':work)&&s.area&&A[s.area]),wsum=sv.reduce((s,x)=>s+A[x.area]*x.price,0);
  let h=`<div class="crumbs"><a href="index.html">Главная</a> / ${p?`<a href="smeta.html?project=${p.id}">Смета «${esc(p.title)}»</a> / `:''}Как сделать самому</div>
  <h1>Как сделать самому</h1><p class="lead">${p?`Пошаговая инструкция по вашему проекту «${esc(p.title)}»: объёмы и товары взяты из сметы.`:'Пошаговые инструкции Омика. Откройте их из сметы — и в шагах будут ваши объёмы и товары.'}</p>
- <div class="wtabs">${works.map(k=>`<a class="${k===work?'on':''}" href="?work=${k}${p?'&project='+p.id:''}">${WORKS[k].icon} ${WORKS[k].name}</a>`).join('')}</div>
+ <div class="wtabs">${works.map(k=>`<a class="${k===work?'on':''}" href="?work=${k}${p?'&project='+p.id:''}">${ui(WORKS[k].icon)}${WORKS[k].name}</a>`).join('')}</div>
  <div class="ins"><div>
-  <div class="card"><h2>${W.icon} ${W.name}</h2><div class="meta"><span>⏱ ${g.time}</span><span>🎯 ${g.level}</span></div></div>
+  ${lead(g)}
+  <div class="card"><h2>${ui(W.icon)}${W.name}</h2><div class="meta"><span><i class="ui ui-clock"></i>${g.time}</span><span><i class="ui ui-level"></i>${g.level}</span></div></div>
   ${mats.length?`<div class="card"><h3>Материалы по смете</h3><div class="mats">${mats.map(m=>`<a href="product.html?id=${m.pr.id}${p?'&project='+p.id:''}">${esc(m.pr.name)}</a><b>${m.qty} ${m.unit}</b>`).join('')}</div></div>`:''}
   <div class="card"><h3>Инструмент</h3><div class="tools">
    ${rent.map(r=>{const d=R?.items[r.id];return`<div class="itl"><img src="${r.img}" alt="" loading="lazy"><div><b>${esc(r.name)}</b><small>${esc(r.model)} · ${esc(r.why)}</small></div><span class="tag ${booked&&d?'gr':''}">${booked&&d?`в прокате, ${d} сут.`:`прокат ${byn(r.day)}/сут.`}</span></div>`}).join('')}
-   ${buy.map(x=>`<div class="itl"><i>🛒</i><div><a href="product.html?id=${x.id}${p?'&project='+p.id:''}"><b>${esc(x.name)}</b></a><small>купить — пригодится и потом</small></div><span class="tag">${byn(x.price)}</span></div>`).join('')}
+   ${buy.map(x=>`<div class="itl"><i><i class="ui ui-cart"></i></i><div><a href="product.html?id=${x.id}${p?'&project='+p.id:''}"><b>${esc(x.name)}</b></a><small>купить — пригодится и потом</small></div><span class="tag">${byn(x.price)}</span></div>`).join('')}
   </div></div>
-  <div class="card"><h3>Шаги</h3><ol class="steps">${g.steps.map(s=>`<li>${s}</li>`).join('')}</ol></div>
+  <div class="card"><h3>Шаги — отмечайте по мере работы</h3><ol class="cps">${g.steps.map((s,i)=>{const m=marks(),d=m[i],cur=curStep(m)===i;
+   return`<li class="cp ${d?'done':''} ${cur?'now':''}"><button class="ck" onclick="tick(${i})" aria-label="${d?'Снять отметку':'Отметить шаг'} ${i+1}" title="${d?'Снять отметку':'Шаг готов'}">${d?ui('check','solo'):i+1}</button><div class="tx">${cur?'<span class="tag">Сейчас</span><br>':''}${s}${d?`<small>Готово · ${fmtDate(d)}</small>`:''}</div></li>`}).join('')}</ol></div>
   <div class="card"><h3>Частые ошибки</h3><ul class="bad">${g.bad.map(b=>`<li>${b}</li>`).join('')}</ul>
    <p class="note" style="margin-bottom:0">Инструкция Омика — общие рекомендации. На упаковке материала — точные нормы производителя, сверяйтесь с ними.</p></div>
  </div>
  <aside class="side">
-  <div class="card">${omikTip('idea','<b>Не уверены, что справитесь?</b> Мастер ОМА сделает под ключ — вы можете передумать в любой момент.')}
+  <div class="card omik-here noprint"><div id="omikHere"></div></div>
+  <div class="card"><h3>Не уверены, что справитесь?</h3><p class="note" style="margin:0 0 10px">Мастер ОМА сделает под ключ — можно передумать на любом шаге.</p>
    ${wsum?`<div class="row"><span>Работа мастера по проекту</span><b>≈ ${byn(wsum)}</b></div>`:''}
-   <a class="btn wide" href="masters.html?service=${sv[0]?.id||''}${p?'&project='+p.id:''}">👷 Выбрать мастера ОМА</a>
+   <a class="btn wide" href="masters.html?service=${sv[0]?.id||''}${p?'&project='+p.id:''}"><i class="ui ui-worker"></i>Выбрать мастера ОМА</a>
   </div>
   ${p&&rent.length?`<div class="card"><h3>Прокат инструмента</h3>${booked?`<p style="margin:0 0 8px">✓ Забронирован: <b>${byn(rentalSum(p).sum)}</b>, залог ${byn(rentalSum(p).dep)}.</p>`:`<p class="note" style="margin:0 0 10px">Не покупайте то, что нужно на пару дней.</p>`}<a class="btn g wide" href="smeta.html?project=${p.id}#doer">${booked?'Изменить прокат':'Подобрать прокат'}</a></div>`:''}
-  <div class="card noprint"><button class="btn ghost wide" onclick="print()">🖨 Распечатать инструкцию</button>${p?`<a class="btn ghost wide mt" href="smeta.html?project=${p.id}">← К смете</a>`:''}</div>
+  <div class="card noprint"><button class="btn ghost wide" onclick="print()"><i class="ui ui-print"></i>Распечатать инструкцию</button>${p?`<a class="btn ghost wide mt" href="smeta.html?project=${p.id}">← К смете</a>`:''}</div>
  </aside></div>`;
  $('#app').innerHTML=h;
+ Omik.mount($('#omikHere'));
 }
+// Баннер Омика: где вы сейчас и что дальше
+function lead(g){const m=marks(),n=g.steps.length,d=g.steps.filter((_,i)=>m[i]).length,c=curStep(m),txt=c<0?'Все шаги отмечены — работа готова. Проверьте результат при дневном свете и сохраните остатки материалов.':g.steps[c].replace(/<\/?b>/g,'').split('. ')[0].replace(/\.$/,'')+'.';
+ return`<div class="lead2"><img src="img/omik-${c<0?'happy':d?'ok':'hi'}.png" alt="Омик"><div><small>Омик ведёт по шагам · готово ${d} из ${n}</small><p>${c<0?'<b>Готово!</b> ':`<b>Шаг ${c+1}.</b> `}${txt}</p><div class="bar"><i style="width:${Math.round(d/n*100)}%"></i></div>
+  <div class="acts">${c>=0?`<button class="btn o sm" onclick="tick(${c});">${ui('check')}Шаг ${c+1} готов</button>`:''}<button class="btn g sm" onclick="document.querySelector('#omikHere input')?.focus()">${ui('chat')}Спросить Омика</button></div></div></div>`}
+window.OMIK_CTX.work=work;
 render();
 </script></body></html>

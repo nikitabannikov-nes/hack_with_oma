@@ -12,6 +12,8 @@ const now=()=>Date.now(),DAY=864e5;
 const fmtDate=t=>new Date(t).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 const fmtDay=t=>new Date(t).toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'short'});
 const P=id=>Calc.byId(id);
+// Линейная иконка из ui-icons.css по ключу: ui('cart') → <i class="ui ui-cart"></i>
+const ui=(k,cls='')=>k?`<i class="ui ui-${k}${cls?' '+cls:''}"></i>`:'';
 const TIERS=Calc.TIERS,RT=Calc.ROOM_TYPES;
 
 // ---------- Хранилище ----------
@@ -62,7 +64,7 @@ function addProject(p){load().projects.unshift(p);S.active=p.id;save();return p}
 function getProject(id){return load().projects.find(p=>p.id===id)}
 function activeProject(){const s=load();return getProject(qp('project'))||getProject(s.active)||null}
 function setActive(p){load().active=p.id;persist()}
-// Закрыть текущий проект: он остаётся в «Моих проектах», сайт просто перестаёт работать в его контексте
+// Закрыть текущий проект: он остаётся в аккаунте, сайт просто перестаёт работать в его контексте
 function closeProject(){
  load().active=null;persist();
  if(/(planner|smeta)\.html/.test(location.pathname)){location='projects.html';return}
@@ -186,10 +188,11 @@ const ico=(id,cls='')=>`<svg class="${cls}"><use href="img/oma-icons.svg#${id}">
 const HICO={search:'<svg viewBox="0 0 24 24"><path d="M10.5 3a7.5 7.5 0 0 1 5.96 12.05l4.25 4.24-1.42 1.42-4.24-4.25A7.5 7.5 0 1 1 10.5 3zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11z"/></svg>',
  user:'<svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-5.33 0-9 2.7-9 6v2h18v-2c0-3.3-3.67-6-9-6z"/></svg>',
  heart:'<svg viewBox="0 0 24 24"><path d="M12 21.35 10.55 20C5.4 15.36 2 12.27 2 8.5A5.42 5.42 0 0 1 7.5 3 6 6 0 0 1 12 5.09 6 6 0 0 1 16.5 3 5.42 5.42 0 0 1 22 8.5c0 3.77-3.4 6.86-8.55 11.54z"/></svg>',
+ home:'<svg viewBox="0 0 24 24"><path d="M12 3 2 11.5h3V21h5.5v-6h3v6H19v-9.5h3z"/></svg>',
  cart:'<svg viewBox="0 0 24 24"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM1 2v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7.42a.25.25 0 0 1-.22-.37L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 20 4H5.21l-.94-2z"/></svg>'};
 // Быстрые ссылки ОМА + наши модули (выделены фиолетовым)
 const QUICK=[['red','Все акции','/sales/',1],['darkblue2','Супер цены','/sales/super-tseny/'],['red','Топ продаж','/sales/top-prodazh/'],['darkorange','Оплата частями','/buyers/payment/#credit']];
-const NAV=[['omik','Омик','omik.html'],['planner','Калькулятор','planner.html'],['projects','Мои проекты','projects.html']];
+const NAV=[['omik','Омик','omik.html'],['planner','Калькулятор','planner.html']];
 // Подкатегория ОМА есть в нашем демо-каталоге → ведём в каталог, иначе — на oma.by
 function inCatalog(name){
  const stem=String(name).toLowerCase().replace(/ё/g,'е').split(/[^a-zа-я0-9]+/).find(w=>w.length>3);
@@ -220,7 +223,8 @@ function chrome(active,o={}){
    <a class="oma-logo" href="index.html" aria-label="ОМА"></a>
    <form class="oma-search" onsubmit="event.preventDefault();location='catalog.html?q='+encodeURIComponent(this.q.value)"><input name="q" placeholder="Ламинат" value="${esc(active==='catalog'?qp('q')||'':'')}"><button aria-label="Найти">${HICO.search}</button></form>
    <div class="oma-acts">
-    <a class="oma-act" href="projects.html">${HICO.user}<span class="t"><small>Мои</small><b>Проекты</b></span><span class="cnt" data-b="proj"></span></a>
+    <a class="oma-act" href="projects.html#home">${HICO.home}<span class="t"><b>Мой дом</b></span><span class="cnt" data-b="dom" title="Пора обслужить"></span></a>
+    <a class="oma-act" href="projects.html">${HICO.user}<span class="t">${currentUser()?`<small>${esc((currentUser().name||"").split(" ")[0]||"Мой")}</small>`:""}<b>Аккаунт</b></span></a>
     <a class="oma-act" href="cart.html">${HICO.cart}<span class="t"><b>Корзина</b></span><span class="cnt" data-b="cart"></span></a>
    </div>
   </div></div>
@@ -229,13 +233,13 @@ function chrome(active,o={}){
    <nav class="oma-quick">${QUICK.map(([c,t,h,f])=>`<a class="${c}" href="${OMA}${h}" target="_blank" rel="noopener">${f?ico('fire'):''}${t}</a>`).join('')}${NAV.map(([k,t,h])=>`<a class="ours ${k===active?'on':''}" href="${h}">${k==='omik'?'<img src="img/omik-avatar.png" alt="">':''}${t}</a>`).join('')}</nav>
   </div>${onIndex?'':`<div class="oma-drop" id="omaDrop" onmouseleave="toggleDrop(false)">${sideMenu()}</div>`}</div></div>
  </header>
- ${p?`<div class="ctx"><div class="wrap"><span class="ctx-l">Текущий проект:</span><a class="ctx-p" href="projects.html">${RT[p.task]?.icon||'📁'} <b>${esc(p.title)}</b></a>
+ ${p?`<div class="ctx"><div class="wrap"><span class="ctx-l">Текущий проект:</span><a class="ctx-p" href="projects.html">${ui(RT[p.task]?.icon||'folder')}<b>${esc(p.title)}</b></a>
   <span class="ctx-s">${num(floorArea(p),1)} м² · ${p.est.lines.length} поз. · ${byn(estTotal(p))}</span><span class="sp"></span>
-  <a href="planner.html?project=${p.id}" class="${active==='planner'?'on':''}">📐 План</a><a href="smeta.html?project=${p.id}" class="${active==='smeta'?'on':''}">📋 Смета</a><button class="ctx-x" onclick="closeProject()" title="Закрыть проект" aria-label="Закрыть проект">×</button></div></div>`:''}`;
+  <a href="planner.html?project=${p.id}" class="${active==='planner'?'on':''}"><i class="ui ui-plan"></i>План</a><a href="smeta.html?project=${p.id}" class="${active==='smeta'?'on':''}"><i class="ui ui-list"></i>Смета</a><button class="ctx-x" onclick="closeProject()" title="Закрыть проект" aria-label="Закрыть проект">×</button></div></div>`:''}`;
  if(!$('footer'))document.body.insertAdjacentHTML('beforeend',footerHtml());
  updateBadges();
  demoGuide();
- if(active!=='omik'&&typeof OmikWidget!=='undefined')OmikWidget.mount();
+ if(active!=='omik'&&typeof OmikWidget!=='undefined')OmikWidget.mount(['index','planner'].includes(active));
 }
 function footerHtml(){
  const ext=(t,h)=>`<a href="${OMA}${h}" target="_blank" rel="noopener">${t}</a>`;
@@ -246,7 +250,7 @@ function footerHtml(){
    <div class="f-pay">${['pay-visa','pay-mastercard','pay-belcart','pay-google-pay','pay-apple-pay','pay-halva'].map(x=>ico(x)).join('')}</div></div>
   <div class="f-cols">
    <div><span class="f-h">Покупателям</span>${ext('Форма обратной связи','/buyers/')}${ext('Доставка','/buyers/delivery/')}${ext('Самовывоз','/buyers/samovyvoz/')}${ext('Способы оплаты','/buyers/payment/')}${ext('Оплата частями','/buyers/payment/#credit')}${ext('Полезные статьи','/buyers/helpful/')}${ext('Возврат и гарантия','/buyers/warranty/')}${ext('Программа лояльности','/buyers/discount/balans/#card-info')}</div>
-   <div><span class="f-h">Ремонт с ОМА</span><a class="ours" href="omik.html">Омик — помощник по ремонту</a><a class="ours" href="planner.html">Калькулятор ремонта 2D и 3D</a><a class="ours" href="planner.html?view=3d">3D-планировка с мебелью</a><a class="ours" href="import.html">Планировка по фото</a><a class="ours" href="catalog.html">Каталог и смета</a><a class="ours" href="masters.html">Мастера ОМА</a><a class="ours" href="instrukcii.html">Сделать самому: прокат и инструкции</a><a class="ours" href="projects.html">Мои проекты</a><a class="ours" href="demo.html">▶ Демо для питча</a>
+   <div><span class="f-h">Ремонт с ОМА</span><a class="ours" href="omik.html">Омик — помощник по ремонту</a><a class="ours" href="projects.html#home">Мой дом</a><a class="ours" href="planner.html">Калькулятор ремонта 2D и 3D</a><a class="ours" href="planner.html?view=3d">3D-планировка с мебелью</a><a class="ours" href="import.html">Планировка по фото</a><a class="ours" href="catalog.html">Каталог и смета</a><a class="ours" href="masters.html">Мастера ОМА</a><a class="ours" href="instrukcii.html">Сделать самому: прокат и инструкции</a><a class="ours" href="projects.html">Аккаунт</a><a class="ours" href="demo.html">Демо для питча</a>
     <span class="f-h" style="margin-top:22px">Компания ОМА</span>${ext('О компании','/about/')}${ext('Новости','/news/')}${ext('Работа в ОМА','/about/rabota-v-oma/')}${ext('Отзывы об ОМА','/reviews/')}</div>
   </div>
   <div><div class="f-awards">${medals.map(([m,y])=>`<div><img src="${OMA}/local/images/awards/${m}.png" alt="" loading="lazy">${y}</div>`).join('')}</div>
@@ -257,7 +261,7 @@ function footerHtml(){
 document.addEventListener('click',e=>{const d=$('#omaDrop');if(d&&d.classList.contains('show')&&!e.target.closest('#omaDrop,.oma-catbtn'))d.classList.remove('show')});
 function updateBadges(){
  const s=load(),set=(k,v)=>$$(`[data-b="${k}"]`).forEach(e=>{e.textContent=v;e.style.display=v?'inline-block':'none'});
- set('cart',s.cart.length);set('proj',s.projects.length);set('req',s.requests.filter(r=>r.status<3).length);
+ set('cart',s.cart.length);set('dom',careDueCount());set('proj',s.projects.length);set('req',s.requests.filter(r=>r.status<3).length);
 }
 function toast(t,ok=true){let e=$('#toast');if(!e){e=document.createElement('div');e.id='toast';document.body.append(e)}e.innerHTML=t;e.className='show '+(ok?'':'bad');clearTimeout(e._t);e._t=setTimeout(()=>e.className='',2600)}
 
@@ -272,9 +276,9 @@ function pimg(p,cls=''){
   else if(p.pattern==='marble')bg=`linear-gradient(115deg,#0000 30%,#9a8f8040 31% 32%,#0000 33% 60%,#9a8f8030 61% 61.6%,#0000 62%),linear-gradient(#0000 calc(100% - 2px),#fff 0) 0 0/100% 50%,linear-gradient(90deg,#0000 calc(100% - 2px),#fff 0) 0 0/50% 100%,${c}`;
   else if(p.pattern==='concrete')bg=`radial-gradient(#0000000d 1px,#0000 1.5px) 0 0/7px 7px,linear-gradient(#0000 calc(100% - 2px),#fff 0) 0 0/100% 50%,linear-gradient(90deg,#0000 calc(100% - 2px),#fff 0) 0 0/50% 100%,${c}`;
   else bg=`linear-gradient(#0000 calc(100% - 2px),#d8d8d8 0) 0 0/100% 33.3%,linear-gradient(90deg,#0000 calc(100% - 2px),#d8d8d8 0) 0 0/33.3% 100%,${c}`;
-  return`<div class="pimg ${cls}" style="background:${bg}">${p.cat==='paint'?'<span>🎨</span>':''}</div>`;
+  return`<div class="pimg ${cls}" style="background:${bg}">${p.cat==='paint'?'<span><i class="ui ui-paint"></i></span>':''}</div>`;
  }
- return`<div class="pimg ${cls} ic">${p.icon||CATS[p.cat]?.icon||'📦'}</div>`;
+ return`<div class="pimg ${cls} ic">${ui(CATS[p.cat]?.icon||'box','solo')}</div>`;
 }
 const priceTag=p=>p.priceM2?`<b>${byn(p.price)}</b><small> / ${p.unit} · ${byn(p.priceM2)} за м²</small>`:`<b>${byn(p.price)}</b><small> / ${p.unit}</small>`;
 const badges=p=>`${p.stm?'<span class="tag stm">СТМ ОМА</span>':''}${p.tier&&TIERS[p.tier]?`<span class="tag t-${p.tier}">${TIERS[p.tier]}</span>`:''}`;
@@ -291,10 +295,10 @@ function pcard(p,o={}){
   <div class="pc-bonus"><span>+${(p.price/100).toFixed(2).replace('.',',')} бонусов</span> за покупку</div>
   <div class="pc-a">${o.actions||`<button class="btn" onclick="quickCart('${p.id}')">${ico('icon__cart-add')}В корзину</button><button class="btn g" onclick="quickEst('${p.id}')">＋ В смету проекта</button>`}</div></div></div>`;
 }
-function quickCart(pid){cartAdd(pid,1);toast(`🛒 «${esc(P(pid).name)}» в корзине`)}
+function quickCart(pid){cartAdd(pid,1);toast(`«${esc(P(pid).name)}» в корзине`)}
 function quickEst(pid){
  const p=ensureProject(P(pid).cat==='plumb'?'bath':'bath');const r=addLine(p,pid,1);save();
- toast(r.dup?'Этот товар уже есть в смете — количество можно изменить там':r.replaced?`Товар закреплён в смете вместо типового · <a href="smeta.html?project=${p.id}">открыть</a>`:`📋 Добавлено в смету «${esc(p.title)}» · <a href="smeta.html?project=${p.id}">открыть</a>`,!r.dup);
+ toast(r.dup?'Этот товар уже есть в смете — количество можно изменить там':r.replaced?`Товар закреплён в смете вместо типового · <a href="smeta.html?project=${p.id}">открыть</a>`:`<i class="ui ui-list"></i>Добавлено в смету «${esc(p.title)}» · <a href="smeta.html?project=${p.id}">открыть</a>`,!r.dup);
 }
 // ---------- Кто делает работу: мастер ОМА → прокат инструмента → инструкция ----------
 // p.doer: null (не выбрано) | 'master' | 'self' | 'later'; p.rental: {items:{id:сутки}, status:'draft'|'booked', at}
@@ -309,6 +313,58 @@ function rentalState(p){
 function rentalSum(p){const R=rentalState(p);let sum=0,dep=0;Object.entries(R.items).forEach(([id,d])=>{const r=RENTAL.find(x=>x.id===id);if(r&&d>0){sum+=r.day*d;dep+=r.deposit}});return{sum,dep}}
 function setDoer(p,who){if(p.doer===who)return;p.doer=who;log(p,{master:'Работу сделает мастер ОМА',self:'Работу делаю сам',later:'Кто делает работу — решу позже'}[who]||'Выбор исполнителя сброшен');save()}
 function bookRental(p,c){const R=rentalState(p),{sum,dep}=rentalSum(p);if(!sum)return false;R.status='booked';R.at=now();if(c)R.phone=c.phone;log(p,`Прокат инструмента забронирован: ${byn(sum)}, залог ${byn(dep)}`);save();return true}
+// ---------- Мой дом: история покупок и напоминания об уходе ----------
+// Что куплено и где лежит — из оформленных заказов и их проектов. Когда пора обслуживать — по правилам ухода CARE:
+// first — через сколько месяцев после покупки первый раз, every — потом каждые N месяцев.
+// s.care: {done:{ключ:дата}, snooze:{ключ:дата}, notify:телефон|null, at:сдвиг «посмотреть на дату» в месяцах}
+const MON=30.44*DAY;
+const CARE=[
+ {id:'seal',when:r=>isWet(r)&&roomRoles(r).some(x=>x.startsWith('tile')),first:24,every:24,t:'Заменить санитарный герметик',
+  why:'Шов у ванны и в углах со временем темнеет и пропускает воду под плитку. Старый срезают, новый кладут на сухую поверхность.',buy:()=>'seal',buyL:'Купить герметик',svc:null},
+ {id:'grout',when:r=>roomRoles(r).some(x=>x.startsWith('tile')),first:r=>isWet(r)?12:36,every:r=>isWet(r)?12:36,t:'Проверить и пропитать швы плитки',
+  why:'Пропитка защищает затирку от грязи и грибка. Если шов крошится — подновите той же затиркой, оттенок совпадёт.',buy:(p)=>lineOf(p,'grout'),svc:null},
+ {id:'fan',when:r=>isWet(r),first:6,every:6,t:'Почистить решётку вентиляции',
+  why:'Забитая решётка не вытягивает влагу — на потолке и в швах появляется плесень. Если вентилятор гудит или не тянет — пора заменить.',buy:()=>'fan',buyL:'Новый вентилятор',svc:'svc_fan'},
+ {id:'lam',when:r=>r.floor==='laminate',first:r=>monthsToMay(),every:12,t:'Осмотреть ламинат после отопительного сезона',
+  why:'Зимой воздух сухой, весной влажный: проверьте зазоры у стен, стыки и плинтус. Держите 1–2 доски из запаса на замену.',buy:()=>null,svc:'svc_lam'},
+ {id:'paintWall',when:r=>r.walls.some(w=>w.finish==='paint'),first:r=>['kitchen','hall'].includes(r.type)?36:60,every:r=>['kitchen','hall'].includes(r.type)?36:60,t:'Освежить покраску стен',
+  why:'В коридоре и на кухне стены пачкаются быстрее. Возьмите ту же краску — цвет и степень блеска совпадут.',buy:(p,r)=>matOf(p,r,'paintWall')?.id,svc:'svc_paint'},
+ {id:'paintCeil',when:r=>r.ceil==='paint',first:96,every:96,t:'Перекрасить потолок',
+  why:'Потолок желтеет медленно, но заметно рядом со свежими стенами. Красят одновременно со стенами.',buy:(p,r)=>matOf(p,r,'paintCeil')?.id,svc:'svc_ceil'},
+];
+const isWet=r=>r.wet??Calc.WET.includes(r.type);
+const lineOf=(p,role)=>p.est.lines.find(l=>l.role===role)?.pid||null;
+// первая проверка ламината — в ближайшем мае, но не раньше чем через 4 месяца после укладки
+function monthsToMay(){const d=new Date();let m=(4-d.getMonth()+12)%12;return m<4?m+12:m}
+const careOf=(v,r)=>typeof v==='function'?v(r):v;
+const careNow=()=>now()+(load().care?.at||0)*MON;
+// Дата покупки проекта: заказ, в котором он оформлен
+function boughtAt(p){const o=load().orders.find(o=>(o.projects||[]).includes(p.id)||o.no===p.order);return o?o.at:null}
+const homeProjects=()=>load().projects.filter(p=>p.status==='ordered'&&boughtAt(p)).sort((a,b)=>boughtAt(b)-boughtAt(a));
+// Все напоминания по дому: срок, статус (late — пора, soon — в ближайший месяц, ok — позже)
+function careList(){
+ const s=load(),c=s.care||{},T=careNow(),out=[];
+ homeProjects().forEach(p=>p.rooms.forEach(r=>CARE.forEach(rule=>{
+  if(!rule.when(r))return;
+  const key=`${p.id}|${r.id}|${rule.id}`,from=c.done?.[key]||boughtAt(p),months=careOf(c.done?.[key]?rule.every:rule.first,r);
+  const due=Math.max(from+months*MON,c.snooze?.[key]||0),left=due-T;
+  out.push({key,p,r,rule,due,from,status:left<=0?'late':left<30*DAY?'soon':'ok',pid:rule.buy(p,r)||null});
+ })));
+ return out.sort((a,b)=>a.due-b.due);
+}
+const careDueCount=()=>{try{return careList().filter(x=>x.status!=='ok').length}catch(e){return 0}};
+function careDone(key){const s=load();s.care=s.care||{};s.care.done={...s.care.done,[key]:careNow()};if(s.care.snooze)delete s.care.snooze[key];save()}
+function careSnooze(key){const s=load();s.care=s.care||{};s.care.snooze={...s.care.snooze,[key]:careNow()+MON};save()}
+// Для показа на питче: история дома «как будто» ремонт был год–четыре назад. Помечено как пример
+function careDemo(){
+ const s=load(),mk=(type,kind,params,title,months,tier,patch)=>{const r=makeRoom(type,kind,params);patch&&patch(r);const p=newProject({title,task:type,rooms:[r],tier,logText:'Пример для раздела «Мой дом»'});
+  const at=now()-months*MON,no='D-'+(20000+Math.floor(Math.random()*7999));p.status='ordered';p.est.status='ordered';p.order=no;p.created=p.updated=at;p.example=true;
+  s.orders.push({no,at,total:estTotal(p),items:p.est.lines.length,delivery:'pickup',date:at,projects:[p.id],lines:p.est.lines.map(l=>({pid:l.pid,qty:l.qty,price:P(l.pid).price,projectId:p.id})),example:true});s.projects.push(p)};
+ mk('bath','rect',{L:2.2,W:1.7},'Ванная (пример)',13,'opt');
+ mk('kitchen','rect',{L:3.4,W:2.8},'Кухня (пример)',35,'eco',r=>{r.floor='tile'});
+ mk('living','rect',{L:4.6,W:3.6},'Гостиная (пример)',8,'opt');
+ save();
+}
 // ---------- Телефон и регистрация ----------
 // Расчёт, Омик, план и 3D — без регистрации. Заявка мастеру и бронь проката — нужен белорусский телефон для связи.
 // Оплата заказа — регистрация по номеру с кодом из SMS (в демо код показываем на экране, SMS не отправляется).
@@ -360,7 +416,7 @@ function gate(kind,cb,why,pre){
 const DEMO_STEPS=[
  ['index.html','Главная ОМА','Обычный сайт ОМА, но с Омиком и калькулятором ремонта. Всё, кроме оплаты, работает без регистрации.'],
  ['import.html?example=1','Планировка по фото','Клиент загружает фото планировки — Омик сам находит стены, комнаты, двери и окна. Дальше берём готовую квартиру.'],
- ['planner.html?project={pid}&tab=fin','План в 2D','5 комнат, 52 м². Площади пола и стен считаются по контуру. Во вкладке «Отделка» — пол, стены, потолок и материал ОМА.'],
+ ['planner.html?project={pid}&tab=floor','План в 2D','5 комнат, 52 м². Площади пола и стен считаются по контуру. Вкладки «Стены», «Пол» и «Потолок» — размеры, отделка и материал ОМА.'],
  ['planner.html?project={pid}&view=3d','Квартира в 3D','Та же квартира в 3D: плитка и ламинат — фото товаров ОМА. Мебель и сантехника — тоже из каталога ОМА, её можно двигать и менять.'],
  ['smeta.html?project={pid}','Смета','Материалы посчитаны до упаковки: плитка, клей, затирка, грунт. Три комплектации и бюджет. Ниже — мебель из 3D; кнопка «Всё в корзину» кладёт материалы и мебель одним списком.'],
  ['smeta.html?project={pid}&doer=self#doer','Мастер или сам','Сначала предлагаем мастера ОМА. Хочет сам — прокат инструмента на нужные дни и бронь по номеру телефона.'],
@@ -391,7 +447,7 @@ function demoStart(){
  const p=demoProject();demoSet({step:0,pid:p.id});location=demoUrl(0);
 }
 const demoUrl=i=>DEMO_STEPS[i][0].replace('{pid}',demoState()?.pid||'');
-function demoGo(i){const d=demoState();if(!d)return;if(i<0)return;if(i>=DEMO_STEPS.length){demoSet(null);toast('Демо пройдено 🎉');$('#demoG')?.remove();return}d.step=i;demoSet(d);
+function demoGo(i){const d=demoState();if(!d)return;if(i<0)return;if(i>=DEMO_STEPS.length){demoSet(null);toast('Демо пройдено');$('#demoG')?.remove();return}d.step=i;demoSet(d);
  // к шагу с корзиной кладём в неё смету и мебель, если выступающий не успел нажать «Всё в корзину»
  const p=getProject(d.pid);if(p&&DEMO_STEPS[i][0].startsWith('cart')&&!load().cart.some(x=>x.projectId===p.id))cartSyncProject(p);
  location=demoUrl(i)}

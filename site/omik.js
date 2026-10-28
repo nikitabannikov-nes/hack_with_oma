@@ -143,11 +143,25 @@ const Omik=(()=>{
   return route(t,o);
  }
  function resume(note){const m=renovation()[0];return[{...m,html:(note?`<span class="note">${note}</span> `:'')+m.html}]}
+ // Инструкция: страница отдаёт window.GUIDE_API — шаги, отметки и действия
+ const G=()=>ctx().page==='instr'&&window.GUIDE_API;
+ const stepMsg=(g,pre='')=>{const st=g.state();if(st.cur<0)return B(`${pre}Все ${st.n} шагов отмечены — работа «${esc(st.name)}» готова. Сфотографируйте результат и сохраните остатки материалов: пригодятся для ремонта мелочей.`,{opts:[{l:'Снять последнюю отметку',a:'say',arg:'назад'}]});
+  return B(`${pre}<b>Шаг ${st.cur+1} из ${st.n}.</b> ${st.steps[st.cur]}`,{opts:[{l:'Шаг готов',a:'gstep',arg:String(st.cur),pri:true},{l:'Сколько сохнет?',a:'say'},{l:'Нужен мастер',a:'say',arg:'Нужен мастер'}]})};
+ function guideReply(t){
+  const g=G();if(!g)return null;const st=g.state();
+  if(/^(шаг )?(готов|сделал|сделала|сделано|закончил|выполнил|есть)|шаг готов|готово/.test(t)){if(st.cur<0)return[stepMsg(g)];g.done(st.cur);return[stepMsg(g,`Отметил шаг ${st.cur+1}. `)]}
+  if(/назад|отмени|не готов|верни|снять/.test(t)){const k=g.undo();return[stepMsg(g,k>=0?`Снял отметку с шага ${k+1}. `:'Отметок пока нет. ')]}
+  if(/сколько (осталось|еще|ещё)|прогресс|где я/.test(t))return[stepMsg(g,`Готово ${st.done} из ${st.n}. `)];
+  if(/что дальше|дальше|следующ|какой шаг|с чего начать|что делать|начнем|начать/.test(t))return[stepMsg(g)];
+  return null;
+ }
  function route(t,o,inFlow){
   const s=loadSt();
+  const gr=!inFlow&&guideReply(t);if(gr)return gr;
+  if(/что пора|по дому|напомин|обслуж|износ|сервисн|книжк|паспорт дома|когда менять|когда перекраш/.test(t))return homeReply();
   const lp=lastP();
   if(/^(стоп|отмен|хватит)/.test(t))return[B('Хорошо. Когда захотите посчитать другое помещение — просто напишите, что делаем и размеры.',{opts:STARTS})];
-  if(POLITE.test(t))return[lp?B(`Пожалуйста! Проект «${esc(lp.title)}» сохранён в «Моих проектах» — к нему можно вернуться в любой момент.`,{opts:resultOpts(lp)}):hello(false)];
+  if(POLITE.test(t))return[lp?B(`Пожалуйста! Проект «${esc(lp.title)}» сохранён в аккаунте — к нему можно вернуться в любой момент.`,{opts:resultOpts(lp)}):hello(false)];
   if(BOT.test(t))return[B('Я Омик — помощник ОМА по ремонту. В этом демо я работаю по готовым сценариям, без нейросети: понимаю задачи вроде «плитка в ванной 2 на 1,7, бюджет 1500». Количество считаю не я, а калькулятор — по площадям и нормам расхода товаров.',{opts:STARTS})];
   if(RENTBOOK.test(t))return rentBookReply();
   if(OWNTOOLS.test(t))return instrReply(true);
@@ -159,17 +173,17 @@ const Omik=(()=>{
   if(lp&&ADD.test(t)&&o.room&&lp.source==='omik'){s.slots={active:true,addTo:lp.id,budget:0};merge(s.slots,o,t);if(!s.slots.work)s.slots.work=o.room==='bath'||o.room==='wc'?'tile':o.room==='kitchen'?'tile':'laminate';const out=renovation();return out}
   if(lp&&lp.source==='omik'&&o.L&&!o.room&&!o.work&&!o.area)return resizeReply(lp,o);
   if(lp&&TIER.test(t)&&!o.room&&!o.work&&!/что такое|чем/.test(t)){const k={эконом:'eco',оптимум:'opt',премиум:'prem'}[t.match(TIER)[1]];lp.tier=k;recalc(lp);touchEst(lp,'Комплектация: '+TIERS[k]);save();return[B(`Перешли на «${TIERS[k]}»:${packCard(lp)}${lp.budget?budLine(lp):''}`,{opts:resultOpts(lp)})]}
-  if(SHOWCART.test(t))return[B(cartCount()?`В корзине ${cartCount()} поз. на <b>${byn(cartTotal())}</b>.`:'Корзина пока пустая.',{opts:cartCount()?[{l:'Перейти в корзину →',a:'go',arg:'cart.html',pri:true}]:lp?[{l:'🛒 Положить смету в корзину',a:'tocart',arg:lp.id,pri:true}]:STARTS})];
+  if(SHOWCART.test(t))return[B(cartCount()?`В корзине ${cartCount()} поз. на <b>${byn(cartTotal())}</b>.`:'Корзина пока пустая.',{opts:cartCount()?[{l:'Перейти в корзину →',a:'go',arg:'cart.html',pri:true}]:lp?[{l:'Положить смету в корзину',a:'tocart',arg:lp.id,pri:true}]:STARTS})];
   if(lp&&ENOUGH.test(t))return[B(`Должно хватить: калькулятор берёт площадь с запасом ${lp.rooms[0]?.waste??10}% на подрезку и округляет вверх до целых упаковок. Если положите меньше — неоткрытые упаковки в ОМА можно вернуть.`+packCard(lp),{opts:[{l:'Объясни расчёт',a:'say'},...resultOpts(lp).slice(0,1)]})];
   if(WORK.test(t))return masterReply((SVC_KW.find(([r])=>r.test(t))||[,'svc_tile_wall'])[1]);
-  if(FURN.test(t))return[B('Под шкаф-купе и кухонный гарнитур ламинат и плитку обычно не кладут — это экономия. Отметьте место под мебель на плане во вкладке «Проёмы и вычеты», и количество пересчитается.',{opts:lp?[{l:'📐 Отметить на плане',a:'go',arg:`planner.html?project=${lp.id}&tab=open`,pri:true}]:STARTS})];
+  if(FURN.test(t))return[B('Под шкаф-купе и кухонный гарнитур ламинат и плитку обычно не кладут — это экономия. Отметьте место под мебель на плане во вкладке «Пол», и количество пересчитается.',{opts:lp?[{l:'Отметить на плане',a:'go',arg:`planner.html?project=${lp.id}&tab=floor`,pri:true}]:STARTS})];
   if(CHEAP.test(t)&&lp&&!ctx().productId&&!/аналог/.test(t))return cheaper(lp);
   if(CALC.test(t)&&!(lp&&/сколько/.test(t)&&!o.room&&!o.work&&!o.L))return calcStart(o,t);
   if(CART.test(t))return cartReply();
   if(MORE.test(t))return moreReply();
   if(SHARE.test(t)&&lastP())return shareReply();
   if(/сколько|упаков|коробок|мешков|список/.test(t)&&lastP()&&!o.room&&!o.work)return[B(`Вот что нужно купить по проекту «${esc(lastP().title)}»:`+packCard(lastP(),12),{opts:resultOpts(lastP())})];
-  if(/фото|чертеж|скан|планировк|план (квартир|дом)/.test(t))return[B('Пришлите планировку: загрузите фото или скан. Я найду на чертеже стены, комнаты, двери и окна — нужен только общий размер для масштаба. Получится проект со сметой на все помещения.',{opts:[{l:'📷 Загрузить планировку',a:'go',arg:'import.html',pri:true},{l:'Посмотреть пример',a:'go',arg:'import.html?example=house'}]})];
+  if(/фото|чертеж|скан|планировк|план (квартир|дом)/.test(t))return[B('Пришлите планировку: загрузите фото или скан. Я найду на чертеже стены, комнаты, двери и окна — нужен только общий размер для масштаба. Получится проект со сметой на все помещения.',{opts:[{l:'Загрузить планировку',a:'go',arg:'import.html',pri:true},{l:'Посмотреть пример',a:'go',arg:'import.html?example=house'}]})];
   if(/^(привет|здравств|добр|хай|hello)|что (ты )?умеешь|помоги|помощь/.test(t))return[hello(true)];
   if(/объясни|как посчитал|почему столько|откуда/.test(t)&&proj())return explain();
   if(/сравн|чем отлича|разниц/.test(t)&&!/c1|c2|кле/.test(t))return compare();
@@ -195,15 +209,15 @@ const Omik=(()=>{
   const what={laminate:'ламинат',tile:'плитку',paint:'краску'}[work]||'материалы';
   const kit={laminate:'с подложкой и плинтусом',tile:'с клеем, затиркой, грунтом и гидроизоляцией',paint:'с грунтом'}[work]||'со всем, что идёт в комплект';
   const out=renovation(),m=out[0];if(!loadSt().slots.active)return out;
-  return[{...m,html:`Посчитаю ${what} прямо здесь — до целых упаковок, ${kit}. `+m.html,opts:[...(m.opts||[]).filter(x=>x.arg!=='Г-образная'),{l:'📐 Сложная форма — на плане',a:'go',arg:`planner.html?new=1&task=${task}${work?'&work='+work:''}&from=omik`}]}];
+  return[{...m,html:`Посчитаю ${what} прямо здесь — до целых упаковок, ${kit}. `+m.html,opts:[...(m.opts||[]).filter(x=>x.arg!=='Г-образная'),{l:'Сложная форма — на плане',a:'go',arg:`planner.html?new=1&task=${task}${work?'&work='+work:''}&from=omik`}]}];
  }
  // «Ванна стоит — вычесть?»: вычитаем место под ванной из пола прямо в чате
  function bathReply(){
   const p=lastP(),r=p&&(p.rooms.find(x=>x.type==='bath')||p.rooms[0]);
   const h='Да, учтите: под ванной плитку на пол не кладут. Стандартная ванна 170 × 70 см — это минус 1,2 м² плитки.';
   if(!r)return[B(h+' Сначала посчитаем ванную — напишите размеры.',{opts:STARTS})];
-  if((r.excl||[]).some(x=>/ванн/i.test(x.name)))return[B('Ванна уже вычтена из пола. Размер и место можно поправить на плане.',{opts:[{l:'📐 Открыть план',a:'go',arg:`planner.html?project=${p.id}&room=${r.id}&tab=open`}]})];
-  return[B(h,{opts:[{l:'Вычесть ванну 170 × 70',a:'bathx',arg:p.id+':'+r.id,pri:true},{l:'Другой размер — на плане',a:'go',arg:`planner.html?project=${p.id}&room=${r.id}&tab=open`}]})];
+  if((r.excl||[]).some(x=>/ванн/i.test(x.name)))return[B('Ванна уже вычтена из пола. Размер и место можно поправить на плане.',{opts:[{l:'Открыть план',a:'go',arg:`planner.html?project=${p.id}&room=${r.id}&tab=floor`}]})];
+  return[B(h,{opts:[{l:'Вычесть ванну 170 × 70',a:'bathx',arg:p.id+':'+r.id,pri:true},{l:'Другой размер — на плане',a:'go',arg:`planner.html?project=${p.id}&room=${r.id}&tab=floor`}]})];
  }
  // Винительный падеж: «покрасить спальню»
  const acc=o=>({Спальня:'спальню',Гостиная:'гостиную',Детская:'детскую',Кабинет:'кабинет',Зал:'зал'})[o.roomName]||{bath:'ванную',wc:'санузел',kitchen:'кухню',living:'комнату',hall:'коридор'}[o.room]||'комнату';
@@ -217,13 +231,20 @@ const Omik=(()=>{
  // «а если 2 на 2» после расчёта — меняем размеры той же комнаты
  function resizeReply(p,o){
   const r=p.rooms[p.rooms.length-1];
-  if(p.rooms.length>1||r.shape?.kind!=='rect')return[B('Размеры комнаты сложной формы удобнее поменять на плане.',{opts:[{l:'📐 Открыть план',a:'go',arg:`planner.html?project=${p.id}&room=${r.id}`,pri:true}]})];
+  if(p.rooms.length>1||r.shape?.kind!=='rect')return[B('Размеры комнаты сложной формы удобнее поменять на плане.',{opts:[{l:'Открыть план',a:'go',arg:`planner.html?project=${p.id}&room=${r.id}`,pri:true}]})];
   r.shape={kind:'rect',params:{L:o.L,W:o.W}};r.pts=Geom.fromTemplate('rect',{L:o.L,W:o.W});
   r.excl=r.excl.filter(x=>Geom.rectInside(x,r.pts));
   r.openings.forEach(q=>{const w=r.walls.findIndex(x=>x.id===q.wallId),len=w<0?0:Geom.segLen(r.pts[w],r.pts[(w+1)%r.pts.length]);q.w=Math.min(q.w,len-0.2);q.off=Math.max(0.1,Math.min(q.off,len-q.w-0.1))});
   recalc(p);touchEst(p,`Омик: размеры ${num(o.L)} × ${num(o.W)} м`);save();
-  if(!p.calc.ok)return[B('С такими размерами не сходится геометрия — поправьте на плане.',{opts:[{l:'📐 Открыть план',a:'go',arg:'planner.html?project='+p.id,pri:true}]})];
+  if(!p.calc.ok)return[B('С такими размерами не сходится геометрия — поправьте на плане.',{opts:[{l:'Открыть план',a:'go',arg:'planner.html?project='+p.id,pri:true}]})];
   return[B(`Пересчитал «${esc(r.name)}» на ${num(o.L)} × ${num(o.W)} м:${packCard(p)}${p.budget?budLine(p):''}`,{opts:resultOpts(p)})];
+ }
+ // «Мой дом»: что пора сделать по дому
+ function homeReply(){
+  const L=careList(),due=L.filter(x=>x.status!=='ok');
+  if(!homeProjects().length)return[B('Когда купите материалы по смете, я запишу их в раздел «Мой дом» и заранее напомню: когда менять герметик в ванной, пропитать швы, освежить покраску.',{opts:[{l:'Открыть «Мой дом»',a:'go',arg:'projects.html#home',pri:true}]})];
+  const top=(due.length?due:L).slice(0,3);
+  return[B(`${due.length?`По дому ${due.length} ${due.length===1?'дело':due.length<5?'дела':'дел'}:`:'Срочных дел нет. Ближайшие:'}<div class="card-in">${top.map(x=>`<div class="row pk"><span>${esc(x.rule.t)}<small>${esc(x.r.name)}</small></span><b>${new Date(x.due).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}</b></div>`).join('')}</div>`,{opts:[{l:'Открыть «Мой дом»',a:'go',arg:'projects.html#home',pri:true}]})];
  }
  function cartMsg(p){
   if(!p.calc?.ok)return B('В проекте ошибка геометрии — сначала поправьте план, потом соберу корзину.',{opts:[{l:'Открыть план',a:'go',arg:'planner.html?project='+p.id,pri:true}]});
@@ -246,11 +267,11 @@ const Omik=(()=>{
   loadSt().last=kit.map(x=>x.id);
   let h=inc.length?`Расходники уже в расчёте: <b>${[...new Set(inc)].join(', ')}</b>.`:'Основные материалы уже в расчёте.';
   h+=kit.length?`<p style="margin-top:6px">Обычно ещё докупают инструмент — если его нет дома:</p>`:'<p style="margin-top:6px">Из инструмента ничего особого не нужно.</p>';
-  return[B(h,{pcs:kit.map(x=>x.id),opts:[{l:'🛒 Всё по смете в корзину',a:'tocart',arg:p.id,pri:true},{l:'📋 Открыть смету',a:'go',arg:'smeta.html?project='+p.id}]})];
+  return[B(h,{pcs:kit.map(x=>x.id),opts:[{l:'Всё по смете в корзину',a:'tocart',arg:p.id,pri:true},{l:'Открыть смету',a:'go',arg:'smeta.html?project='+p.id}]})];
  }
  function shareReply(){
   const p=lastP();
-  return[B('Отправьте смету ссылкой в Viber или Telegram. Она откроется на любом телефоне без регистрации: мастер или домашние увидят размеры, количество и расчёт и смогут согласовать или попросить изменения.',{opts:[{l:'🔗 Получить ссылку',a:'go',arg:`smeta.html?project=${p.id}&share=1`,pri:true}]})];
+  return[B('Отправьте смету ссылкой в Viber или Telegram. Она откроется на любом телефоне без регистрации: мастер или домашние увидят размеры, количество и расчёт и смогут согласовать или попросить изменения.',{opts:[{l:'Получить ссылку',a:'go',arg:`smeta.html?project=${p.id}&share=1`,pri:true}]})];
  }
  // Что купить: материалы и расходники с количеством в упаковках
  const MAIN_ROLES=['tileFloor','tileWall','laminate','paintWall','paintCeil'];
@@ -262,7 +283,7 @@ const Omik=(()=>{
  }
  function resultOpts(p,o={}){
   const rect=p.rooms.length===1&&p.rooms[0].shape?.kind==='rect';
-  return[{l:'🛒 Всё в корзину',a:'tocart',arg:p.id,pri:!o.over},{l:'📋 Смета с расчётом',a:'go',arg:'smeta.html?project='+p.id},rect?{l:'🔗 Ссылка для мастера',a:'go',arg:`smeta.html?project=${p.id}&share=1`}:{l:'📐 Уточнить форму на плане',a:'go',arg:`planner.html?project=${p.id}&from=omik`},{l:'👷 Кто сделает работу?',a:'say',arg:'Нужен мастер'}];
+  return[{l:'Всё в корзину',a:'tocart',arg:p.id,pri:!o.over},{l:'Смета с расчётом',a:'go',arg:'smeta.html?project='+p.id},rect?{l:'Ссылка для мастера',a:'go',arg:`smeta.html?project=${p.id}&share=1`}:{l:'Уточнить форму на плане',a:'go',arg:`planner.html?project=${p.id}&from=omik`},{l:'Кто сделает работу?',a:'say',arg:'Нужен мастер'}];
  }
  function merge(sl,o,t){
   Object.assign(sl,Object.fromEntries(Object.entries(o).filter(([,v])=>v!=null)));
@@ -273,8 +294,10 @@ const Omik=(()=>{
   const c=ctx(),p=proj();
   let h='Привет! Я <b>Омик</b>, помощник по ремонту ОМА. Скажите, что делаете и какого размера комната, — посчитаю материалы до упаковки, уложусь в бюджет и соберу корзину.';
   const opts=[{l:'Плитка в ванной 2,2 на 1,7, бюджет 1500',a:'say'},{l:'Где посчитать ламинат?',a:'say'},{l:'Покрасить комнату 4 на 3',a:'say'},{l:'Клей для керамогранита',a:'say'}];
-  if(c.page==='smeta'&&p){h=`Это смета проекта «${esc(p.title)}». Могу объяснить, как посчитано количество, подсказать, как уложиться в бюджет, или собрать всё в корзину.`;opts.splice(0,4,{l:'Объясни расчёт',a:'say'},{l:'Как удешевить смету?',a:'say'},{l:'Что ещё понадобится?',a:'say'},{l:'🛒 Всё в корзину',a:'tocart',arg:p.id})}
-  if(c.page==='planner'&&p){h='Помогу с планом. Г-образную или П-образную комнату выберите в «Форма», сложную — нарисуйте по точкам. Количества пересчитаются сами.';opts.splice(0,4,{l:'Какой запас брать?',a:'say'},{l:'Нужна ли гидроизоляция?',a:'say'},{l:'Объясни расчёт',a:'say'})}
+  if(c.page==='smeta'&&p){h=`Это смета проекта «${esc(p.title)}». Могу объяснить, как посчитано количество, подсказать, как уложиться в бюджет, или собрать всё в корзину.`;opts.splice(0,4,{l:'Объясни расчёт',a:'say'},{l:'Как удешевить смету?',a:'say'},{l:'Что ещё понадобится?',a:'say'},{l:'Всё в корзину',a:'tocart',arg:p.id})}
+  if(c.page==='dom'){const m=homeReply()[0];h=m.html;opts.splice(0,4,{l:'Что пора по дому?',a:'say'},{l:'Посчитать новый ремонт',a:'say',arg:'Плитка в ванной 2,2 на 1,7, бюджет 1500'})}
+  else if(c.page==='instr'&&G()){const m=stepMsg(G(),`Я веду вас по инструкции «${esc(G().state().name)}». Отмечайте шаги здесь или в списке — подскажу, что дальше. `);h=m.html;opts.splice(0,4,...m.opts)}
+  else if(c.page==='planner'&&p){h='Помогу с планом. Г-образную или П-образную комнату выберите в «Форма», сложную — нарисуйте по точкам. Количества пересчитаются сами.';opts.splice(0,4,{l:'Какой запас брать?',a:'say'},{l:'Нужна ли гидроизоляция?',a:'say'},{l:'Объясни расчёт',a:'say'})}
   if(c.page==='product'&&c.productId){const pr=P(c.productId);h=`Смотрите «${esc(pr.name)}». Могу посчитать нужное количество по плану комнаты, найти аналог или мастера для установки.`;
    opts.splice(0,4,...[pr.roles.length?{l:'Рассчитать количество',a:'go',arg:'product.html?id='+pr.id+'#calc'}:null,{l:'Найди аналог дешевле',a:'say'},pr.service?{l:'Нужен мастер для установки',a:'say'}:null].filter(Boolean))}
   return B(h+(full?'<p class="note" style="margin-top:6px">Демо-режим: отвечаю по сценариям, без внешней LLM. Цены и количества беру из каталога и калькулятора.</p>':''),{opts});
@@ -364,7 +387,7 @@ const Omik=(()=>{
   const R=p?rentalState(p):null,sum=p?rentalSum(p):null;
   const list=rent.map(r=>`<li style="display:flex;gap:8px;align-items:center"><img src="${r.img}" alt="" loading="lazy" style="width:44px;height:44px;object-fit:contain;flex:none;background:#fff;border-radius:6px"><span><b>${esc(r.name)}</b> — ${byn(r.day)}/сут.${R?.items[r.id]?`, ${R.items[r.id]} сут.`:r.opt?' — по желанию':''}<br><span class="note">${esc(r.why)}</span></span></li>`).join('');
   const h=`${asked?'':'Хорошо, делаем сами! '}Чтобы не покупать инструмент на пару дней, возьмите его в <b>прокат ОМА</b>${p?' — подобрал под ваши работы':''}:<ul class="plist">${list}</ul>${sum&&sum.sum?`Прокат ≈ <b>${byn(sum.sum)}</b>, залог ${byn(sum.dep)} вернём при сдаче.`:''}<p class="note" style="margin-top:6px">Цены проката демонстрационные.</p>`;
-  return[B(h,{opts:[p?{l:'🔧 Забронировать прокат',a:'go',arg:`smeta.html?project=${p?.id}&doer=self#doer`,pri:true}:{l:'🔧 Посчитать прокат по проекту',a:'say',arg:'Посчитай ремонт'},{l:'У меня есть инструмент',a:'say',arg:'Инструмент есть, прокат не нужен'},{l:'👷 Всё-таки мастер',a:'say',arg:'Нужен мастер'}].filter(Boolean)})];
+  return[B(h,{opts:[p?{l:'Забронировать прокат',a:'go',arg:`smeta.html?project=${p?.id}&doer=self#doer`,pri:true}:{l:'Посчитать прокат по проекту',a:'say',arg:'Посчитай ремонт'},{l:'У меня есть инструмент',a:'say',arg:'Инструмент есть, прокат не нужен'},{l:'Всё-таки мастер',a:'say',arg:'Нужен мастер'}].filter(Boolean)})];
  }
  // Бронь — в смете: там выбирают инструмент и сутки и оставляют белорусский номер; в чате не регистрируем
  function rentBookReply(){
@@ -372,16 +395,16 @@ const Omik=(()=>{
   if(!p)return[B('Сначала посчитаем ремонт — тогда подберу прокат под ваши работы. Что делаем и какого размера?',{opts:STARTS})];
   setDoer(p,'self');rentalState(p).skip=false;save();
   const{sum,dep}=rentalSum(p);
-  return[B(`Отметил прокат под ваш проект: ≈ <b>${byn(sum)}</b>, залог ${byn(dep)}. Проверьте инструмент и сутки в смете и оставьте номер телефона — пункт проката перезвонит и подтвердит бронь. Регистрация не нужна.`,{opts:[{l:'🔧 Перейти к брони',a:'go',arg:`smeta.html?project=${p.id}#doer`,pri:true},...guideOpts(p).map(o=>({...o,pri:false})),{l:'Не нужно, спасибо',a:'say',arg:'спасибо'}]})];
+  return[B(`Отметил прокат под ваш проект: ≈ <b>${byn(sum)}</b>, залог ${byn(dep)}. Проверьте инструмент и сутки в смете и оставьте номер телефона — пункт проката перезвонит и подтвердит бронь. Регистрация не нужна.`,{opts:[{l:'Перейти к брони',a:'go',arg:`smeta.html?project=${p.id}#doer`,pri:true},...guideOpts(p).map(o=>({...o,pri:false})),{l:'Не нужно, спасибо',a:'say',arg:'спасибо'}]})];
  }
  // Инструкция: шаги с объёмами и товарами из сметы; можно отказаться и продолжить
  function instrReply(ownTools,note){
   const p=lastP();
   if(p&&ownTools){setDoer(p,'self');rentalState(p).skip=true;save()}
   const h=`${note?note+' ':ownTools?'Отлично, тогда инструмент свой. ':''}Вот пошаговая инструкция${p?` по проекту «${esc(p.title)}»: в шагах ваши площади и товары из сметы — сколько клея, какой шпатель, когда затирать`:''}. Её можно распечатать.`;
-  return[B(h,{opts:[...guideOpts(p),{l:'Не нужно, спасибо',a:'say',arg:'спасибо'},{l:'👷 Всё-таки мастер',a:'say',arg:'Нужен мастер'}]})];
+  return[B(h,{opts:[...guideOpts(p),{l:'Не нужно, спасибо',a:'say',arg:'спасибо'},{l:'Всё-таки мастер',a:'say',arg:'Нужен мастер'}]})];
  }
- function guideOpts(p){const w=p&&projectWorks(p).length?projectWorks(p):Object.keys(WORKS);return w.map((k,i)=>({l:`📖 ${WORKS[k].name}`,a:'go',arg:`instrukcii.html?work=${k}${p?'&project='+p.id:''}`,pri:i===0}))}
+ function guideOpts(p){const w=p&&projectWorks(p).length?projectWorks(p):Object.keys(WORKS);return w.map((k,i)=>({l:`${WORKS[k].name}`,a:'go',arg:`instrukcii.html?work=${k}${p?'&project='+p.id:''}`,pri:i===0}))}
  function masterReply(sid){
   const p=proj();
   // по проекту сразу берём его основную работу — не переспрашиваем
@@ -390,7 +413,7 @@ const Omik=(()=>{
   const sv=svc(sid),ms=MASTERS.filter(m=>m.cats.includes(sv.cat)),e=svcEstimate(sv,p);
   const vol=sv.area&&p&&e.q?` По вашему проекту это ${num(e.q,1)} ${sv.unit}, ориентировочно <b>${byn(e.sum)}</b>.`:'';
   return[B(`«${sv.name}» — от <b>${byn(sv.price)}</b> за ${sv.unit}.${vol} Доступно мастеров: ${ms.length}, ближайший выезд — ${fmtDay(now()+Math.min(...ms.map(m=>m.days))*DAY)}.<p class="note" style="margin-top:6px">Мастера, цены и даты в прототипе демонстрационные. Работы оплачиваются мастеру, ОМА не гарантирует их в демо.</p>`,
-   {opts:[{l:'Выбрать мастера',a:'go',arg:`masters.html?service=${sid}${p?'&project='+p.id:''}`,pri:true},{l:'Оставить заявку',a:'go',arg:`masters.html?service=${sid}${p?'&project='+p.id:''}#new`},{l:'🛠 Сделаю сам',a:'say',arg:'Мастер не нужен, сделаю сам'}]})];
+   {opts:[{l:'Выбрать мастера',a:'go',arg:`masters.html?service=${sid}${p?'&project='+p.id:''}`,pri:true},{l:'Оставить заявку',a:'go',arg:`masters.html?service=${sid}${p?'&project='+p.id:''}#new`},{l:'Сделаю сам',a:'say',arg:'Мастер не нужен, сделаю сам'}]})];
  }
  function cheaper(lp){
   const p=lp||proj();if(!p.calc?.ok)return[B('В проекте ошибка геометрии — сначала исправьте план, потом посчитаю.',{opts:[{l:'Открыть план',a:'go',arg:'planner.html?project='+p.id}]})];
@@ -412,13 +435,14 @@ const Omik=(()=>{
  function act(a,arg,label){
   if(a==='say')return send(arg||label);
   if(a==='go'){location=arg;return}
-  if(a==='cart'){cartAdd(arg,1);toast('🛒 Добавлено в корзину');return}
+  if(a==='gstep'){const g=G();if(g){g.done(+arg);push(stepMsg(g,`Отметил шаг ${+arg+1}. `))}return}
+  if(a==='cart'){cartAdd(arg,1);toast('Добавлено в корзину');return}
   if(a==='bathx'){const[pid,rid]=arg.split(':'),p=getProject(pid),r=p&&p.rooms.find(x=>x.id===rid);if(!r)return;
    const xs=r.pts.map(q=>q[0]),ys=r.pts.map(q=>q[1]),x0=Math.min(...xs),y0=Math.min(...ys),w=Geom.r2(Math.min(1.7,Math.max(...xs)-x0)),hh=Geom.r2(Math.min(0.7,Math.max(...ys)-y0));
    r.excl.push({id:uid(),name:'Ванна',x:x0,y:y0,w,h:hh});recalc(p);touchEst(p,'Омик: вычтено место под ванной');save();
    push(B(`Вычел ванну ${num(w*100,0)} × ${num(hh*100,0)} см из пола и пересчитал:${packCard(p)}`,{opts:resultOpts(p)}));updateBadges();return}
   if(a==='tocart'){const p=getProject(arg);if(p){push(cartMsg(p));updateBadges()}return}
-  if(a==='est'){const p=ensureProject('bath');const r=addLine(p,arg,1,'omik');save();toast(r.dup?'Уже есть в смете':`📋 В смете «${esc(p.title)}»`);return}
+  if(a==='est'){const p=ensureProject('bath');const r=addLine(p,arg,1,'omik');save();toast(r.dup?'Уже есть в смете':`<i class="ui ui-list"></i>В смете «${esc(p.title)}»`);return}
   if(a==='pin'){const[pid,role,alt]=arg.split(':'),p=getProject(pid);p.pinned[role]=alt;recalc(p);touchEst(p,`Омик: замена «${ROLES[role]}» на более дешёвую`);save();push(B(`Заменил. Новая сумма материалов: <b>${byn(estTotal(p))}</b>.`,{opts:[{l:'Открыть смету',a:'go',arg:'smeta.html?project='+p.id}]}));if(ctx().page==='smeta'&&window.renderSmeta)renderSmeta();return}
   if(a==='tier'){const[pid,t]=arg.split(':'),p=getProject(pid);p.tier=t;recalc(p);touchEst(p,'Комплектация: '+TIERS[t]);save();push(B(`Перешли на «${TIERS[t]}»: ${byn(estTotal(p))}.`,{opts:[{l:'Открыть смету',a:'go',arg:'smeta.html?project='+p.id}]}));if(window.renderSmeta)renderSmeta();return}
   if(a==='mod'){const[pid]=arg.split(':'),p=getProject(pid);p.rooms.forEach(r=>r.walls.forEach(w=>w.finish='paint'));recalc(p);p.tier=['prem','opt','eco'].find(k=>{const x=tierTotal(p,k);return p.budget&&x!=null&&x<=p.budget})||'eco';recalc(p);touchEst(p,'Омик: стены под покраску вместо плитки');save();
@@ -445,6 +469,8 @@ const Omik=(()=>{
  function suggestions(){
   const c=ctx();
   if(c.page==='smeta')return['Объясни расчёт','Как удешевить смету?','Что ещё понадобится?','Отправить смету мастеру'];
+  if(c.page==='dom')return['Что пора по дому?','Когда менять герметик?','Плитка в ванной 2,2 на 1,7, бюджет 1500'];
+  if(c.page==='instr')return['Шаг готов','Что дальше?','Сколько сохнет?','Сколько осталось?'];
   if(c.page==='planner')return['Какой запас брать?','Нужна ли гидроизоляция?','Объясни расчёт'];
   if(c.page==='product')return['Найди аналог дешевле','Сравни с аналогами','Нужен мастер для установки'];
   return['Плитка в ванной 2,2 на 1,7, бюджет 1500','Где посчитать ламинат?','Покрасить комнату 4 на 3','Клей для керамогранита'];
@@ -459,17 +485,21 @@ const Omik=(()=>{
   el.querySelector('.msgs').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;act(b.dataset.a,b.dataset.arg,b.textContent)});
   const s=loadSt();
   const last=s.msgs[s.msgs.length-1];
-  if(!s.msgs.length||ctx().page&&s.ctxPage!==ctx().page+(ctx().productId||'')){s.ctxPage=ctx().page+(ctx().productId||'');s.msgs.push(hello(!s.msgs.length));saveSt()}
+  if(!s.msgs.length||ctx().page&&s.ctxPage!==ctx().page+(ctx().productId||'')+(ctx().work||'')){s.ctxPage=ctx().page+(ctx().productId||'')+(ctx().work||'');s.msgs.push(hello(!s.msgs.length));saveSt()}
   render();
   return{send};
  }
- return{mount,send,reply,parse,loadSt,reset:()=>{st={msgs:[],slots:{},last:[]};saveSt();render()}};
+ // Страница сообщает Омику о своём событии — например, отмеченном шаге инструкции
+ function note(){const g=G();if(g&&host)push(stepMsg(g,'Отлично! '))}
+ return{mount,send,reply,parse,loadSt,note,reset:()=>{st={msgs:[],slots:{},last:[]};saveSt();render()}};
 })();
 // Плавающая кнопка и окно чата на всех страницах
+// hideFab: на главной и в калькуляторе (и импорте) Омик уже встроен в страницу — плавающая кнопка там только перекрывает контент.
+// Окно всё равно создаём: его могут открыть кнопки на странице
 const OmikWidget={
- mount(){
+ mount(hideFab){
   if($('#omikFab'))return;
-  document.body.insertAdjacentHTML('beforeend',`<button class="fab" id="omikFab" onclick="OmikWidget.open()"><img src="img/omik-avatar.png" alt=""><span>Спросить Омика</span></button><div class="drawer" id="omikDrawer" data-close="1"></div>`);
+  document.body.insertAdjacentHTML('beforeend',`<button class="fab" id="omikFab" onclick="OmikWidget.open()"${hideFab?' hidden':''}><img src="img/omik-avatar.png" alt=""><span>Спросить Омика</span></button><div class="drawer" id="omikDrawer" data-close="1"></div>`);
  },
  open(q){const d=$('#omikDrawer');if(!d.dataset.m){Omik.mount(d);d.dataset.m=1}d.classList.add('show');$('#omikFab').style.display='none';if(q)Omik.send(q);setTimeout(()=>d.querySelector('input')?.focus(),50)},
  close(){$('#omikDrawer').classList.remove('show');$('#omikFab').style.display=''}

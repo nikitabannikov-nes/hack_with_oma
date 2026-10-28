@@ -2,12 +2,12 @@ const LOGO='<svg viewBox="0 0 120 40"><path d="M2 20a18 18 0 0 1 18-18h4L10 38A1
 function chrome(active){
  const cart=JSON.parse(localStorage.getItem('omaCartN')||'0');
  document.querySelector('#chrome').innerHTML=`
- <div class="top"><div class="wrap"><span>Ваш регион: <b>Минск</b></span><span class="hide">Акции</span><span class="hide">Листовка</span><span class="hide">Оплата частями</span><span class="sp"></span><span>☎ 536-45-00</span></div></div>
+ <div class="top"><div class="wrap"><span>Ваш регион: <b>Минск</b></span><span class="hide">Акции</span><span class="hide">Листовка</span><span class="hide">Оплата частями</span><span class="sp"></span><span><i class="ui ui-phone"></i>536-45-00</span></div></div>
  <header class="main"><div class="wrap">
   <a class="logo" href="index.html">${LOGO}<span>ГИПЕРМАРКЕТ<br>ОМА</span></a>
-  <a class="cat" href="#">☰ Каталог</a>
+  <a class="cat" href="#"><i class="ui ui-menu"></i>Каталог</a>
   <div class="search"><input placeholder="Поиск по товарам и услугам"><b>Найти</b></div>
-  <div class="hico"><a href="passport.html"><i>🏠</i>Паспорт дома</a><a href="#"><i>♡</i>Избранное</a><a href="cart.html"><i>🛒</i>Корзина<span class="cnt" id="cn" style="display:${cart?'inline':'none'}">${cart}</span></a></div>
+  <div class="hico"><a href="passport.html"><i><i class="ui ui-home"></i></i>Паспорт дома</a><a href="#"><i><i class="ui ui-heart"></i></i>Избранное</a><a href="cart.html"><i><i class="ui ui-cart"></i></i>Корзина<span class="cnt" id="cn" style="display:${cart?'inline':'none'}">${cart}</span></a></div>
  </div></header>
  <nav class="sub"><div class="wrap"><span>Интерьер и отделка</span><span>Сантехника</span><span>Инструмент</span><span>Стройматериалы</span><span>Электрика</span><b class="hot">ВСЕ АКЦИИ</b><span>Прокат</span><a href="index.html#services" style="color:var(--blue)">Услуги мастеров</a></div></nav>`;
  if(!/prorab/.test(location.pathname)) document.body.insertAdjacentHTML('beforeend','<a class="fab" href="prorab.html"><img src="img/omik-avatar.png" alt=""><span>Рассчитать ремонт</span></a>');

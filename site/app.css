@@ -331,3 +331,5 @@ nav.sub img{width:24px;height:24px;border-radius:50%;object-fit:cover}
 .demo-g p{margin:6px 0 10px;line-height:1.45;color:#dce6f2}.demo-g .demo-a{display:flex;gap:6px}.demo-g .demo-a .btn{flex:1;justify-content:center;padding:7px 8px;font-size:13px}
 .demo-g .btn.g{background:#fff}
 @media(max-width:700px){.demo-g{left:8px;right:8px;bottom:72px;width:auto}}
+/* Плавающая кнопка Омика скрыта там, где он уже встроен в страницу (OmikWidget.mount(hideFab)) */
+.fab[hidden]{display:none!important}

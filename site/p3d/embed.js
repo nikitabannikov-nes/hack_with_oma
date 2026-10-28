@@ -101,10 +101,8 @@ export function mount({ host, tools, panel, project: p, focus = 'all', activeRoo
   // --- Кнопки на холсте
   tools.innerHTML = `<div class="grp"><button data-v="3d">3D</button><button data-v="top">Сверху</button></div>
    <button data-a="cam" title="Вернуть камеру">⟲</button><span class="sep"></span>
-   <button data-a="rot" title="Повернуть на 90° (R)">↻<span class="lb"> Повернуть</span></button><button data-a="del" title="Удалить (Delete)">🗑<span class="lb"> Удалить</span></button>
-   <button data-a="walls" title="Низкие стены — видно всю квартиру; высокие — как в жизни">▥<span class="lb"> Низкие стены</span></button>
-   <button data-a="grid" title="Привязка к сетке 5 см">#<span class="lb"> Сетка 5 см</span></button><span class="sep"></span>
-   <button data-a="png" title="Сохранить картинку">📷<span class="lb"> Картинка</span></button>`;
+   <button data-a="rot" title="Повернуть на 90° (R)">↻<span class="lb"> Повернуть</span></button><button data-a="del" title="Удалить (Delete)"><i class="ui ui-trash"></i><span class="lb">Удалить</span></button>
+`;
   tools.onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.v) store.set({ view: b.dataset.v });
@@ -112,14 +110,9 @@ export function mount({ host, tools, panel, project: p, focus = 'all', activeRoo
     if (a === 'cam') ui.resetView();
     if (a === 'rot') rotateSelected();
     if (a === 'del') removeItem();
-    if (a === 'grid') store.set(s => ({ grid: !s.grid }));
-    if (a === 'walls') store.set(s => ({ lowWalls: !s.lowWalls }));
-    if (a === 'png') download(ui.screenshot(), (p.title || 'квартира') + ' — 3D.png');
   };
   function drawTools(s) {
     tools.querySelectorAll('[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === s.view));
-    tools.querySelector('[data-a="grid"]').classList.toggle('on', s.grid);
-    tools.querySelector('[data-a="walls"]').classList.toggle('on', s.lowWalls);
     tools.querySelectorAll('[data-a="rot"],[data-a="del"]').forEach(b => b.disabled = !s.selected);
   }
   function download(href, name) { const a = document.createElement('a'); a.href = href; a.download = name; document.body.append(a); a.click(); a.remove(); }
@@ -148,7 +141,7 @@ export function mount({ host, tools, panel, project: p, focus = 'all', activeRoo
         <div><b>${esc(x.name)}</b><small>${bad.has(i.uid) ? '<em>Пересекается с другим товаром</em>' : vr.length > 1 ? esc(rn) : ''}</small></div><span>${byn(x.price)}</span><button class="x" data-del="${i.uid}" title="Убрать">×</button></div>`;
      }).join('') : '<p class="note">Пока пусто. Нажмите на товар в каталоге.</p>'}</div>
      <div class="fur-tot"><span>${vr.length > 1 ? 'Итого по квартире' : 'Итого по помещению'}</span><b>${byn(total)}</b></div>
-     ${s.items.length ? `<div class="fur-acts"><button class="btn o" data-tocart>🛒 Мебель в корзину</button><a class="btn g" href="smeta.html?project=${p.id}">📋 В смете</a></div>` : ''}
+     ${s.items.length ? `<div class="fur-acts"><button class="btn o" data-tocart><i class="ui ui-cart"></i>Мебель в корзину</button><a class="btn g" href="smeta.html?project=${p.id}"><i class="ui ui-list"></i>В смете</a></div>` : ''}
      ${vr.length === 1 && all !== total ? `<p class="note">Во всей квартире: ${byn(all)}</p>` : ''}
      <p class="note">Тащите товар по полу мышью или пальцем, в соседнюю комнату — тоже можно. <kbd>R</kbd> — повернуть, <kbd>Delete</kbd> — удалить. Ближе 15 см к стене товар прилипает к ней. Товары и цены — из каталога ОМА; с пометкой «демо» — примерные, такой позиции в ОМА не нашлось.</p>
     </div>`;
@@ -156,7 +149,7 @@ export function mount({ host, tools, panel, project: p, focus = 'all', activeRoo
   panel.addEventListener('click', e => {
     if (!active) return;
     const c = e.target.closest('[data-cat]'); if (c) { cat = c.dataset.cat; return renderPanel(); }
-    if (e.target.closest('[data-tocart]')) { const n = cartSyncFurniture(p); return toast(`🛒 В корзине мебель: ${n} поз. · <a href="cart.html">открыть корзину</a>`); }
+    if (e.target.closest('[data-tocart]')) { const n = cartSyncFurniture(p); return toast(`В корзине мебель: ${n} поз. · <a href="cart.html">открыть корзину</a>`); }
     const del = e.target.closest('[data-del]'); if (del) return removeItem(del.dataset.del);
     const row = e.target.closest('.s3'); if (row) store.set({ selected: row.dataset.uid });
   });

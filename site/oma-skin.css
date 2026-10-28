@@ -231,21 +231,28 @@ footer.oma-f .wrap{display:grid;grid-template-columns:24% 48.6% 27.4%;gap:0}
  footer.oma-f .wrap,.f-cols{grid-template-columns:minmax(0,1fr);padding-left:0}
  .ssm{width:calc(100vw - 20px);left:0;top:auto}
 }
-/* Поле Омика в первом экране: задача одной строкой → сразу расчёт */
-.ask1{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;margin-top:12px;background:#fff;border:2px solid var(--blue);border-radius:14px;padding:8px 8px 8px 10px;box-shadow:0 6px 20px #005ead1a}
-.ask1>img{width:40px;height:40px;border-radius:50%;object-fit:cover;background:#eef4fb}
-.ask1 input{border:0;outline:0;font:inherit;font-size:16px;min-width:0;padding:10px 4px;background:none;color:#001a34}
-.ask1 .btn{padding:12px 22px;font-size:15px}
-.ask1-ch{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;padding:2px 2px 2px 0}
-.ask1-ch a{border:1px solid #e5e5e5;border-radius:20px;padding:5px 12px;font-size:13px;color:#001a34;background:#fff}
-.ask1-ch a:hover{border-color:var(--blue);color:var(--blue)}
-@media(max-width:800px){.ask1{grid-template-columns:minmax(0,1fr) auto}.ask1>img{display:none}.ask1 input{font-size:15px}.ask1 .btn{padding:11px 14px}.ask1-ch{flex-wrap:nowrap;overflow-x:auto}.ask1-ch a{white-space:nowrap}.slider{height:340px}.bnr p{font-size:15px;margin-bottom:14px}.tools4{grid-template-columns:1fr}}
 /* полоса преимуществ — белая во всю ширину, как на oma.by */
 .promo6{background:#fff;box-shadow:0 0 0 100vmax #fff;clip-path:inset(0 -100vmax);margin-top:10px}
 body:has(.promo6) footer.oma-f{margin-top:0}
 .doors.cont2{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:30px}
 @media(max-width:800px){.doors.cont2{grid-template-columns:minmax(0,1fr)}}
 /* Финиш-ревью 390 px: текст баннера не уходит под бобра, фокус поля Омика виден, подвал с отступами */
-.ask1:focus-within{box-shadow:0 0 0 4px #005ead33}
-@media(max-width:800px){.bnr p{max-width:60%}.bnr img.pers{height:160px}.ask1-ch a{padding:8px 12px}footer.oma-f .wrap{padding:0 16px}}
+@media(max-width:800px){.bnr p{max-width:60%}.bnr img.pers{height:160px}footer.oma-f .wrap{padding:0 16px}}
 @media(max-width:800px){.slider .dots{bottom:auto;top:16px;left:auto;right:16px}}
+/* Блок Омика перед подборками: одна понятная задача — написать, что ремонтируем */
+.askbig{display:grid;grid-template-columns:240px minmax(0,1fr);gap:36px;align-items:center;background:#fff;border-radius:16px;padding:32px 40px 32px 28px;margin:30px 0 34px;box-shadow:var(--shadow)}
+.askbig-pic{width:100%;max-height:260px;object-fit:contain}
+.askbig-l{display:inline-block;background:var(--g-blue);color:#fff;font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:5px 10px}
+.askbig h2{font-size:36px;line-height:1.1;font-weight:900;margin:12px 0 8px;color:#001a34}
+.askbig p{font-size:17px;color:#4d5b6b;margin:0 0 20px;max-width:640px}
+.askbig-f{display:flex;gap:10px;max-width:860px}
+.askbig-f input{flex:1;min-width:0;height:60px;border:2px solid var(--blue);border-radius:12px;padding:0 20px;font:inherit;font-size:18px;color:#001a34;outline:0}
+.askbig-f input:focus{box-shadow:0 0 0 4px #005ead26}
+.askbig-f .btn{height:60px;padding:0 30px;font-size:17px;border-radius:12px}
+.askbig-ch{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.askbig-ch a{display:inline-flex;align-items:center;border:1px solid #dfe3e8;border-radius:22px;padding:9px 16px;font-size:14px;font-weight:500;color:#001a34;background:#fff}
+.askbig-ch a .ui{color:var(--blue)}
+.askbig-ch a:hover{border-color:var(--blue);color:var(--blue)}
+@media(max-width:1000px){.askbig{grid-template-columns:150px minmax(0,1fr);gap:22px;padding:24px}.askbig h2{font-size:28px}}
+@media(max-width:700px){.askbig{grid-template-columns:minmax(0,1fr);padding:20px 16px;margin:20px 0}.askbig-pic{display:none}.askbig h2{font-size:26px}.askbig p{font-size:15px}
+ .askbig-f{flex-direction:column}.askbig-f input,.askbig-f .btn{height:54px}.askbig-ch{flex-wrap:nowrap;overflow-x:auto;margin-right:-16px;padding-right:16px}.askbig-ch a{white-space:nowrap}}

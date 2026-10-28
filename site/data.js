@@ -2,14 +2,14 @@
 // Товары, цены, рейтинги и даты условные. Нормы расхода — типовые значения из техкарт, расчёт по ним ориентировочный.
 (function(root){
 const CATS={
- tile:{name:'Плитка и керамогранит',icon:'🧱'},
- mix:{name:'Сухие смеси и гидроизоляция',icon:'🪣'},
- paint:{name:'Краски',icon:'🎨'},
- floor:{name:'Напольные покрытия',icon:'🪵'},
- plumb:{name:'Сантехника',icon:'🚿'},
- tools:{name:'Инструмент',icon:'🔧'},
- elec:{name:'Электрика и вентиляция',icon:'💡'},
- furn:{name:'Мебель, сантехника и техника',icon:'🛋'}
+ tile:{name:'Плитка и керамогранит',icon:'tile'},
+ mix:{name:'Сухие смеси и гидроизоляция',icon:'bucket'},
+ paint:{name:'Краски',icon:'paint'},
+ floor:{name:'Напольные покрытия',icon:'floor'},
+ plumb:{name:'Сантехника',icon:'drop'},
+ tools:{name:'Инструмент',icon:'tool'},
+ elec:{name:'Электрика и вентиляция',icon:'bulb'},
+ furn:{name:'Мебель, сантехника и техника',icon:'sofa'}
 };
 // Роли — что товар делает в расчёте. Для каждой роли есть товар на каждую комплектацию.
 const ROLES={
@@ -73,27 +73,27 @@ floor({id:'skirt_opt',name:'Плинтус МДФ под покраску, 2,4 �
 floor({id:'skirt_prem',name:'Плинтус шпонированный, 2,4 м',roles:['skirting'],tier:'prem',unit:'шт.',price:21.00,pack:{q:2.4,u:'м'},spec:{},props:[['Длина','2,4 м'],['Материал','МДФ, шпон дуба']],desc:'',rel:[]});
 // --- Сантехника, электрика (не рассчитываются по площади — добавляются в смету)
 const item=(o)=>add({unit:'шт.',roles:[],tier:null,pack:null,spec:{},rel:['seal'],...o});
-item({id:'mix_bath',cat:'plumb',name:'Смеситель для ванны с душевым гарнитуром',price:129.00,service:'svc_mixer',icon:'🚿',props:[['Тип','однорычажный'],['Материал','латунь, хром'],['Гарантия','5 лет (демо)']],desc:'Настенный смеситель с переключателем на душ.'});
-item({id:'mix_bath_p',cat:'plumb',name:'Смеситель термостатический для ванны',price:289.00,service:'svc_mixer',icon:'🚿',props:[['Тип','термостат'],['Материал','латунь, хром'],['Гарантия','5 лет (демо)']],desc:'Держит заданную температуру воды.'});
-item({id:'mix_sink',cat:'plumb',name:'Смеситель для раковины',price:89.00,service:'svc_mixer',icon:'🚰',props:[['Тип','однорычажный'],['Материал','латунь']],desc:''});
-item({id:'mix_sink_e',cat:'plumb',name:'Смеситель для раковины, эконом',price:49.00,service:'svc_mixer',icon:'🚰',props:[['Тип','однорычажный'],['Материал','силумин']],desc:''});
-item({id:'wc',cat:'plumb',name:'Унитаз-компакт, сиденье микролифт',price:289.00,service:'svc_wc',icon:'🚽',props:[['Выпуск','косой'],['Сиденье','микролифт']],desc:''});
-item({id:'sink',cat:'plumb',name:'Тумба с раковиной 60 см',price:349.00,service:'svc_sink',icon:'🪞',props:[['Ширина','60 см'],['Материал','влагостойкий ЛДСП']],desc:''});
-item({id:'bath',cat:'plumb',name:'Ванна акриловая 170×70 с каркасом',price:459.00,service:'svc_bath',icon:'🛁',props:[['Размер','170×70 см'],['Материал','акрил']],desc:''});
-item({id:'rail',cat:'plumb',name:'Полотенцесушитель водяной 50×80',price:159.00,service:'svc_rail',icon:'♨️',props:[['Размер','50×80 см'],['Подключение','боковое']],desc:''});
-item({id:'drain',cat:'plumb',name:'Трап для душа 30 см',price:69.00,service:'svc_mixer',icon:'🕳️',props:[['Длина','30 см']],desc:''});
-item({id:'fan',cat:'elec',name:'Вентилятор вытяжной 100 мм, с обратным клапаном',price:45.00,service:'svc_fan',icon:'🌀',props:[['Диаметр','100 мм'],['Обратный клапан','да']],desc:''});
-item({id:'led',cat:'elec',name:'Светильник влагозащищённый IP44',price:38.00,icon:'💡',props:[['Защита','IP44']],desc:''});
+item({id:'mix_bath',cat:'plumb',name:'Смеситель для ванны с душевым гарнитуром',price:129.00,service:'svc_mixer',icon:'drop',props:[['Тип','однорычажный'],['Материал','латунь, хром'],['Гарантия','5 лет (демо)']],desc:'Настенный смеситель с переключателем на душ.'});
+item({id:'mix_bath_p',cat:'plumb',name:'Смеситель термостатический для ванны',price:289.00,service:'svc_mixer',icon:'drop',props:[['Тип','термостат'],['Материал','латунь, хром'],['Гарантия','5 лет (демо)']],desc:'Держит заданную температуру воды.'});
+item({id:'mix_sink',cat:'plumb',name:'Смеситель для раковины',price:89.00,service:'svc_mixer',icon:'drop',props:[['Тип','однорычажный'],['Материал','латунь']],desc:''});
+item({id:'mix_sink_e',cat:'plumb',name:'Смеситель для раковины, эконом',price:49.00,service:'svc_mixer',icon:'drop',props:[['Тип','однорычажный'],['Материал','силумин']],desc:''});
+item({id:'wc',cat:'plumb',name:'Унитаз-компакт, сиденье микролифт',price:289.00,service:'svc_wc',icon:'wc',props:[['Выпуск','косой'],['Сиденье','микролифт']],desc:''});
+item({id:'sink',cat:'plumb',name:'Тумба с раковиной 60 см',price:349.00,service:'svc_sink',icon:'drop',props:[['Ширина','60 см'],['Материал','влагостойкий ЛДСП']],desc:''});
+item({id:'bath',cat:'plumb',name:'Ванна акриловая 170×70 с каркасом',price:459.00,service:'svc_bath',icon:'bath',props:[['Размер','170×70 см'],['Материал','акрил']],desc:''});
+item({id:'rail',cat:'plumb',name:'Полотенцесушитель водяной 50×80',price:159.00,service:'svc_rail',icon:'drop',props:[['Размер','50×80 см'],['Подключение','боковое']],desc:''});
+item({id:'drain',cat:'plumb',name:'Трап для душа 30 см',price:69.00,service:'svc_mixer',icon:'drop',props:[['Длина','30 см']],desc:''});
+item({id:'fan',cat:'elec',name:'Вентилятор вытяжной 100 мм, с обратным клапаном',price:45.00,service:'svc_fan',icon:'tool',props:[['Диаметр','100 мм'],['Обратный клапан','да']],desc:''});
+item({id:'led',cat:'elec',name:'Светильник влагозащищённый IP44',price:38.00,icon:'bulb',props:[['Защита','IP44']],desc:''});
 // --- Инструмент (Werker — СТМ ОМА)
 const tool=(o)=>add({cat:'tools',unit:'шт.',roles:[],tier:null,pack:null,spec:{},rel:[],...o});
-tool({id:'clips',name:'Система выравнивания плитки 2 мм, 200 шт — Werker',roles:['clips'],tier:'all',stm:true,unit:'уп.',price:14.50,pack:{q:200,u:'шт.'},icon:'📏',props:[['Шов','2 мм'],['Количество','200 клипс']],desc:'Клипсы и клинья: плитка ложится без перепадов.'});
-tool({id:'trowel8',name:'Шпатель зубчатый 8 мм — Werker',stm:true,price:7.90,icon:'🧰',props:[['Зуб','8×8 мм']],desc:'Для плитки 30–60 см.'});
-tool({id:'cross2',name:'Крестики для плитки 2 мм, 200 шт',price:3.50,icon:'✚',props:[['Шов','2 мм']],desc:''});
-tool({id:'cutter',name:'Плиткорез ручной 600 мм — Werker',stm:true,price:89.00,icon:'🔪',props:[['Длина реза','600 мм']],desc:''});
-tool({id:'level',name:'Уровень строительный 60 см — Werker',stm:true,price:19.90,icon:'📐',props:[['Длина','60 см']],desc:''});
-tool({id:'roller',name:'Валик малярный 25 см с ручкой — Werker',stm:true,price:12.90,icon:'🖌️',props:[['Ширина','25 см']],desc:''});
-tool({id:'tape_m',name:'Лента малярная 50 мм × 50 м',price:4.50,icon:'🎞️',props:[['Ширина','50 мм']],desc:''});
-tool({id:'mixer_d',name:'Миксер строительный 1200 Вт — Werker',stm:true,price:179.00,icon:'🌀',props:[['Мощность','1200 Вт']],desc:'Для замеса клея и затирки.'});
+tool({id:'clips',name:'Система выравнивания плитки 2 мм, 200 шт — Werker',roles:['clips'],tier:'all',stm:true,unit:'уп.',price:14.50,pack:{q:200,u:'шт.'},icon:'level',props:[['Шов','2 мм'],['Количество','200 клипс']],desc:'Клипсы и клинья: плитка ложится без перепадов.'});
+tool({id:'trowel8',name:'Шпатель зубчатый 8 мм — Werker',stm:true,price:7.90,icon:'tool',props:[['Зуб','8×8 мм']],desc:'Для плитки 30–60 см.'});
+tool({id:'cross2',name:'Крестики для плитки 2 мм, 200 шт',price:3.50,icon:'plus',props:[['Шов','2 мм']],desc:''});
+tool({id:'cutter',name:'Плиткорез ручной 600 мм — Werker',stm:true,price:89.00,icon:'tool',props:[['Длина реза','600 мм']],desc:''});
+tool({id:'level',name:'Уровень строительный 60 см — Werker',stm:true,price:19.90,icon:'plan',props:[['Длина','60 см']],desc:''});
+tool({id:'roller',name:'Валик малярный 25 см с ручкой — Werker',stm:true,price:12.90,icon:'paint',props:[['Ширина','25 см']],desc:''});
+tool({id:'tape_m',name:'Лента малярная 50 мм × 50 м',price:4.50,icon:'tool',props:[['Ширина','50 мм']],desc:''});
+tool({id:'mixer_d',name:'Миксер строительный 1200 Вт — Werker',stm:true,price:179.00,icon:'tool',props:[['Мощность','1200 Вт']],desc:'Для замеса клея и затирки.'});
 
 // Что предложить вместе с работой
 const KITS={tile:['trowel8','cross2','clips','level','cutter'],paint:['roller','tape_m'],floor:['level'],wet:['seal','fan']};
@@ -135,15 +135,15 @@ if(REAL){
 // Прокат инструмента в гипермаркете ОМА: цена за сутки и залог — демо. works — для каких работ проекта предлагать;
 // opt — по желанию: в списке есть, но галочка по умолчанию снята; img и model — фото и модель из каталога oma.by (снимок 28.10.2026)
 const RENTAL=[
- {id:'r_cutter',img:'https://www.oma.by/upload/images/resize/products/e7/c6/2418630/350x350_in.jpg',model:'MTX, монорельсовый 600 мм',name:'Плиткорез ручной 600 мм',icon:'📐',day:12,deposit:100,works:['tile'],why:'ровный прямой рез плитки до 60 см',replaces:['cutter']},
- {id:'r_mixer',img:'https://www.oma.by/upload/images/resize/products/72/52/2191954/350x350_in.png',model:'WERKER EM 950',name:'Строительный миксер',icon:'🌀',day:15,deposit:150,works:['tile'],why:'замес клея и затирки без комков'},
- {id:'r_grinder',img:'https://www.oma.by/upload/images/resize/products/a3/f2/2335730/350x350_in.jpg',model:'WERKER AG 750',name:'Болгарка с алмазным диском',icon:'⚙️',day:12,deposit:120,works:['tile'],why:'вырезы под трубы и розетки',opt:true},
- {id:'r_laser',img:'https://www.oma.by/upload/images/resize/products/b7/ca/2340810/350x350_in.jpg',model:'Halk GreenLine 88202',name:'Лазерный уровень',icon:'🔴',day:14,deposit:200,works:['tile','floor'],why:'разметка рядов и проверка ровности пола'},
- {id:'r_jigsaw',img:'https://www.oma.by/upload/images/resize/products/20/6a/1777770/350x350_in.png',model:'WERKER JS 850',name:'Электролобзик',icon:'🪚',day:10,deposit:120,works:['floor'],why:'подрезка доски по длине и вырезы под трубы'},
- {id:'r_sander',img:'https://www.oma.by/upload/images/resize/products/5e/46/2383430/350x350_in.jpg',model:'«Жираф» DLT GrandFlex V32',name:'Шлифмашина для стен',icon:'🧽',day:18,deposit:200,works:['paint'],why:'шлифовка шпаклёвки перед покраской'},
- {id:'r_sprayer',img:'https://www.oma.by/upload/images/resize/products/fe/97/1703575/350x350_in.jpg',model:'Вихрь ЭКП-700В',name:'Краскопульт',icon:'💨',day:20,deposit:250,works:['paint'],why:'быстрая покраска больших площадей',opt:true}
+ {id:'r_cutter',img:'https://www.oma.by/upload/images/resize/products/e7/c6/2418630/350x350_in.jpg',model:'MTX, монорельсовый 600 мм',name:'Плиткорез ручной 600 мм',icon:'plan',day:12,deposit:100,works:['tile'],why:'ровный прямой рез плитки до 60 см',replaces:['cutter']},
+ {id:'r_mixer',img:'https://www.oma.by/upload/images/resize/products/72/52/2191954/350x350_in.png',model:'WERKER EM 950',name:'Строительный миксер',icon:'tool',day:15,deposit:150,works:['tile'],why:'замес клея и затирки без комков'},
+ {id:'r_grinder',img:'https://www.oma.by/upload/images/resize/products/a3/f2/2335730/350x350_in.jpg',model:'WERKER AG 750',name:'Болгарка с алмазным диском',icon:'tool',day:12,deposit:120,works:['tile'],why:'вырезы под трубы и розетки',opt:true},
+ {id:'r_laser',img:'https://www.oma.by/upload/images/resize/products/b7/ca/2340810/350x350_in.jpg',model:'Halk GreenLine 88202',name:'Лазерный уровень',icon:'tool',day:14,deposit:200,works:['tile','floor'],why:'разметка рядов и проверка ровности пола'},
+ {id:'r_jigsaw',img:'https://www.oma.by/upload/images/resize/products/20/6a/1777770/350x350_in.png',model:'WERKER JS 850',name:'Электролобзик',icon:'tool',day:10,deposit:120,works:['floor'],why:'подрезка доски по длине и вырезы под трубы'},
+ {id:'r_sander',img:'https://www.oma.by/upload/images/resize/products/5e/46/2383430/350x350_in.jpg',model:'«Жираф» DLT GrandFlex V32',name:'Шлифмашина для стен',icon:'tool',day:18,deposit:200,works:['paint'],why:'шлифовка шпаклёвки перед покраской'},
+ {id:'r_sprayer',img:'https://www.oma.by/upload/images/resize/products/fe/97/1703575/350x350_in.jpg',model:'Вихрь ЭКП-700В',name:'Краскопульт',icon:'tool',day:20,deposit:250,works:['paint'],why:'быстрая покраска больших площадей',opt:true}
 ];
-const WORKS={tile:{name:'Укладка плитки',icon:'🧱'},floor:{name:'Укладка ламината',icon:'🪵'},paint:{name:'Покраска стен и потолка',icon:'🎨'}};
+const WORKS={tile:{name:'Укладка плитки',icon:'tile'},floor:{name:'Укладка ламината',icon:'floor'},paint:{name:'Покраска стен и потолка',icon:'paint'}};
 // Мебель, сантехника и техника из 3D-вида (oma-furniture.js): в общий список товаров — для сметы, корзины и карточки
 const FURN=typeof module!=='undefined'?null:root.OMA_FURN;
 if(FURN)FURN.forEach(f=>P.push({id:f.id,name:f.name,cat:'furn',roles:[],tier:'all',price:f.price,unit:'шт.',img:f.photo||null,url:f.url||null,brand:f.brand||null,real:!!f.real,furn:true,
