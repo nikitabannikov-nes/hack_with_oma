@@ -42,10 +42,11 @@ function material(look, len, hh, u0, y0) {
 /**
  * rooms: [{ id, polygon:{x,z}[], height, floor: look|null, walls: [{ look, h }], openings: [{ wall, kind, off, w, h, sill }] }]
  */
-export function buildApartment(rooms) {
+// cut — высота среза стен (вид «кукольный домик» для всей квартиры), null — стены в полную высоту
+export function buildApartment(rooms, { cut = null } = {}) {
   const group = new THREE.Group(), fading = [];   // fading: { meshes, w } — гасим, если камера снаружи стены
   for (const r of rooms) {
-    const poly = r.polygon, H = r.height;
+    const poly = r.polygon, H = cut ? Math.min(cut, r.height) : r.height;
     // пол по контуру; UV пола — координаты в метрах, так что рисунок плитки в реальном масштабе
     const shape = new THREE.Shape(poly.map(p => new THREE.Vector2(p.x, -p.z)));
     const fg = new THREE.ShapeGeometry(shape); fg.rotateX(-Math.PI / 2);

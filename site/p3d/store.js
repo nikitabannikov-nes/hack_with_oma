@@ -1,7 +1,7 @@
 // Состояние 3D-вида: комнаты (контур {x,z}[] в метрах, высота, отделка), расставленные товары, настройки вида.
 // Маленькое хранилище с подпиской вместо zustand. Куда сохранять товары, решает страница (onSave).
 export function createStore(initial, onSave = () => {}) {
-  let state = { grid: true, view: '3d', focus: 'all', selected: null, ...initial };
+  let state = { grid: true, view: '3d', focus: 'all', selected: null, lowWalls: (initial.focus || 'all') === 'all', ...initial };
   const subs = new Set();
   return {
     get: () => state,

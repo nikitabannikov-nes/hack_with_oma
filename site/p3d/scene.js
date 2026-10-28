@@ -5,8 +5,9 @@ import { buildApartment } from './room.js';
 import { buildObject } from './normalizeModel.js';
 import { bbox, place, pointInPoly } from './snapping.js';
 import { collisions } from './collision.js';
+import { onTexturesChange } from './textures.js';
 
-const BLUE = 0x005ead, RED = 0xef2e23;
+const BLUE = 0x005ead, RED = 0xef2e23, LOW_WALLS = 1.1;   // высота среза стен, м
 
 // Какие комнаты сейчас на сцене: вся квартира или одна выбранная
 export const visibleRooms = s => {
@@ -52,6 +53,7 @@ export function createScene(host, store, catalog) {
   const controls = () => view === 'top' ? top : orbit;
   const invalidate = () => { dirty = true; };
   orbit.addEventListener('change', invalidate); top.addEventListener('change', invalidate);
+  onTexturesChange(invalidate);   // догрузилось фото плитки или ламината — перерисовать
 
   function fitCameras(reset) {
     const vr = visibleRooms(store.get());
@@ -76,7 +78,7 @@ export function createScene(host, store, catalog) {
 
   function rebuildRooms(s) {
     if (apt) { scene.remove(apt.group); apt.group.traverse(o => { o.geometry?.dispose(); o.material?.map?.dispose(); o.material?.dispose?.(); }); }
-    apt = buildApartment(visibleRooms(s)); scene.add(apt.group);
+    apt = buildApartment(visibleRooms(s), { cut: s.lowWalls ? LOW_WALLS : null }); scene.add(apt.group);
   }
 
   // Рамка выделения/пересечения: рёбра габаритного короба
@@ -184,7 +186,7 @@ export function createScene(host, store, catalog) {
 
   // --- Подписка на состояние
   let lastBad = new Set();
-  const keyOf = s => JSON.stringify(visibleRooms(s));
+  const keyOf = s => JSON.stringify([visibleRooms(s), s.lowWalls]);
   store.subscribe((s, prev) => {
     const key = keyOf(s);
     if (key !== roomKey) { const refocus = s.focus !== prev.focus || !roomKey; roomKey = key; rebuildRooms(s); fitCameras(refocus); }

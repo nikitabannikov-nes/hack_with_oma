@@ -15,15 +15,23 @@ preloadModels(catalog);
 const byId = id => catalog.find(p => p.id === id);
 const dimsOf = it => { const p = byId(it.id); return { ...p.dimensions, elevation: p.elevation || 0, wallMounted: !!p.wallMounted }; };
 
-// Отделка из калькулятора → вид поверхности для 3D
+// Отделка из калькулятора → вид поверхности для 3D. Плитка и ламинат — с фото товара (img/tex/<id>.jpg),
+// если для него есть вырезка в oma-crops.js; иначе рисунок по цвету
+function lookOf(prod, kind) {
+  const l = prod && matLook(prod);
+  if (!l) return null;
+  const k = kind || l.kind;
+  return { kind: k, color: l.color, size: l.size, ...(l.crop && k !== 'paint' ? { tex: `img/tex/${prod.id}.jpg`, grain: l.crop[4] || '' } : {}) };
+}
 function wallLook(p, r, finish) {
-  if (finish === 'tile') { const l = matLook(matOf(p, r, 'tileWall')); return l && { kind: 'tile', color: l.color, size: l.size }; }
-  if (finish === 'paint') { const l = matLook(matOf(p, r, 'paintWall')); return l && { kind: 'paint', color: l.color }; }
+  // настенную плитку кладём длинной стороной вдоль стены — как обычно укладывают 30×60
+  if (finish === 'tile') { const l = lookOf(matOf(p, r, 'tileWall')); return l && { ...l, kind: l.kind === 'plank' ? 'plank' : 'tile', size: [...l.size].sort((a, b) => b - a) }; }
+  if (finish === 'paint') return lookOf(matOf(p, r, 'paintWall'), 'paint');
   return null;
 }
 function floorLook3(p, r) {
-  const l = floorLook(p, r);
-  return l && { kind: l.kind === 'plank' ? 'plank' : 'tile', color: l.color, size: l.size };
+  const role = r.floor === 'tile' ? 'tileFloor' : r.floor === 'laminate' ? 'laminate' : null;
+  return role ? lookOf(matOf(p, r, role)) : null;
 }
 export function roomsOf(p) {
   return p.rooms.filter(r => r.pts.length >= 3 && Geom.validate(r).ok).map(r => ({
@@ -92,6 +100,7 @@ export function mount({ host, tools, panel, project: p, focus = 'all', activeRoo
   tools.innerHTML = `<div class="grp"><button data-v="3d">3D</button><button data-v="top">Сверху</button></div>
    <button data-a="cam" title="Вернуть камеру">⟲</button><span class="sep"></span>
    <button data-a="rot" title="Повернуть на 90° (R)">↻<span class="lb"> Повернуть</span></button><button data-a="del" title="Удалить (Delete)">🗑<span class="lb"> Удалить</span></button>
+   <button data-a="walls" title="Низкие стены — видно всю квартиру; высокие — как в жизни">▥<span class="lb"> Низкие стены</span></button>
    <button data-a="grid" title="Привязка к сетке 5 см">#<span class="lb"> Сетка 5 см</span></button><span class="sep"></span>
    <button data-a="png" title="Сохранить картинку">📷<span class="lb"> Картинка</span></button>`;
   tools.onclick = e => {
@@ -102,11 +111,13 @@ export function mount({ host, tools, panel, project: p, focus = 'all', activeRoo
     if (a === 'rot') rotateSelected();
     if (a === 'del') removeItem();
     if (a === 'grid') store.set(s => ({ grid: !s.grid }));
+    if (a === 'walls') store.set(s => ({ lowWalls: !s.lowWalls }));
     if (a === 'png') download(ui.screenshot(), (p.title || 'квартира') + ' — 3D.png');
   };
   function drawTools(s) {
     tools.querySelectorAll('[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === s.view));
     tools.querySelector('[data-a="grid"]').classList.toggle('on', s.grid);
+    tools.querySelector('[data-a="walls"]').classList.toggle('on', s.lowWalls);
     tools.querySelectorAll('[data-a="rot"],[data-a="del"]').forEach(b => b.disabled = !s.selected);
   }
   function download(href, name) { const a = document.createElement('a'); a.href = href; a.download = name; document.body.append(a); a.click(); a.remove(); }
@@ -180,7 +191,8 @@ export function mount({ host, tools, panel, project: p, focus = 'all', activeRoo
 
   return {
     renderPanel,
-    setFocus: f => store.set({ focus: f, selected: null }),
+    // вся квартира — стены пониже, чтобы видеть комнаты; одна комната — в полную высоту
+    setFocus: f => store.set(s => s.focus === f ? {} : { focus: f, selected: null, lowWalls: f === 'all' }),
     // план поменяли в 2D — пересобираем комнаты и подтягиваем товары внутрь стен
     refresh() { const rooms = roomsOf(p); store.set(s => ({ rooms, items: refit(rooms, s.items) })); },
     setActive(on) { active = on; if (on) { ui.resize(); renderPanel(); } },

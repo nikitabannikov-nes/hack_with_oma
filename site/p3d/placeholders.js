@@ -41,18 +41,37 @@ function bath(w, d, h) {
   shell.holes.push(roundedRect(w - 2 * wall, d - 2 * wall, Math.max(0.02, r - wall)));
   g.add(mesh(extrudeUp(shell, h), M.ceramic()));
   g.add(mesh(extrudeUp(roundedRect(w - 2 * wall + 0.002, d - 2 * wall + 0.002, Math.max(0.02, r - wall)), h * 0.35), M.inner()));
-  g.add(mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.1, 12), M.chrome(), -w / 2 + wall + 0.12, h + 0.05, -d / 2 + wall / 2)); // смеситель на борту
+  // смеситель на борту: излив смотрит внутрь ванны и не выходит выше борта больше чем на 4 см
+  g.add(mesh(new THREE.CylinderGeometry(0.018, 0.022, 0.04, 14), M.chrome(), -w / 2 + wall + 0.14, h + 0.02, -d / 2 + wall / 2));
+  g.add(box(0.03, 0.02, 0.09, M.chrome(), -w / 2 + wall + 0.14, h + 0.03, -d / 2 + wall / 2 + 0.05));
   return g;
 }
 
+// Унитаз-компакт: чаша (полая, видно внутри), сиденье с крышкой, бачок на задней полке чаши.
+// Все части строго в габаритах и без совпадающих граней — иначе поверхности мерцают
 function toilet(w, d, h) {
   const g = new THREE.Group(), cer = M.ceramic();
-  const bowl = mesh(new THREE.CylinderGeometry(0.5, 0.36, 1, 28), cer, 0, h * 0.21, d * 0.1);
-  bowl.scale.set(w, h * 0.42, d * 0.8);
-  const seat = mesh(new THREE.CylinderGeometry(0.5, 0.5, 1, 28), M.ceramic(), 0, h * 0.435, d * 0.1);
-  seat.scale.set(w * 1.02, 0.03, d * 0.8);
-  g.add(bowl, seat, box(w * 0.92, h * 0.52, d * 0.2, cer, 0, h * 0.74, -d * 0.4));
-  g.add(box(w * 0.18, 0.015, 0.05, M.chrome(), 0, h + 0.008, -d * 0.4)); // кнопка слива
+  const rim = h * 0.47, tankD = d * 0.24, bowlD = d * 0.8, bz = d / 2 - bowlD / 2;
+  // чаша: профиль вращения, сужается к полу; снаружи и внутри одна керамика
+  const prof = [[0.3, 0], [0.33, 0.12], [0.37, 0.4], [0.45, 0.72], [0.5, 0.93], [0.5, 1], [0.44, 1], [0.38, 0.86], [0.2, 0.6], [0.0, 0.58]]
+    .map(([r, y]) => new THREE.Vector2(r, y));
+  const bowl = mesh(new THREE.LatheGeometry(prof, 40), cer, 0, 0, bz);
+  bowl.scale.set(w * 0.96, rim, bowlD);
+  bowl.material.side = THREE.DoubleSide;
+  // задняя полка, на которой стоит бачок
+  g.add(bowl, box(w * 0.6, rim * 0.9, tankD * 0.9, cer, 0, rim * 0.45, -d / 2 + tankD * 0.55));
+  // сиденье — плоское кольцо на ободе, сверху закрытая крышка
+  const seat = mesh(new THREE.TorusGeometry(0.5, 0.075, 10, 40), M.white(), 0, rim + 0.015, bz + 0.01);
+  seat.rotation.x = Math.PI / 2; seat.scale.set(w * 0.82, bowlD * 0.84, 0.2);
+  const lid = mesh(new THREE.CylinderGeometry(0.5, 0.5, 1, 40), M.white(), 0, rim + 0.04, bz + 0.01);
+  lid.scale.set(w * 0.95, 0.02, bowlD * 0.9);
+  g.add(seat, lid);
+  // бачок с крышкой и кнопкой; верх кнопки ровно на заявленной высоте
+  const tankTop = h - 0.03;
+  g.add(box(w * 0.94, tankTop - rim * 0.9, tankD, cer, 0, rim * 0.9 + (tankTop - rim * 0.9) / 2, -d / 2 + tankD / 2));
+  g.add(box(w * 0.98, 0.02, tankD + 0.012, M.white(), 0, tankTop + 0.01, -d / 2 + tankD / 2 + 0.002));
+  const btn = mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.01, 20), M.chrome(), 0, h - 0.005, -d / 2 + tankD / 2);
+  g.add(btn);
   return g;
 }
 
@@ -75,7 +94,7 @@ function shower(w, d, h) {
   g.add(box(t, gh, d - 0.02, M.glass(), w / 2 - t, tray + gh / 2, 0));   // стекло сбоку
   g.add(box(0.025, gh, 0.025, M.chrome(), w / 2 - 0.012, tray + gh / 2, d / 2 - 0.012));
   g.add(box(0.02, h * 0.9 - tray, 0.02, M.chrome(), -w / 2 + 0.08, tray + (h * 0.9 - tray) / 2, -d / 2 + 0.03));
-  const head = mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.015, 24), M.chrome(), -w / 2 + 0.08, h * 0.9, -d / 2 + 0.12);
+  const head = mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.015, 24), M.chrome(), -w / 2 + 0.12, h * 0.9, -d / 2 + 0.14);
   g.add(head);
   return g;
 }
@@ -95,7 +114,7 @@ function cabinet(w, d, h, mirror) {
 
 function sofa(w, d, h, color = 0x8c9aa8) {
   const g = new THREE.Group(), f = M.fabric(color), seat = Math.min(0.45, h * 0.55), arm = Math.min(0.2, w * 0.12);
-  g.add(box(w, seat * 0.55, d, f, 0, seat * 0.275, 0));                                   // основание
+  g.add(box(w - 0.004, seat * 0.55, d - 0.004, f, 0, seat * 0.275, 0));                                // основание
   g.add(box(w - 2 * arm, seat * 0.45, d * 0.72, M.fabric(new THREE.Color(color).offsetHSL(0, 0, .06)), 0, seat * 0.775, d * 0.12)); // подушки
   g.add(box(w, h - seat * 0.55, d * 0.24, f, 0, seat * 0.55 + (h - seat * 0.55) / 2, -d * 0.38)); // спинка
   for (const sx of [-1, 1]) g.add(box(arm, seat * 1.35, d, f, sx * (w / 2 - arm / 2), seat * 0.675, 0)); // подлокотники
