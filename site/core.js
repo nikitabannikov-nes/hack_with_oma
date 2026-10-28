@@ -359,7 +359,7 @@ function careSnooze(key){const s=load();s.care=s.care||{};s.care.snooze={...s.ca
 function careDemo(){
  const s=load(),mk=(type,kind,params,title,months,tier,patch)=>{const r=makeRoom(type,kind,params);patch&&patch(r);const p=newProject({title,task:type,rooms:[r],tier,logText:'Пример для раздела «Мой дом»'});
   const at=now()-months*MON,no='D-'+(20000+Math.floor(Math.random()*7999));p.status='ordered';p.est.status='ordered';p.order=no;p.created=p.updated=at;p.example=true;
-  s.orders.push({no,at,total:estTotal(p),items:p.est.lines.length,delivery:'pickup',date:at,projects:[p.id],lines:p.est.lines.map(l=>({pid:l.pid,qty:l.qty,projectId:p.id})),example:true});s.projects.push(p)};
+  s.orders.push({no,at,total:estTotal(p),items:p.est.lines.length,delivery:'pickup',date:at,projects:[p.id],lines:p.est.lines.map(l=>({pid:l.pid,qty:l.qty,price:P(l.pid).price,projectId:p.id})),example:true});s.projects.push(p)};
  mk('bath','rect',{L:2.2,W:1.7},'Ванная (пример)',13,'opt');
  mk('kitchen','rect',{L:3.4,W:2.8},'Кухня (пример)',35,'eco',r=>{r.floor='tile'});
  mk('living','rect',{L:4.6,W:3.6},'Гостиная (пример)',8,'opt');
