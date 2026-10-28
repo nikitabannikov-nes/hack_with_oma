@@ -43,12 +43,17 @@ function pointInPoly(p,pts){
 }
 function distToSeg(p,a,b){const dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy;let t=L?((p[0]-a[0])*dx+(p[1]-a[1])*dy)/L:0;t=Math.max(0,Math.min(1,t));return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy)}
 function rectPts(x){return[[x.x,x.y],[x.x+x.w,x.y],[x.x+x.w,x.y+x.h],[x.x,x.y+x.h]]}
-// Прямоугольник целиком внутри контура: все углы внутри и ни одна сторона не пересекает стены
+// Стороны пересекаются крест-накрест (касание и наложение на одной линии не считаются)
+function crosses(a,b,c,d){return orient(a,b,c)*orient(a,b,d)<0&&orient(c,d,a)*orient(c,d,b)<0}
+// Прямоугольник внутри контура. Вплотную к стене можно (ванна, шкаф), выходить за стену — нельзя
 function rectInside(x,pts){
- const R=rectPts(x);
- if(!R.every(p=>pointInPoly(p,pts)))return false;
- for(const[a,b]of edges(R))for(const[c,d]of edges(pts))if(segIntersect(a,b,c,d))return false;
- return true;
+ const E=edges(pts),inOrOn=p=>pointInPoly(p,pts)||E.some(([a,b])=>distToSeg(p,a,b)<1e-6),R=rectPts(x);
+ // углы, середины сторон и центр — внутри или на стене
+ const probe=[...R,...edges(R).map(([a,b])=>[(a[0]+b[0])/2,(a[1]+b[1])/2]),[x.x+x.w/2,x.y+x.h/2]];
+ if(!probe.every(inOrOn))return false;
+ for(const[a,b]of edges(R))for(const[c,d]of E)if(crosses(a,b,c,d))return false;
+ // внутренний угол Г-образной комнаты не должен попадать в прямоугольник
+ return!pts.some(p=>p[0]>x.x+1e-6&&p[0]<x.x+x.w-1e-6&&p[1]>x.y+1e-6&&p[1]<x.y+x.h-1e-6);
 }
 // Точка для подписи площади: центроид, если он внутри, иначе самая «глубокая» точка сетки
 function labelPoint(pts){

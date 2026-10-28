@@ -1,6 +1,6 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Корзина — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610280100"><link rel="stylesheet" href="app.css?v=202610280100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610280100"></head><body><div id="chrome"></div>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Корзина — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610290100"><link rel="stylesheet" href="app.css?v=202610290100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610290100"></head><body><div id="chrome"></div>
 <div class="wrap" id="app"></div>
-<script src="oma-catalog.js?v=202610280100"></script><script src="oma-menu.js?v=202610280100"></script><script src="oma-social.js?v=202610280100"></script><script src="data.js?v=202610280100"></script><script src="geom.js?v=202610280100"></script><script src="calc.js?v=202610280100"></script><script src="core.js?v=202610280100"></script><script src="plan.js?v=202610280100"></script><script src="omik.js?v=202610280100"></script><script>
+<script src="oma-catalog.js?v=202610290100"></script><script src="oma-menu.js?v=202610290100"></script><script src="oma-social.js?v=202610290100"></script><script src="data.js?v=202610290100"></script><script src="geom.js?v=202610290100"></script><script src="calc.js?v=202610290100"></script><script src="core.js?v=202610290100"></script><script src="plan.js?v=202610290100"></script><script src="omik.js?v=202610290100"></script><script>
 const DATES=[1,2,3].map(d=>now()+d*DAY);
 let o={delivery:'pickup',date:0,address:'',name:'',phone:''},done=null;
 function draw(){
@@ -24,7 +24,7 @@ function draw(){
   <label><input type="radio" name="dl" ${o.delivery==='delivery'?'checked':''} onchange="o.delivery='delivery';draw()"><span><b>Доставка</b><small>25 BYN, бесплатно от 300 BYN (демо-условия)</small></span></label></div>
   ${o.delivery==='delivery'?`<label class="fld mt">Адрес<input value="${esc(o.address)}" placeholder="Минск, ул. …" oninput="o.address=this.value"></label>`:''}
   <div class="fld mt2">Когда</div><div class="seg mt">${DATES.map((d,i)=>`<button class="${o.date===i?'on':''}" onclick="o.date=${i};draw()">${fmtDay(d)}</button>`).join('')}</div>
-  <div class="f2 mt2"><label class="fld">Имя<input value="${esc(o.name)}" oninput="o.name=this.value" placeholder="Как к вам обращаться"></label><label class="fld">Телефон<input value="${esc(o.phone)}" oninput="o.phone=this.value" placeholder="+375 …"></label></div></div>`;
+  <div class="f2 mt2"><label class="fld">Имя<input value="${esc(o.name)}" oninput="o.name=this.value" placeholder="Как к вам обращаться" autocomplete="name"></label><label class="fld">Телефон<input value="${esc(o.phone)}" oninput="o.phone=this.value" placeholder="+375 29 123-45-67" type="tel" inputmode="tel" autocomplete="tel"></label></div></div>`;
  h+=`</div><aside class="card side"><div class="note">Итого</div><div class="tot">${byn(tot+ship)}</div><div style="margin:10px 0 16px"><div class="row"><span>Товары, ${s.cart.length} поз.</span><b>${byn(tot)}</b></div><div class="row"><span>${o.delivery==='delivery'?'Доставка':'Самовывоз'}</span><b>${ship?byn(ship):'бесплатно'}</b></div></div>
   <button class="btn o wide" id="pay" onclick="order()">Оформить заказ (демо)</button><p class="note">⚠ Демонстрационное оформление: оплата не проводится, данные карты не запрашиваются, заказ в ОМА не уходит.</p></aside></div>`;
  $('#app').innerHTML=h;
@@ -36,6 +36,8 @@ function del(ix){C().splice(ix,1);save();draw()}
 function resync(id){cartSyncProject(getProject(id));toast('Корзина обновлена по смете');draw()}
 function order(){
  if(o.delivery==='delivery'&&!o.address.trim()){toast('Укажите адрес доставки',false);return}
+ if(!o.name.trim()){toast('Укажите, как к вам обращаться',false);document.querySelector('input[oninput^="o.name"]')?.focus();return}
+ if(o.phone.replace(/\D/g,'').length<9){toast('Укажите телефон: на него придёт подтверждение заказа',false);document.querySelector('input[oninput^="o.phone"]')?.focus();return}
  const s=load(),b=$('#pay');b.disabled=true;b.textContent='Оформляем…';
  setTimeout(()=>{
   const tot=cartTotal(),ship=o.delivery==='delivery'&&tot<300?25:0,pids=[...new Set(s.cart.map(i=>i.projectId).filter(Boolean))];

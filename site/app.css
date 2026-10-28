@@ -172,6 +172,14 @@ nav.sub img{width:24px;height:24px;border-radius:50%;object-fit:cover}
 .m .pcs .mp .act button,.m .pcs .mp .act a{flex:1;border:1px solid var(--blue);background:#fff;color:var(--blue);border-radius:8px;font-size:11px;font-weight:700;padding:4px;cursor:pointer;text-align:center}
 .m .card-in{background:#f6f8fc;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:13px}
 .m .card-in .row{padding:2px 0}
+.m .card-in .row.pk{align-items:baseline;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.m .card-in .row.pk span{display:flex;flex-direction:column;min-width:0;color:var(--ink);font-weight:600}
+.m .card-in .row.pk small{font-weight:400;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m .card-in .row.pk small a.plink{color:var(--mute);font-weight:400;text-decoration:none}
+.m .card-in .row.pk b{white-space:nowrap;font-size:14px}
+.m .card-in .row.tot{padding-top:8px;font-size:14px}.m .card-in .row.tot b{font-size:16px}
+.m .bud{margin-top:8px;padding:7px 10px;border-radius:10px;font-size:13px;font-weight:700}
+.m .bud.ok{background:#e7f5ec;color:#1b7a3d}.m .bud.over{background:#fdecea;color:#b42318}
 .dots{display:flex;gap:4px;padding:6px 2px}.dots i{width:7px;height:7px;border-radius:50%;background:var(--blue);animation:bo 1s infinite}.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
 @keyframes bo{50%{transform:translateY(-5px);opacity:.4}}@keyframes in{from{opacity:0;transform:translateY(6px)}}
 .cin{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:#fff}
@@ -296,3 +304,12 @@ nav.sub img{width:24px;height:24px;border-radius:50%;object-fit:cover}
 .m .b a.plink{color:var(--blue);font-weight:700;text-decoration:underline;text-decoration-color:#0057d655;text-underline-offset:2px}
 .m .b a.plink:hover{text-decoration-color:var(--blue)}
 .m .b .plist{margin:4px 0 0;padding-left:18px}.m .b .plist li{margin:4px 0}
+/* Смета на телефоне: итог и корзина всегда под пальцем */
+.mbar{display:none}
+@media(max-width:1000px){
+ .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:60;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 20px #0b2a6a1f}
+ .mbar small{display:block;color:var(--mute);font-size:12px}.mbar b{font-size:20px;white-space:nowrap}
+ .mbar .btn{white-space:nowrap}
+ body:has(.mbar){padding-bottom:76px}
+ body:has(.mbar) .fab{bottom:86px}
+}
