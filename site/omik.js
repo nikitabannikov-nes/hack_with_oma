@@ -494,10 +494,12 @@ const Omik=(()=>{
  return{mount,send,reply,parse,loadSt,note,reset:()=>{st={msgs:[],slots:{},last:[]};saveSt();render()}};
 })();
 // Плавающая кнопка и окно чата на всех страницах
+// hideFab: на главной и в калькуляторе (и импорте) Омик уже встроен в страницу — плавающая кнопка там только перекрывает контент.
+// Окно всё равно создаём: его могут открыть кнопки на странице
 const OmikWidget={
- mount(){
+ mount(hideFab){
   if($('#omikFab'))return;
-  document.body.insertAdjacentHTML('beforeend',`<button class="fab" id="omikFab" onclick="OmikWidget.open()"><img src="img/omik-avatar.png" alt=""><span>Спросить Омика</span></button><div class="drawer" id="omikDrawer" data-close="1"></div>`);
+  document.body.insertAdjacentHTML('beforeend',`<button class="fab" id="omikFab" onclick="OmikWidget.open()"${hideFab?' hidden':''}><img src="img/omik-avatar.png" alt=""><span>Спросить Омика</span></button><div class="drawer" id="omikDrawer" data-close="1"></div>`);
  },
  open(q){const d=$('#omikDrawer');if(!d.dataset.m){Omik.mount(d);d.dataset.m=1}d.classList.add('show');$('#omikFab').style.display='none';if(q)Omik.send(q);setTimeout(()=>d.querySelector('input')?.focus(),50)},
  close(){$('#omikDrawer').classList.remove('show');$('#omikFab').style.display=''}

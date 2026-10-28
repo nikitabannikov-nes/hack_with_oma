@@ -239,7 +239,7 @@ function chrome(active,o={}){
  if(!$('footer'))document.body.insertAdjacentHTML('beforeend',footerHtml());
  updateBadges();
  demoGuide();
- if(active!=='omik'&&typeof OmikWidget!=='undefined')OmikWidget.mount();
+ if(active!=='omik'&&typeof OmikWidget!=='undefined')OmikWidget.mount(['index','planner'].includes(active));
 }
 function footerHtml(){
  const ext=(t,h)=>`<a href="${OMA}${h}" target="_blank" rel="noopener">${t}</a>`;
