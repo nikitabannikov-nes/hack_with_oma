@@ -49,6 +49,7 @@ ICONS = {
     "plus": "<path d='M12 5v14M5 12h14'/>",
     "copy": "<rect x='8' y='8' width='12' height='12' rx='2'/><path d='M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2'/>",
     "cube": "<path d='M12 3l8 4.5v9L12 21l-8-4.5v-9z'/><path d='M4 7.5l8 4.5 8-4.5M12 12v9'/>",
+    "trash": "<path d='M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5'/>",
     "flag": "<path d='M5 21V4h11l-1.5 4L16 12H5'/>",
 }
 

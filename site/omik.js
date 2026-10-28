@@ -175,7 +175,7 @@ const Omik=(()=>{
   if(SHOWCART.test(t))return[B(cartCount()?`В корзине ${cartCount()} поз. на <b>${byn(cartTotal())}</b>.`:'Корзина пока пустая.',{opts:cartCount()?[{l:'Перейти в корзину →',a:'go',arg:'cart.html',pri:true}]:lp?[{l:'Положить смету в корзину',a:'tocart',arg:lp.id,pri:true}]:STARTS})];
   if(lp&&ENOUGH.test(t))return[B(`Должно хватить: калькулятор берёт площадь с запасом ${lp.rooms[0]?.waste??10}% на подрезку и округляет вверх до целых упаковок. Если положите меньше — неоткрытые упаковки в ОМА можно вернуть.`+packCard(lp),{opts:[{l:'Объясни расчёт',a:'say'},...resultOpts(lp).slice(0,1)]})];
   if(WORK.test(t))return masterReply((SVC_KW.find(([r])=>r.test(t))||[,'svc_tile_wall'])[1]);
-  if(FURN.test(t))return[B('Под шкаф-купе и кухонный гарнитур ламинат и плитку обычно не кладут — это экономия. Отметьте место под мебель на плане во вкладке «Проёмы и вычеты», и количество пересчитается.',{opts:lp?[{l:'Отметить на плане',a:'go',arg:`planner.html?project=${lp.id}&tab=open`,pri:true}]:STARTS})];
+  if(FURN.test(t))return[B('Под шкаф-купе и кухонный гарнитур ламинат и плитку обычно не кладут — это экономия. Отметьте место под мебель на плане во вкладке «Пол», и количество пересчитается.',{opts:lp?[{l:'Отметить на плане',a:'go',arg:`planner.html?project=${lp.id}&tab=floor`,pri:true}]:STARTS})];
   if(CHEAP.test(t)&&lp&&!ctx().productId&&!/аналог/.test(t))return cheaper(lp);
   if(CALC.test(t)&&!(lp&&/сколько/.test(t)&&!o.room&&!o.work&&!o.L))return calcStart(o,t);
   if(CART.test(t))return cartReply();
@@ -215,8 +215,8 @@ const Omik=(()=>{
   const p=lastP(),r=p&&(p.rooms.find(x=>x.type==='bath')||p.rooms[0]);
   const h='Да, учтите: под ванной плитку на пол не кладут. Стандартная ванна 170 × 70 см — это минус 1,2 м² плитки.';
   if(!r)return[B(h+' Сначала посчитаем ванную — напишите размеры.',{opts:STARTS})];
-  if((r.excl||[]).some(x=>/ванн/i.test(x.name)))return[B('Ванна уже вычтена из пола. Размер и место можно поправить на плане.',{opts:[{l:'Открыть план',a:'go',arg:`planner.html?project=${p.id}&room=${r.id}&tab=open`}]})];
-  return[B(h,{opts:[{l:'Вычесть ванну 170 × 70',a:'bathx',arg:p.id+':'+r.id,pri:true},{l:'Другой размер — на плане',a:'go',arg:`planner.html?project=${p.id}&room=${r.id}&tab=open`}]})];
+  if((r.excl||[]).some(x=>/ванн/i.test(x.name)))return[B('Ванна уже вычтена из пола. Размер и место можно поправить на плане.',{opts:[{l:'Открыть план',a:'go',arg:`planner.html?project=${p.id}&room=${r.id}&tab=floor`}]})];
+  return[B(h,{opts:[{l:'Вычесть ванну 170 × 70',a:'bathx',arg:p.id+':'+r.id,pri:true},{l:'Другой размер — на плане',a:'go',arg:`planner.html?project=${p.id}&room=${r.id}&tab=floor`}]})];
  }
  // Винительный падеж: «покрасить спальню»
  const acc=o=>({Спальня:'спальню',Гостиная:'гостиную',Детская:'детскую',Кабинет:'кабинет',Зал:'зал'})[o.roomName]||{bath:'ванную',wc:'санузел',kitchen:'кухню',living:'комнату',hall:'коридор'}[o.room]||'комнату';
