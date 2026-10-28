@@ -489,7 +489,7 @@ async function setView(v){
   if(mode==='draw')setMode('edit');
   const focus=allMode||!picked?'all':p.activeRoom;
   if(!P3){
-   try{const m=await import('./p3d/embed.js?v=202610282000');P3=m.mount({host:$('#st3d'),tools:$('#t3x'),panel:$('#panel'),project:p,focus,activeRoom:()=>p.activeRoom})}
+   try{const m=await import('./p3d/embed.js?v=202610282100');P3=m.mount({host:$('#st3d'),tools:$('#t3x'),panel:$('#panel'),project:p,focus,activeRoom:()=>p.activeRoom})}
    catch(e){console.error(e);toast('3D-вид не загрузился — проверьте интернет',false);return setView('2d')}
   }else{P3.refresh();P3.setFocus(focus)}
   P3.setActive(true);mark3dAll();

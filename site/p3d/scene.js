@@ -21,7 +21,6 @@ export function createScene(host, store, catalog) {
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));   // слабым ноутбукам хватит
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   host.append(renderer.domElement);
   const canvas = renderer.domElement;
@@ -30,8 +29,7 @@ export function createScene(host, store, catalog) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xeef2f6);
   scene.add(new THREE.HemisphereLight(0xffffff, 0xd8d2c6, 1.6));
-  const sun = new THREE.DirectionalLight(0xffffff, 1.4);   // единственный источник теней
-  sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0005;
+  const sun = new THREE.DirectionalLight(0xffffff, 1.4);   // без теней: так план читается чище и быстрее на слабых ноутбуках
   scene.add(sun, sun.target);
 
   const persp = new THREE.PerspectiveCamera(45, 1, 0.05, 200);
@@ -73,8 +71,6 @@ export function createScene(host, store, catalog) {
     if (reset) ortho.zoom = 1;
     ortho.updateProjectionMatrix();
     sun.position.set(c.x + span * 0.6, h + 6, c.z + span * 0.4); sun.target.position.copy(c);
-    Object.assign(sun.shadow.camera, { left: -span, right: span, top: span, bottom: -span, near: 0.5, far: 40 });
-    sun.shadow.camera.updateProjectionMatrix();
     orbit.update(); top.update(); invalidate();
   }
 
@@ -194,7 +190,6 @@ export function createScene(host, store, catalog) {
     if (key !== roomKey) { const refocus = s.focus !== prev.focus || !roomKey; roomKey = key; rebuildRooms(s); fitCameras(refocus); }
     if (s.view !== view) {
       view = s.view; orbit.enabled = view === '3d'; top.enabled = view === 'top';
-      sun.castShadow = view === '3d';   // сверху тени только путают
       if (view === 'top') fitCameras(false);
     }
     lastBad = syncItems(s);
