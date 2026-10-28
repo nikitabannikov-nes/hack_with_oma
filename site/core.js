@@ -329,7 +329,10 @@ function matLook(prod){
  let size=prod.spec&&prod.spec.size?prod.spec.size.map(x=>x/100):null;
  // размер доски из названия: «1285х192х8мм» или «195x1380x8мм» — длина и ширина = два больших числа
  if(!size&&prod.roles.includes('laminate')){const m=n.match(/(\d+)\s*[хx×*]\s*(\d+)\s*[хx×*]\s*(\d+)/);const d=m?[+m[1],+m[2],+m[3]].sort((a,b)=>b-a):null;size=d&&d[1]>=50?[d[0]/1000,d[1]/1000]:[1.2,0.19]}
- return{color,img:prod.img||null,crop:typeof OMA_CROPS!=='undefined'&&OMA_CROPS[prod.id]||null,size:size||[0.3,0.3],kind:prod.roles.includes('laminate')||prod.pattern==='wood'?'plank':'tile'};
+ // Дерево (ламинат и плитка «под дерево» — у её фото есть направление волокон) кладём доской: длинной стороной вдоль, рядами со сдвигом
+ const crop=typeof OMA_CROPS!=='undefined'&&OMA_CROPS[prod.id]||null,plank=prod.roles.includes('laminate')||prod.pattern==='wood'||!!(crop&&crop[4]);
+ size=size||[0.3,0.3];if(plank&&size[0]<size[1])size=[size[1],size[0]];
+ return{color,img:prod.img||null,crop,size,kind:plank?'plank':'tile'};
 }
 // Выбор материала для поверхности помещения: лента мини-карточек (видно 2–3), страница определяет onMat(roomId, role, pid)
 function matPicker(p,r,role){
