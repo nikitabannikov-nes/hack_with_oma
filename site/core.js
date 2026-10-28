@@ -188,6 +188,7 @@ const ico=(id,cls='')=>`<svg class="${cls}"><use href="img/oma-icons.svg#${id}">
 const HICO={search:'<svg viewBox="0 0 24 24"><path d="M10.5 3a7.5 7.5 0 0 1 5.96 12.05l4.25 4.24-1.42 1.42-4.24-4.25A7.5 7.5 0 1 1 10.5 3zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11z"/></svg>',
  user:'<svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-5.33 0-9 2.7-9 6v2h18v-2c0-3.3-3.67-6-9-6z"/></svg>',
  heart:'<svg viewBox="0 0 24 24"><path d="M12 21.35 10.55 20C5.4 15.36 2 12.27 2 8.5A5.42 5.42 0 0 1 7.5 3 6 6 0 0 1 12 5.09 6 6 0 0 1 16.5 3 5.42 5.42 0 0 1 22 8.5c0 3.77-3.4 6.86-8.55 11.54z"/></svg>',
+ home:'<svg viewBox="0 0 24 24"><path d="M12 3 2 11.5h3V21h5.5v-6h3v6H19v-9.5h3z"/></svg>',
  cart:'<svg viewBox="0 0 24 24"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM1 2v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7.42a.25.25 0 0 1-.22-.37L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 20 4H5.21l-.94-2z"/></svg>'};
 // Быстрые ссылки ОМА + наши модули (выделены фиолетовым)
 const QUICK=[['red','Все акции','/sales/',1],['darkblue2','Супер цены','/sales/super-tseny/'],['red','Топ продаж','/sales/top-prodazh/'],['darkorange','Оплата частями','/buyers/payment/#credit']];
@@ -222,6 +223,7 @@ function chrome(active,o={}){
    <a class="oma-logo" href="index.html" aria-label="ОМА"></a>
    <form class="oma-search" onsubmit="event.preventDefault();location='catalog.html?q='+encodeURIComponent(this.q.value)"><input name="q" placeholder="Ламинат" value="${esc(active==='catalog'?qp('q')||'':'')}"><button aria-label="Найти">${HICO.search}</button></form>
    <div class="oma-acts">
+    <a class="oma-act" href="dom.html">${HICO.home}<span class="t"><b>Мой дом</b></span><span class="cnt" data-b="dom" title="Пора обслужить"></span></a>
     <a class="oma-act" href="projects.html">${HICO.user}<span class="t">${currentUser()?`<small>${esc((currentUser().name||"").split(" ")[0]||"Мой")}</small>`:""}<b>Аккаунт</b></span></a>
     <a class="oma-act" href="cart.html">${HICO.cart}<span class="t"><b>Корзина</b></span><span class="cnt" data-b="cart"></span></a>
    </div>
@@ -248,7 +250,7 @@ function footerHtml(){
    <div class="f-pay">${['pay-visa','pay-mastercard','pay-belcart','pay-google-pay','pay-apple-pay','pay-halva'].map(x=>ico(x)).join('')}</div></div>
   <div class="f-cols">
    <div><span class="f-h">Покупателям</span>${ext('Форма обратной связи','/buyers/')}${ext('Доставка','/buyers/delivery/')}${ext('Самовывоз','/buyers/samovyvoz/')}${ext('Способы оплаты','/buyers/payment/')}${ext('Оплата частями','/buyers/payment/#credit')}${ext('Полезные статьи','/buyers/helpful/')}${ext('Возврат и гарантия','/buyers/warranty/')}${ext('Программа лояльности','/buyers/discount/balans/#card-info')}</div>
-   <div><span class="f-h">Ремонт с ОМА</span><a class="ours" href="omik.html">Омик — помощник по ремонту</a><a class="ours" href="planner.html">Калькулятор ремонта 2D и 3D</a><a class="ours" href="planner.html?view=3d">3D-планировка с мебелью</a><a class="ours" href="import.html">Планировка по фото</a><a class="ours" href="catalog.html">Каталог и смета</a><a class="ours" href="masters.html">Мастера ОМА</a><a class="ours" href="instrukcii.html">Сделать самому: прокат и инструкции</a><a class="ours" href="projects.html">Аккаунт</a><a class="ours" href="demo.html">Демо для питча</a>
+   <div><span class="f-h">Ремонт с ОМА</span><a class="ours" href="omik.html">Омик — помощник по ремонту</a><a class="ours" href="dom.html">Сервисная книжка дома</a><a class="ours" href="planner.html">Калькулятор ремонта 2D и 3D</a><a class="ours" href="planner.html?view=3d">3D-планировка с мебелью</a><a class="ours" href="import.html">Планировка по фото</a><a class="ours" href="catalog.html">Каталог и смета</a><a class="ours" href="masters.html">Мастера ОМА</a><a class="ours" href="instrukcii.html">Сделать самому: прокат и инструкции</a><a class="ours" href="projects.html">Аккаунт</a><a class="ours" href="demo.html">Демо для питча</a>
     <span class="f-h" style="margin-top:22px">Компания ОМА</span>${ext('О компании','/about/')}${ext('Новости','/news/')}${ext('Работа в ОМА','/about/rabota-v-oma/')}${ext('Отзывы об ОМА','/reviews/')}</div>
   </div>
   <div><div class="f-awards">${medals.map(([m,y])=>`<div><img src="${OMA}/local/images/awards/${m}.png" alt="" loading="lazy">${y}</div>`).join('')}</div>
@@ -259,7 +261,7 @@ function footerHtml(){
 document.addEventListener('click',e=>{const d=$('#omaDrop');if(d&&d.classList.contains('show')&&!e.target.closest('#omaDrop,.oma-catbtn'))d.classList.remove('show')});
 function updateBadges(){
  const s=load(),set=(k,v)=>$$(`[data-b="${k}"]`).forEach(e=>{e.textContent=v;e.style.display=v?'inline-block':'none'});
- set('cart',s.cart.length);set('proj',s.projects.length);set('req',s.requests.filter(r=>r.status<3).length);
+ set('cart',s.cart.length);set('dom',careDueCount());set('proj',s.projects.length);set('req',s.requests.filter(r=>r.status<3).length);
 }
 function toast(t,ok=true){let e=$('#toast');if(!e){e=document.createElement('div');e.id='toast';document.body.append(e)}e.innerHTML=t;e.className='show '+(ok?'':'bad');clearTimeout(e._t);e._t=setTimeout(()=>e.className='',2600)}
 
@@ -311,6 +313,58 @@ function rentalState(p){
 function rentalSum(p){const R=rentalState(p);let sum=0,dep=0;Object.entries(R.items).forEach(([id,d])=>{const r=RENTAL.find(x=>x.id===id);if(r&&d>0){sum+=r.day*d;dep+=r.deposit}});return{sum,dep}}
 function setDoer(p,who){if(p.doer===who)return;p.doer=who;log(p,{master:'Работу сделает мастер ОМА',self:'Работу делаю сам',later:'Кто делает работу — решу позже'}[who]||'Выбор исполнителя сброшен');save()}
 function bookRental(p,c){const R=rentalState(p),{sum,dep}=rentalSum(p);if(!sum)return false;R.status='booked';R.at=now();if(c)R.phone=c.phone;log(p,`Прокат инструмента забронирован: ${byn(sum)}, залог ${byn(dep)}`);save();return true}
+// ---------- Сервисная книжка дома ----------
+// Что куплено и где лежит — из оформленных заказов и их проектов. Когда пора обслуживать — по правилам ухода CARE:
+// first — через сколько месяцев после покупки первый раз, every — потом каждые N месяцев.
+// s.care: {done:{ключ:дата}, snooze:{ключ:дата}, notify:телефон|null, at:сдвиг «посмотреть на дату» в месяцах}
+const MON=30.44*DAY;
+const CARE=[
+ {id:'seal',when:r=>isWet(r)&&roomRoles(r).some(x=>x.startsWith('tile')),first:24,every:24,t:'Заменить санитарный герметик',
+  why:'Шов у ванны и в углах со временем темнеет и пропускает воду под плитку. Старый срезают, новый кладут на сухую поверхность.',buy:()=>'seal',buyL:'Купить герметик',svc:null},
+ {id:'grout',when:r=>roomRoles(r).some(x=>x.startsWith('tile')),first:r=>isWet(r)?12:36,every:r=>isWet(r)?12:36,t:'Проверить и пропитать швы плитки',
+  why:'Пропитка защищает затирку от грязи и грибка. Если шов крошится — подновите той же затиркой, оттенок совпадёт.',buy:(p)=>lineOf(p,'grout'),svc:null},
+ {id:'fan',when:r=>isWet(r),first:6,every:6,t:'Почистить решётку вентиляции',
+  why:'Забитая решётка не вытягивает влагу — на потолке и в швах появляется плесень. Если вентилятор гудит или не тянет — пора заменить.',buy:()=>'fan',buyL:'Новый вентилятор',svc:'svc_fan'},
+ {id:'lam',when:r=>r.floor==='laminate',first:r=>monthsToMay(),every:12,t:'Осмотреть ламинат после отопительного сезона',
+  why:'Зимой воздух сухой, весной влажный: проверьте зазоры у стен, стыки и плинтус. Держите 1–2 доски из запаса на замену.',buy:()=>null,svc:'svc_lam'},
+ {id:'paintWall',when:r=>r.walls.some(w=>w.finish==='paint'),first:r=>['kitchen','hall'].includes(r.type)?36:60,every:r=>['kitchen','hall'].includes(r.type)?36:60,t:'Освежить покраску стен',
+  why:'В коридоре и на кухне стены пачкаются быстрее. Возьмите ту же краску — цвет и степень блеска совпадут.',buy:(p,r)=>matOf(p,r,'paintWall')?.id,svc:'svc_paint'},
+ {id:'paintCeil',when:r=>r.ceil==='paint',first:96,every:96,t:'Перекрасить потолок',
+  why:'Потолок желтеет медленно, но заметно рядом со свежими стенами. Красят одновременно со стенами.',buy:(p,r)=>matOf(p,r,'paintCeil')?.id,svc:'svc_ceil'},
+];
+const isWet=r=>r.wet??Calc.WET.includes(r.type);
+const lineOf=(p,role)=>p.est.lines.find(l=>l.role===role)?.pid||null;
+// первая проверка ламината — в ближайшем мае, но не раньше чем через 4 месяца после укладки
+function monthsToMay(){const d=new Date();let m=(4-d.getMonth()+12)%12;return m<4?m+12:m}
+const careOf=(v,r)=>typeof v==='function'?v(r):v;
+const careNow=()=>now()+(load().care?.at||0)*MON;
+// Дата покупки проекта: заказ, в котором он оформлен
+function boughtAt(p){const o=load().orders.find(o=>(o.projects||[]).includes(p.id)||o.no===p.order);return o?o.at:null}
+const homeProjects=()=>load().projects.filter(p=>p.status==='ordered'&&boughtAt(p)).sort((a,b)=>boughtAt(b)-boughtAt(a));
+// Все напоминания по дому: срок, статус (late — пора, soon — в ближайший месяц, ok — позже)
+function careList(){
+ const s=load(),c=s.care||{},T=careNow(),out=[];
+ homeProjects().forEach(p=>p.rooms.forEach(r=>CARE.forEach(rule=>{
+  if(!rule.when(r))return;
+  const key=`${p.id}|${r.id}|${rule.id}`,from=c.done?.[key]||boughtAt(p),months=careOf(c.done?.[key]?rule.every:rule.first,r);
+  const due=Math.max(from+months*MON,c.snooze?.[key]||0),left=due-T;
+  out.push({key,p,r,rule,due,from,status:left<=0?'late':left<30*DAY?'soon':'ok',pid:rule.buy(p,r)||null});
+ })));
+ return out.sort((a,b)=>a.due-b.due);
+}
+const careDueCount=()=>{try{return careList().filter(x=>x.status!=='ok').length}catch(e){return 0}};
+function careDone(key){const s=load();s.care=s.care||{};s.care.done={...s.care.done,[key]:careNow()};if(s.care.snooze)delete s.care.snooze[key];save()}
+function careSnooze(key){const s=load();s.care=s.care||{};s.care.snooze={...s.care.snooze,[key]:careNow()+MON};save()}
+// Для показа на питче: история дома «как будто» ремонт был год–четыре назад. Помечено как пример
+function careDemo(){
+ const s=load(),mk=(type,kind,params,title,months,tier,patch)=>{const r=makeRoom(type,kind,params);patch&&patch(r);const p=newProject({title,task:type,rooms:[r],tier,logText:'Пример для сервисной книжки'});
+  const at=now()-months*MON,no='D-'+(20000+Math.floor(Math.random()*7999));p.status='ordered';p.est.status='ordered';p.order=no;p.created=p.updated=at;p.example=true;
+  s.orders.push({no,at,total:estTotal(p),items:p.est.lines.length,delivery:'pickup',date:at,projects:[p.id],lines:p.est.lines.map(l=>({pid:l.pid,qty:l.qty,projectId:p.id})),example:true});s.projects.push(p)};
+ mk('bath','rect',{L:2.2,W:1.7},'Ванная (пример)',13,'opt');
+ mk('kitchen','rect',{L:3.4,W:2.8},'Кухня (пример)',35,'eco',r=>{r.floor='tile'});
+ mk('living','rect',{L:4.6,W:3.6},'Гостиная (пример)',8,'opt');
+ save();
+}
 // ---------- Телефон и регистрация ----------
 // Расчёт, Омик, план и 3D — без регистрации. Заявка мастеру и бронь проката — нужен белорусский телефон для связи.
 // Оплата заказа — регистрация по номеру с кодом из SMS (в демо код показываем на экране, SMS не отправляется).

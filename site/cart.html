@@ -1,6 +1,6 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Корзина — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610300300"><link rel="stylesheet" href="app.css?v=202610300300"><link rel="stylesheet" href="ui-icons.css?v=202610300300"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300300"></head><body><div id="chrome"></div>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Корзина — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610300500"><link rel="stylesheet" href="app.css?v=202610300500"><link rel="stylesheet" href="ui-icons.css?v=202610300500"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300500"></head><body><div id="chrome"></div>
 <div class="wrap" id="app"></div>
-<script src="oma-catalog.js?v=202610300300"></script><script src="oma-menu.js?v=202610300300"></script><script src="oma-social.js?v=202610300300"></script><script src="oma-furniture.js?v=202610300300"></script><script src="data.js?v=202610300300"></script><script src="geom.js?v=202610300300"></script><script src="calc.js?v=202610300300"></script><script src="oma-crops.js?v=202610300300"></script><script src="core.js?v=202610300300"></script><script src="plan.js?v=202610300300"></script><script src="omik.js?v=202610300300"></script><script>
+<script src="oma-catalog.js?v=202610300500"></script><script src="oma-menu.js?v=202610300500"></script><script src="oma-social.js?v=202610300500"></script><script src="oma-furniture.js?v=202610300500"></script><script src="data.js?v=202610300500"></script><script src="geom.js?v=202610300500"></script><script src="calc.js?v=202610300500"></script><script src="oma-crops.js?v=202610300500"></script><script src="core.js?v=202610300500"></script><script src="plan.js?v=202610300500"></script><script src="omik.js?v=202610300500"></script><script>
 const DATES=[1,2,3].map(d=>now()+d*DAY);
 let o={delivery:'pickup',date:0,address:'',name:contact()?.name||'',phone:contact()?.phone?phoneFmt(contact().phone):''},done=null;
 function draw(){
@@ -44,7 +44,7 @@ function order(){
  const s=load(),b=$('#pay');b.disabled=true;b.textContent='Оформляем…';
  setTimeout(()=>{
   const tot=cartTotal(),ship=o.delivery==='delivery'&&tot<300?25:0,pids=[...new Set(s.cart.map(i=>i.projectId).filter(Boolean))];
-  done={no:'D-'+(10000+Math.floor(Math.random()*89999)),at:now(),total:tot+ship,items:s.cart.length,delivery:o.delivery,date:DATES[o.date],projects:pids};
+  done={no:'D-'+(10000+Math.floor(Math.random()*89999)),at:now(),total:tot+ship,items:s.cart.length,delivery:o.delivery,date:DATES[o.date],projects:pids,lines:s.cart.map(i=>({pid:i.pid,qty:i.qty,projectId:i.projectId||null}))};
   s.orders.unshift(done);
   pids.forEach(id=>{const p=getProject(id);if(p){p.est.status='ordered';p.status='ordered';p.order=done.no;log(p,`Заказ ${done.no} оформлен (демо): ${o.delivery==='delivery'?'доставка':'самовывоз'} ${fmtDay(done.date)}`)}});
   s.cart=[];save();draw();scrollTo(0,0);

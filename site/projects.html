@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Аккаунт — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610300300"><link rel="stylesheet" href="app.css?v=202610300300"><link rel="stylesheet" href="ui-icons.css?v=202610300300"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300300"></head><body><div id="chrome"></div>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Аккаунт — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610300500"><link rel="stylesheet" href="app.css?v=202610300500"><link rel="stylesheet" href="ui-icons.css?v=202610300500"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300500"></head><body><div id="chrome"></div>
 <style>
 .acc{display:grid;grid-template-columns:280px minmax(0,1fr);gap:20px;align-items:start;margin-bottom:30px}
 .acc-me{padding:22px;text-align:center;position:sticky;top:84px}
@@ -19,7 +19,7 @@
  <h1>Аккаунт</h1>
  <div class="acc"><aside class="card acc-me" id="me"></aside><div id="tab"></div></div>
 </div>
-<script src="oma-catalog.js?v=202610300300"></script><script src="oma-menu.js?v=202610300300"></script><script src="oma-social.js?v=202610300300"></script><script src="oma-furniture.js?v=202610300300"></script><script src="data.js?v=202610300300"></script><script src="geom.js?v=202610300300"></script><script src="calc.js?v=202610300300"></script><script src="oma-crops.js?v=202610300300"></script><script src="core.js?v=202610300300"></script><script src="plan.js?v=202610300300"></script><script src="omik.js?v=202610300300"></script><script>
+<script src="oma-catalog.js?v=202610300500"></script><script src="oma-menu.js?v=202610300500"></script><script src="oma-social.js?v=202610300500"></script><script src="oma-furniture.js?v=202610300500"></script><script src="data.js?v=202610300500"></script><script src="geom.js?v=202610300500"></script><script src="calc.js?v=202610300500"></script><script src="oma-crops.js?v=202610300500"></script><script src="core.js?v=202610300500"></script><script src="plan.js?v=202610300500"></script><script src="omik.js?v=202610300500"></script><script>
 const ST={draft:['Черновик',''],sent:['Отправлена по ссылке','or'],changes:['Просят изменения','red'],approved:['Согласована','gr'],ordered:['Заказ оформлен','bl']};
 const TABS={projects:['folder','Проекты'],orders:['box','Заказы'],requests:['worker','Заявки мастерам'],rental:['tool','Прокат']};
 const tab=()=>TABS[location.hash.slice(1)]?location.hash.slice(1):'projects';
@@ -30,7 +30,7 @@ function draw(){
  const cnt={projects:s.projects.length,orders:s.orders.length,requests:s.requests.length,rental:rent.length};
  $('#me').innerHTML=`<div class="acc-av">${ui('user','solo')}</div>${u?`<h2>${esc(u.name||'Покупатель ОМА')}</h2><p class="note">${phoneFmt(u.phone)}</p><button class="btn ghost sm" onclick="logout()">Выйти</button>`
   :`<h2>Гость</h2><p class="note">Проекты и сметы сохраняются в этом браузере. Войдите по номеру телефона, чтобы оплачивать заказы.</p><button class="btn o wide" onclick="gate('account',()=>draw(),'Вход в аккаунт ОМА.')">Войти по номеру</button>`}
-  <nav class="acc-nav">${Object.entries(TABS).map(([k,[ic,t]])=>`<a href="#${k}" class="${tab()===k?'on':''}">${ui(ic)}${t}<b>${cnt[k]||''}</b></a>`).join('')}</nav>`;
+  <nav class="acc-nav">${Object.entries(TABS).map(([k,[ic,t]])=>`<a href="#${k}" class="${tab()===k?'on':''}">${ui(ic)}${t}<b>${cnt[k]||''}</b></a>`).join('')}<a href="dom.html">${ui('home')}Сервисная книжка<b>${careDueCount()||''}</b></a></nav>`;
  $('#tab').innerHTML=({projects,orders,requests,rental})[tab()](s,rent);
 }
 function projects(s){

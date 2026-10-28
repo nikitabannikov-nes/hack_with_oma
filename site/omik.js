@@ -158,6 +158,7 @@ const Omik=(()=>{
  function route(t,o,inFlow){
   const s=loadSt();
   const gr=!inFlow&&guideReply(t);if(gr)return gr;
+  if(/что пора|по дому|напомин|обслуж|износ|сервисн|книжк|паспорт дома|когда менять|когда перекраш/.test(t))return homeReply();
   const lp=lastP();
   if(/^(стоп|отмен|хватит)/.test(t))return[B('Хорошо. Когда захотите посчитать другое помещение — просто напишите, что делаем и размеры.',{opts:STARTS})];
   if(POLITE.test(t))return[lp?B(`Пожалуйста! Проект «${esc(lp.title)}» сохранён в аккаунте — к нему можно вернуться в любой момент.`,{opts:resultOpts(lp)}):hello(false)];
@@ -238,6 +239,13 @@ const Omik=(()=>{
   if(!p.calc.ok)return[B('С такими размерами не сходится геометрия — поправьте на плане.',{opts:[{l:'Открыть план',a:'go',arg:'planner.html?project='+p.id,pri:true}]})];
   return[B(`Пересчитал «${esc(r.name)}» на ${num(o.L)} × ${num(o.W)} м:${packCard(p)}${p.budget?budLine(p):''}`,{opts:resultOpts(p)})];
  }
+ // Сервисная книжка: что пора сделать по дому
+ function homeReply(){
+  const L=careList(),due=L.filter(x=>x.status!=='ok');
+  if(!homeProjects().length)return[B('Когда купите материалы по смете, я запишу их в сервисную книжку дома и заранее напомню: когда менять герметик в ванной, пропитать швы, освежить покраску.',{opts:[{l:'Открыть книжку',a:'go',arg:'dom.html',pri:true}]})];
+  const top=(due.length?due:L).slice(0,3);
+  return[B(`${due.length?`По дому ${due.length} ${due.length===1?'дело':due.length<5?'дела':'дел'}:`:'Срочных дел нет. Ближайшие:'}<div class="card-in">${top.map(x=>`<div class="row pk"><span>${esc(x.rule.t)}<small>${esc(x.r.name)}</small></span><b>${new Date(x.due).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}</b></div>`).join('')}</div>`,{opts:[{l:'Открыть сервисную книжку',a:'go',arg:'dom.html',pri:true}]})];
+ }
  function cartMsg(p){
   if(!p.calc?.ok)return B('В проекте ошибка геометрии — сначала поправьте план, потом соберу корзину.',{opts:[{l:'Открыть план',a:'go',arg:'planner.html?project='+p.id,pri:true}]});
   cartSyncProject(p);const L=p.est.lines.filter(l=>l.qty>0);
@@ -287,7 +295,8 @@ const Omik=(()=>{
   let h='Привет! Я <b>Омик</b>, помощник по ремонту ОМА. Скажите, что делаете и какого размера комната, — посчитаю материалы до упаковки, уложусь в бюджет и соберу корзину.';
   const opts=[{l:'Плитка в ванной 2,2 на 1,7, бюджет 1500',a:'say'},{l:'Где посчитать ламинат?',a:'say'},{l:'Покрасить комнату 4 на 3',a:'say'},{l:'Клей для керамогранита',a:'say'}];
   if(c.page==='smeta'&&p){h=`Это смета проекта «${esc(p.title)}». Могу объяснить, как посчитано количество, подсказать, как уложиться в бюджет, или собрать всё в корзину.`;opts.splice(0,4,{l:'Объясни расчёт',a:'say'},{l:'Как удешевить смету?',a:'say'},{l:'Что ещё понадобится?',a:'say'},{l:'Всё в корзину',a:'tocart',arg:p.id})}
-  if(c.page==='instr'&&G()){const m=stepMsg(G(),`Я веду вас по инструкции «${esc(G().state().name)}». Отмечайте шаги здесь или в списке — подскажу, что дальше. `);h=m.html;opts.splice(0,4,...m.opts)}
+  if(c.page==='dom'){const m=homeReply()[0];h=m.html;opts.splice(0,4,{l:'Что пора по дому?',a:'say'},{l:'Посчитать новый ремонт',a:'say',arg:'Плитка в ванной 2,2 на 1,7, бюджет 1500'})}
+  else if(c.page==='instr'&&G()){const m=stepMsg(G(),`Я веду вас по инструкции «${esc(G().state().name)}». Отмечайте шаги здесь или в списке — подскажу, что дальше. `);h=m.html;opts.splice(0,4,...m.opts)}
   else if(c.page==='planner'&&p){h='Помогу с планом. Г-образную или П-образную комнату выберите в «Форма», сложную — нарисуйте по точкам. Количества пересчитаются сами.';opts.splice(0,4,{l:'Какой запас брать?',a:'say'},{l:'Нужна ли гидроизоляция?',a:'say'},{l:'Объясни расчёт',a:'say'})}
   if(c.page==='product'&&c.productId){const pr=P(c.productId);h=`Смотрите «${esc(pr.name)}». Могу посчитать нужное количество по плану комнаты, найти аналог или мастера для установки.`;
    opts.splice(0,4,...[pr.roles.length?{l:'Рассчитать количество',a:'go',arg:'product.html?id='+pr.id+'#calc'}:null,{l:'Найди аналог дешевле',a:'say'},pr.service?{l:'Нужен мастер для установки',a:'say'}:null].filter(Boolean))}
@@ -460,6 +469,7 @@ const Omik=(()=>{
  function suggestions(){
   const c=ctx();
   if(c.page==='smeta')return['Объясни расчёт','Как удешевить смету?','Что ещё понадобится?','Отправить смету мастеру'];
+  if(c.page==='dom')return['Что пора по дому?','Когда менять герметик?','Плитка в ванной 2,2 на 1,7, бюджет 1500'];
   if(c.page==='instr')return['Шаг готов','Что дальше?','Сколько сохнет?','Сколько осталось?'];
   if(c.page==='planner')return['Какой запас брать?','Нужна ли гидроизоляция?','Объясни расчёт'];
   if(c.page==='product')return['Найди аналог дешевле','Сравни с аналогами','Нужен мастер для установки'];

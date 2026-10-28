@@ -1,0 +1,93 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Сервисная книжка дома — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610300500"><link rel="stylesheet" href="app.css?v=202610300500"><link rel="stylesheet" href="ui-icons.css?v=202610300500"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300500">
+<style>
+/* Сервисная книжка: сверху — что пора сделать, ниже — что где лежит и история покупок; справа — напоминания и «посмотреть вперёд» */
+.hb{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start;margin-bottom:30px}
+.hb .card{padding:20px 22px;margin-bottom:14px}.hb h2{font-size:20px;margin:0 0 12px}
+.hb-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end;margin:0 0 18px}
+.hb-top p{margin:0;max-width:720px}
+.kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 14px}
+.kpi div{background:#fff;border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}.kpi span{display:block;font-size:13px;color:var(--mute)}.kpi b{font-size:24px}
+.kpi .late b{color:var(--red)}
+.rm{display:grid;grid-template-columns:110px minmax(0,1fr);gap:16px;padding:14px 0;border-top:1px solid var(--line)}.rm:first-of-type{border-top:0;padding-top:0}
+.task{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;padding:14px 0;border-top:1px solid var(--line)}.task:first-of-type{border-top:0;padding-top:0}
+.task h3{margin:0;font-size:16px}.task .where{font-size:13px;color:var(--mute);margin-top:2px}.task p{margin:6px 0 0;font-size:14px;color:#3c4a5a;max-width:640px}
+.task .when{text-align:right;font-size:13px;color:var(--mute);white-space:nowrap}.task .when b{display:block;font-size:14px;color:var(--ink)}
+.task .acts{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.st.late{background:#fdecea;color:#b42318}.st.soon{background:#fff3e0;color:#b45309}.st.ok{background:#eef2f6;color:var(--mute)}
+.mt-list{display:grid;gap:6px;margin-top:6px}
+.mt-i{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;font-size:14px;align-items:baseline}
+.mt-i small{grid-column:1/-1;color:var(--mute);font-size:12px}.mt-i .lbl{color:var(--mute)}
+.ord{border-top:1px solid var(--line);padding:12px 0}.ord:first-of-type{border-top:0;padding-top:0}
+.ord summary{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;cursor:pointer;list-style:none}.ord summary::-webkit-details-marker{display:none}
+.ord summary b{font-size:15px}.ord summary span{font-size:13px;color:var(--mute)}
+.ord ul{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:6px}.ord li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;font-size:14px}.ord li small{color:var(--mute)}
+.ahead{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.ahead button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 8px;font:inherit;font-size:13px;font-weight:500;cursor:pointer}
+.ahead button.on{border-color:var(--blue);background:var(--blue-l);color:var(--blue)}
+.ex{font-size:11px;font-weight:600;color:var(--mute);background:#eef2f6;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:2px}
+@media(max-width:1000px){.hb{grid-template-columns:minmax(0,1fr)}.hb-top{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.kpi{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.kpi b{font-size:20px}.rm{grid-template-columns:minmax(0,1fr)}.task{grid-template-columns:minmax(0,1fr)}.task .when{text-align:left}}
+</style></head><body><div id="chrome"></div>
+<div class="wrap" id="app"></div>
+<script src="oma-catalog.js?v=202610300500"></script><script src="oma-menu.js?v=202610300500"></script><script src="oma-social.js?v=202610300500"></script><script src="oma-furniture.js?v=202610300500"></script><script src="data.js?v=202610300500"></script><script src="geom.js?v=202610300500"></script><script src="calc.js?v=202610300500"></script><script src="oma-crops.js?v=202610300500"></script><script src="core.js?v=202610300500"></script><script src="plan.js?v=202610300500"></script><script src="omik.js?v=202610300500"></script><script>
+window.OMIK_CTX={page:'dom'};
+const longDay=t=>new Date(t).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+const inDays=t=>{const d=Math.round((t-careNow())/DAY);return d<=0?(d===0?'сегодня':`просрочено на ${-d} дн.`):d<45?`через ${d} дн.`:d<365?`через ${Math.round(d/30.44)} мес.`:`через ${num(d/365,1)} г.`};
+const AHEAD=[[0,'Сегодня'],[6,'Через полгода'],[12,'Через год'],[36,'Через 3 года']];
+const ST_N={late:'Пора',soon:'Скоро',ok:'По плану'};
+
+function draw(){
+ chrome('dom');
+ const s=load(),c=s.care||{},H=homeProjects(),L=careList(),due=L.filter(x=>x.status!=='ok'),later=L.filter(x=>x.status==='ok');
+ const orders=[...s.orders].sort((a,b)=>b.at-a.at),spent=orders.reduce((t,o)=>t+(o.total||0),0);
+ let h=`<div class="crumbs"><a href="index.html">Главная</a> / Сервисная книжка дома</div>
+ <div class="hb-top"><div><h1 style="margin-bottom:6px">Сервисная книжка дома</h1><p class="lead">Что, где и когда куплено в ОМА — и когда это пора обслужить. Омик напомнит заранее, а докупить ту же затирку или краску можно в один клик.</p></div>
+  ${c.at?`<span class="st soon">Показано на ${longDay(careNow())}</span>`:''}</div>`;
+ if(!H.length){
+  h+=`<div class="card empty"><img src="img/omik-idea.png" alt=""><h2>Книжка пока пустая</h2><p class="note" style="max-width:520px;margin:0 auto 16px">Сюда попадает всё, что вы покупаете в ОМА по смете: какая плитка в ванной, какой краской покрашены стены, когда менять герметик и чистить вентиляцию.</p>
+   <div class="seg" style="justify-content:center"><a class="btn o" href="omik.html">Посчитать ремонт с Омиком</a><button class="btn g" onclick="careDemo();draw()">Показать пример</button></div></div>`;
+  $('#app').innerHTML=h;return;
+ }
+ h+=`<div class="kpi"><div class="${due.some(x=>x.status==='late')?'late':''}"><span>Пора и скоро</span><b>${due.length}</b></div><div><span>Помещений</span><b>${H.reduce((n,p)=>n+p.rooms.length,0)}</b></div><div><span>Покупок в ОМА</span><b>${byn(spent)}</b></div></div>
+ <div class="hb"><div>`;
+ // Что пора сделать
+ h+=`<div class="card"><h2>${due.length?'Пора и скоро':'Ближайшие дела'}</h2>${(due.length?due:later.slice(0,3)).map(task).join('')}
+  ${due.length&&later.length?`<details style="margin-top:10px"><summary class="note" style="cursor:pointer">Дальше по плану: ${later.length}</summary>${later.map(task).join('')}</details>`:''}</div>`;
+ // Что где лежит
+ h+=`<div class="card"><h2>Что где лежит</h2>${H.flatMap(p=>p.rooms.map(r=>room(p,r))).join('')}</div>`;
+ // История покупок
+ h+=`<div class="card"><h2>История покупок</h2>${orders.map(order).join('')||'<p class="note">Заказов пока нет.</p>'}</div>`;
+ h+=`</div><aside>
+  <div class="card">${omikTip(due.length?'warn':'happy',due.length?`<b>${due.length} ${plural(due.length,'дело','дела','дел')} по дому.</b> Ближайшее — «${esc(due[0].rule.t.toLowerCase())}» в помещении «${esc(due[0].r.name)}».`:'<b>Всё в порядке.</b> Ближайшее дело — '+(L[0]?`${inDays(L[0].due)}: ${esc(L[0].rule.t.toLowerCase())}.`:'нет.'))}</div>
+  <div class="card"><h3 style="margin:0 0 6px">Напоминания</h3>${c.notify?`<p style="margin:0 0 10px">Напомним по SMS на <b>${phoneFmt(c.notify)}</b> за 2 недели до срока.</p><button class="btn ghost sm" onclick="notifyOff()">Выключить</button>`
+   :`<p class="note" style="margin:0 0 10px">Омик пришлёт SMS за 2 недели до срока: когда менять герметик, пропитать швы, освежить покраску.</p><button class="btn o wide" onclick="notifyOn()">${ui('bell')}Включить напоминания</button>`}
+   <p class="note" style="margin:10px 0 0">Демо: SMS не отправляются.</p></div>
+  <div class="card"><h3 style="margin:0 0 6px">Посмотреть вперёд</h3><p class="note" style="margin:0 0 10px">Как книжка будет выглядеть через время — какие дела к тому моменту подойдут.</p>
+   <div class="ahead">${AHEAD.map(([m,t])=>`<button class="${(c.at||0)===m?'on':''}" onclick="ahead(${m})">${t}</button>`).join('')}</div></div>
+  ${H.some(p=>p.example)?`<div class="card"><p class="note" style="margin:0 0 8px">В книжке есть примеры — помещения с пометкой «пример».</p><button class="btn ghost sm" onclick="dropDemo()">Убрать примеры</button></div>`:''}
+ </aside></div>`;
+ $('#app').innerHTML=h;
+}
+function task(x){
+ const pr=x.pid&&P(x.pid),sv=x.rule.svc&&svc(x.rule.svc);
+ return`<div class="task"><div><span class="st ${x.status}">${ST_N[x.status]}</span><h3 style="margin-top:6px">${esc(x.rule.t)}</h3><div class="where">${ui(RT[x.r.type]?.icon)}${esc(x.r.name)} · ${esc(x.p.title)}${x.p.example?'<span class="ex">пример</span>':''}</div><p>${x.rule.why}</p></div>
+  <div class="when"><b>${longDay(x.due)}</b>${inDays(x.due)}</div>
+  <div class="acts">${pr?`<button class="btn sm o" onclick="buy('${pr.id}')">${ui('cart')}${x.rule.buyL||'Купить ту же'} — ${byn(pr.price)}</button>`:''}${sv?`<a class="btn sm g" href="masters.html?service=${sv.id}&project=${x.p.id}">${ui('worker')}Мастер</a>`:''}<button class="btn sm g" onclick="careDone('${x.key}');draw();toast('Отмечено. Следующий раз — по плану')">${ui('check')}Сделано</button><button class="btn sm ghost" onclick="careSnooze('${x.key}');draw()">Через месяц</button></div></div>`;
+}
+function room(p,r){
+ const at=boughtAt(p),roles=roomRoles(r),m=Geom.validate(r).ok?Geom.metrics(r):null,area={tileFloor:m?.floorNet,laminate:m?.floorNet,tileWall:m?.byFinish.tile,paintWall:m?.byFinish.paint,paintCeil:m?.ceil};
+ return`<div class="rm">${Plan.mini(r,110,82,!!m,floorLook(p,r))}<div><b>${ui(RT[r.type]?.icon)}${esc(r.name)}</b>${p.example?'<span class="ex">пример</span>':''} <span class="note">· куплено ${longDay(at)}</span>
+  <div class="mt-list">${roles.map(role=>{const pr=matOf(p,r,role),l=p.est.lines.find(x=>x.pid===pr?.id);return pr?`<div class="mt-i"><span><span class="lbl">${MAT_N[role]}:</span> <a href="product.html?id=${pr.id}">${esc(pr.name)}</a></span><button class="btn ghost sm" onclick="buy('${pr.id}')">Докупить</button><small>${area[role]?num(area[role],1)+' м²':''}${l?` · куплено ${l.qty} ${esc(pr.unit)}`:''}${pr.sku?` · код ${esc(pr.sku)} — по нему ту же партию найдут в магазине`:''}</small></div>`:''}).join('')||'<span class="note">Отделка не выбрана</span>'}</div></div></div>`;
+}
+function order(o){
+ const lines=o.lines||(o.projects||[]).flatMap(id=>getProject(id)?.est.lines.map(l=>({pid:l.pid,qty:l.qty}))||[]);
+ return`<details class="ord"><summary><span><b>${longDay(o.at)}</b> · заказ ${esc(o.no)}${o.example?'<span class="ex">пример</span>':''}<br>${lines.length} ${plural(lines.length,'позиция','позиции','позиций')} · ${o.delivery==='delivery'?'доставка':'самовывоз'}</span><b>${byn(o.total||0)}</b></summary>
+  <ul>${lines.map(l=>{const pr=P(l.pid);return pr?`<li><span><a href="product.html?id=${pr.id}">${esc(pr.name)}</a>${pr.sku?`<br><small>код ${esc(pr.sku)}</small>`:''}</span><span>${l.qty} ${esc(pr.unit)}</span></li>`:''}).join('')}</ul></details>`;
+}
+const plural=(n,a,b,c)=>n%10===1&&n%100!==11?a:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?b:c;
+function buy(pid){cartAdd(pid,1);toast(`«${esc(P(pid).name)}» в корзине · <a href="cart.html">открыть</a>`)}
+function ahead(m){const s=load();s.care={...s.care,at:m};save();draw()}
+function notifyOn(){gate('phone',c=>{const s=load();s.care={...s.care,notify:c.phone};save();draw();toast('Напоминания включены')},'Пришлём SMS за 2 недели до срока.')}
+function notifyOff(){const s=load();s.care={...s.care,notify:null};save();draw()}
+function dropDemo(){const s=load(),ids=new Set(s.projects.filter(p=>p.example).map(p=>p.id));s.projects=s.projects.filter(p=>!ids.has(p.id));s.orders=s.orders.filter(o=>!o.example);if(ids.has(s.active))s.active=null;save();draw()}
+draw();
+</script></body></html>
