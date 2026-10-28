@@ -103,6 +103,12 @@ const Omik=(()=>{
  const TIER=/(эконом|оптимум|премиум)/;
  const SHOWCART=/(покаж|откр|что в|где) ?\S* ?корзин/;
  const DIY=/(сам(а|ой|и|ому)?|своими руками) .{0,15}(можно|смогу|получится|положу|положить|справл)|(можно|смогу).{0,10}сам[аи]?(?![а-я])/;
+ // Цепочка «мастер → прокат → инструкция»: отказ от мастера, свой инструмент, бронь проката
+ const NOMASTER=/без мастера|мастер.{0,12}(не нужен|не надо|дорог|не буду)|не нужен мастер|не (хочу|буду|надо).{0,12}мастер|сделаю сам|сам(а)? сделаю|сам(а)? (положу|покрашу|уложу|справлюсь)|своими руками/;
+ const OWNTOOLS=/инструмент (есть|свой|имеется)|свой инструмент|есть (свой )?инструмент|прокат не (нужен|надо)|без проката|не нужен прокат/;
+ const RENTBOOK=/(брон|оформ|возьм|бер[уё]).{0,15}прокат|прокат.{0,10}(брон|оформ|давай|беру)/;
+ const RENTASK=/прокат|аренд|взять инструмент/;
+ const INSTR=/инструкц|как (самому|самостоятельно|положить|уложить|покрасить|клеить|класть)|пошагов/;
  const WORK=/работ[аыу] .{0,15}(мастер|плиточ|стоит)|плиточник|стоимость работ|сколько .{0,10}(за работу|работа)/;
  const ADD=/(добав|ещ[её]|плюс|и ещ)/;
  const FURN=/(шкаф|мебел|гарнитур|кухн[яюи] стоит).{0,30}(учит|вычест|вычит|стоит|под)/;
@@ -128,7 +134,7 @@ const Omik=(()=>{
     const early=o.budget!=null&&sl.ask!=='budget';merge(sl,o,t);const out=renovation();
     return early&&loadSt().slots.active?[{...out[0],html:`<span class="note">Бюджет ${byn(o.budget)} запомнил.</span> `+out[0].html}]:out}
    // Действия, которые имеют смысл только после расчёта: обещаем и продолжаем с текущего шага
-   const later=CART.test(t)?'Досчитаю — и сразу положу всё в корзину.':SHARE.test(t)||/мастер/.test(t)?'Досчитаю — и дам ссылку на смету для мастера.':MORE.test(t)?'Клей, грунт, затирку и остальное я добавлю в список сам.':CALC.test(t)?'Как раз считаю, до упаковки.':POLITE.test(t)?'':null;
+   const later=CART.test(t)?'Досчитаю — и сразу положу всё в корзину.':SHARE.test(t)||/мастер/.test(t)&&!NOMASTER.test(t)?'Досчитаю — и дам ссылку на смету для мастера.':MORE.test(t)?'Клей, грунт, затирку и остальное я добавлю в список сам.':CALC.test(t)?'Как раз считаю, до упаковки.':POLITE.test(t)?'':null;
    if(later!=null)return resume(later);
    // Побочный вопрос посреди расчёта: отвечаем и возвращаемся к шагу, на котором остановились
    const out=route(t,o,true);
@@ -143,6 +149,11 @@ const Omik=(()=>{
   if(/^(стоп|отмен|хватит)/.test(t))return[B('Хорошо. Когда захотите посчитать другое помещение — просто напишите, что делаем и размеры.',{opts:STARTS})];
   if(POLITE.test(t))return[lp?B(`Пожалуйста! Проект «${esc(lp.title)}» сохранён в «Моих проектах» — к нему можно вернуться в любой момент.`,{opts:resultOpts(lp)}):hello(false)];
   if(BOT.test(t))return[B('Я Омик — помощник ОМА по ремонту. В этом демо я работаю по готовым сценариям, без нейросети: понимаю задачи вроде «плитка в ванной 2 на 1,7, бюджет 1500». Количество считаю не я, а калькулятор — по площадям и нормам расхода товаров.',{opts:STARTS})];
+  if(RENTBOOK.test(t))return rentBookReply();
+  if(OWNTOOLS.test(t))return instrReply(true);
+  if(NOMASTER.test(t)||DIY.test(t))return selfReply();
+  if(RENTASK.test(t))return selfReply(true);
+  if(INSTR.test(t)&&!/^как (положить|уложить|покрасить) .{0,6}(мастер)/.test(t))return instrReply(false);
   if(BATH.test(t))return bathReply();
   if(o.wallp&&!o.work)return[B('Обои я пока не считаю — в демо есть плитка, ламинат и покраска стен. Посчитать покраску?',{opts:[{l:`Покрасить ${acc(o)}${o.L?` ${num(o.L)} на ${num(o.W)}`:''}`,a:'say',arg:`Покрасить ${acc(o)}${o.L?` ${o.L} на ${o.W}`:''}`}]})];
   if(lp&&ADD.test(t)&&o.room&&lp.source==='omik'){s.slots={active:true,addTo:lp.id,budget:0};merge(s.slots,o,t);if(!s.slots.work)s.slots.work=o.room==='bath'||o.room==='wc'?'tile':o.room==='kitchen'?'tile':'laminate';const out=renovation();return out}
@@ -151,7 +162,6 @@ const Omik=(()=>{
   if(SHOWCART.test(t))return[B(cartCount()?`В корзине ${cartCount()} поз. на <b>${byn(cartTotal())}</b>.`:'Корзина пока пустая.',{opts:cartCount()?[{l:'Перейти в корзину →',a:'go',arg:'cart.html',pri:true}]:lp?[{l:'🛒 Положить смету в корзину',a:'tocart',arg:lp.id,pri:true}]:STARTS})];
   if(lp&&ENOUGH.test(t))return[B(`Должно хватить: калькулятор берёт площадь с запасом ${lp.rooms[0]?.waste??10}% на подрезку и округляет вверх до целых упаковок. Если положите меньше — неоткрытые упаковки в ОМА можно вернуть.`+packCard(lp),{opts:[{l:'Объясни расчёт',a:'say'},...resultOpts(lp).slice(0,1)]})];
   if(WORK.test(t))return masterReply((SVC_KW.find(([r])=>r.test(t))||[,'svc_tile_wall'])[1]);
-  if(DIY.test(t))return[B('Сами — вполне: покраска и ламинат самые простые, плитка требует аккуратности и уровня. Главное — подготовить основание и взять инструмент.',{opts:[{l:'Что ещё понадобится?',a:'say',pri:true},{l:'Нужен мастер',a:'say',arg:'Нужен мастер уложить плитку'}]})];
   if(FURN.test(t))return[B('Под шкаф-купе и кухонный гарнитур ламинат и плитку обычно не кладут — это экономия. Отметьте место под мебель на плане во вкладке «Проёмы и вычеты», и количество пересчитается.',{opts:lp?[{l:'📐 Отметить на плане',a:'go',arg:`planner.html?project=${lp.id}&tab=open`,pri:true}]:STARTS})];
   if(CHEAP.test(t)&&lp&&!ctx().productId&&!/аналог/.test(t))return cheaper(lp);
   if(CALC.test(t)&&!(lp&&/сколько/.test(t)&&!o.room&&!o.work&&!o.L))return calcStart(o,t);
@@ -252,7 +262,7 @@ const Omik=(()=>{
  }
  function resultOpts(p,o={}){
   const rect=p.rooms.length===1&&p.rooms[0].shape?.kind==='rect';
-  return[{l:'🛒 Всё в корзину',a:'tocart',arg:p.id,pri:!o.over},{l:'📋 Смета с расчётом',a:'go',arg:'smeta.html?project='+p.id},rect?{l:'🔗 Ссылка для мастера',a:'go',arg:`smeta.html?project=${p.id}&share=1`}:{l:'📐 Уточнить форму на плане',a:'go',arg:`planner.html?project=${p.id}&from=omik`}];
+  return[{l:'🛒 Всё в корзину',a:'tocart',arg:p.id,pri:!o.over},{l:'📋 Смета с расчётом',a:'go',arg:'smeta.html?project='+p.id},rect?{l:'🔗 Ссылка для мастера',a:'go',arg:`smeta.html?project=${p.id}&share=1`}:{l:'📐 Уточнить форму на плане',a:'go',arg:`planner.html?project=${p.id}&from=omik`},{l:'👷 Кто сделает работу?',a:'say',arg:'Нужен мастер'}];
  }
  function merge(sl,o,t){
   Object.assign(sl,Object.fromEntries(Object.entries(o).filter(([,v])=>v!=null)));
@@ -346,13 +356,41 @@ const Omik=(()=>{
   const tbl=`<div style="overflow:auto"><table class="cmp" style="font-size:12px;margin-top:8px"><tr><th></th>${L.map(x=>`<td><b>${esc(x.name)}</b></td>`).join('')}</tr><tr><th>Цена</th>${L.map(x=>`<td><b>${byn(x.price)}</b></td>`).join('')}</tr>${keys.map(k=>`<tr><th>${k}</th>${L.map(x=>`<td>${esc((x.props.find(q=>q[0]===k)||[,'—'])[1])}</td>`).join('')}</tr>`).join('')}</table></div>`;
   return[B('Сравнение по характеристикам из карточек товаров:'+tbl,{opts:[{l:'Открыть подробное сравнение',a:'go',arg:'catalog.html?cmp='+ids.join(',')}]})];
  }
+ // Отказались от мастера: предлагаем прокат под работы проекта; можно отказаться — тогда инструкция
+ function selfReply(asked){
+  const p=lastP(),rent=p?rentalFor(p):RENTAL.slice(0,4);
+  if(p&&!asked){setDoer(p,'self')}
+  if(p&&!rent.length)return instrReply(false,'Для ваших работ особый инструмент не нужен.');
+  const R=p?rentalState(p):null,sum=p?rentalSum(p):null;
+  const list=rent.map(r=>`<li>${r.icon} <b>${esc(r.name)}</b> — ${byn(r.day)}/сут.${R?.items[r.id]?`, ${R.items[r.id]} сут.`:r.opt?' — по желанию':''}<br><span class="note">${esc(r.why)}</span></li>`).join('');
+  const h=`${asked?'':'Хорошо, делаем сами! '}Чтобы не покупать инструмент на пару дней, возьмите его в <b>прокат ОМА</b>${p?' — подобрал под ваши работы':''}:<ul class="plist">${list}</ul>${sum&&sum.sum?`Прокат ≈ <b>${byn(sum.sum)}</b>, залог ${byn(sum.dep)} вернём при сдаче.`:''}<p class="note" style="margin-top:6px">Цены проката демонстрационные.</p>`;
+  return[B(h,{opts:[p?{l:'🔧 Забронировать прокат',a:'go',arg:`smeta.html?project=${p?.id}&doer=self#doer`,pri:true}:{l:'🔧 Посчитать прокат по проекту',a:'say',arg:'Посчитай ремонт'},{l:'У меня есть инструмент',a:'say',arg:'Инструмент есть, прокат не нужен'},{l:'👷 Всё-таки мастер',a:'say',arg:'Нужен мастер'}].filter(Boolean)})];
+ }
+ // Бронь — в смете: там выбирают инструмент и сутки и оставляют белорусский номер; в чате не регистрируем
+ function rentBookReply(){
+  const p=lastP();
+  if(!p)return[B('Сначала посчитаем ремонт — тогда подберу прокат под ваши работы. Что делаем и какого размера?',{opts:STARTS})];
+  setDoer(p,'self');rentalState(p).skip=false;save();
+  const{sum,dep}=rentalSum(p);
+  return[B(`Отметил прокат под ваш проект: ≈ <b>${byn(sum)}</b>, залог ${byn(dep)}. Проверьте инструмент и сутки в смете и оставьте номер телефона — пункт проката перезвонит и подтвердит бронь. Регистрация не нужна.`,{opts:[{l:'🔧 Перейти к брони',a:'go',arg:`smeta.html?project=${p.id}#doer`,pri:true},...guideOpts(p).map(o=>({...o,pri:false})),{l:'Не нужно, спасибо',a:'say',arg:'спасибо'}]})];
+ }
+ // Инструкция: шаги с объёмами и товарами из сметы; можно отказаться и продолжить
+ function instrReply(ownTools,note){
+  const p=lastP();
+  if(p&&ownTools){setDoer(p,'self');rentalState(p).skip=true;save()}
+  const h=`${note?note+' ':ownTools?'Отлично, тогда инструмент свой. ':''}Вот пошаговая инструкция${p?` по проекту «${esc(p.title)}»: в шагах ваши площади и товары из сметы — сколько клея, какой шпатель, когда затирать`:''}. Её можно распечатать.`;
+  return[B(h,{opts:[...guideOpts(p),{l:'Не нужно, спасибо',a:'say',arg:'спасибо'},{l:'👷 Всё-таки мастер',a:'say',arg:'Нужен мастер'}]})];
+ }
+ function guideOpts(p){const w=p&&projectWorks(p).length?projectWorks(p):Object.keys(WORKS);return w.map((k,i)=>({l:`📖 ${WORKS[k].name}`,a:'go',arg:`instrukcii.html?work=${k}${p?'&project='+p.id:''}`,pri:i===0}))}
  function masterReply(sid){
   const p=proj();
+  // по проекту сразу берём его основную работу — не переспрашиваем
+  if(!sid){const lp=lastP(),w=lp&&projectWorks(lp)[0];if(w)sid={tile:'svc_tile_floor',floor:'svc_lam',paint:'svc_paint'}[w]}
   if(!sid){return[B('Какую работу нужно сделать?',{opts:[{l:'Установить смеситель',a:'say'},{l:'Уложить плитку',a:'say',arg:'Нужен мастер уложить плитку'},{l:'Покрасить стены',a:'say',arg:'Мастер покрасить стены'},{l:'Замер помещения',a:'say',arg:'Нужен замерщик'}]})]}
   const sv=svc(sid),ms=MASTERS.filter(m=>m.cats.includes(sv.cat)),e=svcEstimate(sv,p);
   const vol=sv.area&&p&&e.q?` По вашему проекту это ${num(e.q,1)} ${sv.unit}, ориентировочно <b>${byn(e.sum)}</b>.`:'';
   return[B(`«${sv.name}» — от <b>${byn(sv.price)}</b> за ${sv.unit}.${vol} Доступно мастеров: ${ms.length}, ближайший выезд — ${fmtDay(now()+Math.min(...ms.map(m=>m.days))*DAY)}.<p class="note" style="margin-top:6px">Мастера, цены и даты в прототипе демонстрационные. Работы оплачиваются мастеру, ОМА не гарантирует их в демо.</p>`,
-   {opts:[{l:'Выбрать мастера',a:'go',arg:`masters.html?service=${sid}${p?'&project='+p.id:''}`,pri:true},{l:'Оставить заявку',a:'go',arg:`masters.html?service=${sid}${p?'&project='+p.id:''}#new`}]})];
+   {opts:[{l:'Выбрать мастера',a:'go',arg:`masters.html?service=${sid}${p?'&project='+p.id:''}`,pri:true},{l:'Оставить заявку',a:'go',arg:`masters.html?service=${sid}${p?'&project='+p.id:''}#new`},{l:'🛠 Сделаю сам',a:'say',arg:'Мастер не нужен, сделаю сам'}]})];
  }
  function cheaper(lp){
   const p=lp||proj();if(!p.calc?.ok)return[B('В проекте ошибка геометрии — сначала исправьте план, потом посчитаю.',{opts:[{l:'Открыть план',a:'go',arg:'planner.html?project='+p.id}]})];

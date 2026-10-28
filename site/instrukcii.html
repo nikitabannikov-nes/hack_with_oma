@@ -1,0 +1,110 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Как сделать самому — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610291700"><link rel="stylesheet" href="app.css?v=202610291700"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610291700">
+<style>
+.ins{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start;margin-bottom:30px}
+.ins .card{padding:20px 22px;margin-bottom:14px}
+.ins h2{font-size:22px;margin:0 0 4px}.ins h3{font-size:16px;margin:0 0 10px}
+.wtabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.wtabs a{border:1px solid var(--line);background:#fff;border-radius:20px;padding:8px 14px;font-size:14px;font-weight:500;color:var(--ink)}
+.wtabs a.on{border-color:var(--blue);background:var(--blue-l);color:var(--blue)}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 0}.meta span{background:#f2f5f9;border-radius:8px;padding:5px 10px;font-size:13px}
+.mats{display:grid;grid-template-columns:1fr auto;gap:6px 14px;font-size:14px}.mats b{white-space:nowrap}
+.tools{display:grid;gap:8px}
+.itl{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:14px}
+.itl i{font-style:normal;font-size:20px;width:32px;text-align:center}.itl div{flex:1;min-width:0}.itl small{display:block;color:var(--mute);font-size:12px}
+.itl .tag{white-space:nowrap}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0}
+.steps li{counter-increment:s;position:relative;padding:0 0 16px 46px;line-height:1.5}
+.steps li:before{content:counter(s);position:absolute;left:0;top:-2px;width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:700}
+.steps li b{color:var(--ink)}
+.bad li{margin:4px 0}
+.side{position:sticky;top:12px}
+.side .row{display:flex;justify-content:space-between;gap:10px;font-size:14px;margin:4px 0}
+@media(max-width:900px){.ins{grid-template-columns:minmax(0,1fr)}.side{position:static}}
+@media print{#chrome,footer,.side,.wtabs,.noprint,#omikW{display:none!important}.ins{display:block}.card{box-shadow:none;border:1px solid #ccc}}
+</style></head>
+<body><div id="chrome"></div>
+<div class="wrap" id="app"></div>
+<script src="oma-catalog.js?v=202610291700"></script><script src="oma-menu.js?v=202610291700"></script><script src="oma-social.js?v=202610291700"></script><script src="oma-crops.js?v=202610291700"></script><script src="data.js?v=202610291700"></script><script src="geom.js?v=202610291700"></script><script src="calc.js?v=202610291700"></script><script src="core.js?v=202610291700"></script><script src="plan.js?v=202610291700"></script><script src="omik.js?v=202610291700"></script>
+<script>
+const p=qp('project')?getProject(qp('project')):activeProject();
+if(p)setActive(p);
+window.OMIK_CTX={page:'instr',projectId:p?.id};
+chrome('instr');
+const works=p&&projectWorks(p).length?projectWorks(p):Object.keys(WORKS);
+let work=works.includes(qp('work'))?qp('work'):works[0];
+
+// Строка сметы по роли: название, количество, единица
+const line=role=>{const l=p?.est.lines.find(x=>x.role===role);const pr=l&&P(l.pid);return pr?{pr,qty:l.qty,unit:pr.unit,txt:`${l.qty} ${pr.unit} «${pr.name}»`}:null};
+const A=p?.calc?.areas||{},m2=v=>`${num(v,1)} м²`;
+const glueRate=()=>{const l=line('glue');return l?.pr.spec?.rate?`${num(l.pr.spec.rate)} кг/м² на мм слоя`:null};
+
+// Тексты инструкций; там, где есть проект, подставляем его объёмы и товары из сметы
+const GUIDE={
+ tile:()=>{const area=(A.tileWall||0)+(A.tileFloor||0);return{
+  time:area?`${Math.max(1,Math.ceil(area/6))+1} дн. на ${m2(area)}`:'3–4 дня на ванную 4 м²',level:'Нужна аккуратность',
+  roles:['tileWall','tileFloor','glue','grout','primer','wp','wpTape','clips'],
+  steps:[
+   `<b>Подготовьте основание.</b> Снимите старую отделку, перепад — не больше 2 мм на 2 м. Загрунтуйте${line('primer')?` (${line('primer').txt})`:''} и дайте высохнуть 4 часа.`,
+   A.wp?`<b>Гидроизоляция ${m2(A.wp)}.</b> Пол и стены на 20–30 см вверх, у душа — на 2 м. В углы и примыкания — лента${line('wpTape')?` (${line('wpTape').txt})`:''}. Два слоя крест-накрест, сутки на высыхание.`:'<b>Во влажной зоне — гидроизоляция.</b> Пол и стены на 20–30 см вверх, в углах лента, два слоя крест-накрест.',
+   '<b>Разметьте раскладку лазерным уровнем.</b> Начните с центра видимой стены, чтобы подрезка ушла в углы и под ванну.',
+   `<b>Замешайте клей миксером</b>${line('glue')?` — у вас ${line('glue').txt}`:''}: вода, затем сухая смесь, 3 минуты на низких оборотах, 5 минут отдыха и ещё раз перемешать.${glueRate()?` Расход ${glueRate()}.`:''}`,
+   '<b>Клей — зубчатым шпателем 8–10 мм.</b> Плитку от 30×60 мажьте и с обратной стороны, чтобы не было пустот. Прижмите и чуть сдвиньте на место.',
+   `<b>Швы — крестиками 2 мм${line('clips')?' или системой выравнивания':''}.</b> Каждые 2–3 плитки проверяйте уровень. Рез — плиткорезом, вырезы под трубы — болгаркой.`,
+   `<b>Затирка через сутки</b>${line('grout')?` (${line('grout').txt})`:''}: резиновым шпателем по диагонали к шву, через 15–20 минут смойте излишки влажной губкой.`],
+  bad:['Клей C0 на тёплый пол — плитка отвалится','Пустоты под плиткой — она треснет от нагрузки','Затирка в тот же день — швы потрескаются']}},
+ floor:()=>{const area=A.laminate||0;return{
+  time:area?`${Math.max(1,Math.ceil(area/18))} дн. на ${m2(area)}`:'1–2 дня на комнату 18 м²',level:'Справится новичок',
+  roles:['laminate','underlay','skirting'],
+  steps:[
+   `<b>Акклиматизация 48 часов.</b> Занесите упаковки${line('laminate')?` (${line('laminate').txt})`:''} в комнату и не распаковывайте.`,
+   '<b>Проверьте основание.</b> Перепад — не больше 2 мм на 2 м. Если больше, сначала наливной пол или стяжка.',
+   `<b>Подложка встык</b>${line('underlay')?` (${line('underlay').txt})`:''}, без нахлёста, стыки проклейте скотчем.`,
+   '<b>Первый ряд — гребнем к стене</b>, клинья 8–10 мм по всему периметру: это зазор на расширение.',
+   '<b>Сдвиг стыков — от 30 см.</b> Обрезок прошлого ряда начинает следующий. Режьте лобзиком лицевой стороной вниз.',
+   `<b>Последний ряд</b> подгоните по ширине и подбейте скобой. Снимите клинья и закройте зазор плинтусом${line('skirting')?` (${line('skirting').txt})`:''} — крепится только к стене.`],
+  bad:['Без зазора у стен пол летом вспучится','Плинтус крепят к стене, не к полу','В ванную ламинат не кладут, даже влагостойкий']}},
+ paint:()=>{const area=(A.paintWall||0)+(A.paintCeil||0);return{
+  time:area?`${Math.max(1,Math.ceil(area/50))+1} дн. на ${m2(area)} с сушкой`:'2 дня на комнату с сушкой',level:'Справится новичок',
+  roles:['paintCeil','paintWall','primer'],
+  steps:[
+   '<b>Защитите пол и проёмы</b> плёнкой и малярным скотчем, снимите накладки розеток.',
+   '<b>Зашпаклюйте трещины и отшлифуйте</b> стены шлифмашиной или бруском, обеспыльте влажной тряпкой.',
+   `<b>Грунт в один слой</b>${line('primer')?` (${line('primer').txt})`:''}, сушка 4 часа. Без грунта краска ляжет пятнами.`,
+   `<b>Сначала потолок</b>${A.paintCeil?` — ${m2(A.paintCeil)}`:''}${line('paintCeil')?`, ${line('paintCeil').txt}`:''}: от окна вглубь комнаты, полосами внахлёст.`,
+   `<b>Стены — два слоя</b>${A.paintWall?` на ${m2(A.paintWall)}`:''}${line('paintWall')?`, ${line('paintWall').txt}`:''}. Углы — кистью, плоскость — валиком сверху вниз. Второй слой — через 2–4 часа.`,
+   '<b>Скотч снимайте</b>, пока последний слой не высох полностью, — край будет ровным.'],
+  bad:['Краска на непрогрунтованную стену — пятна','Сквозняк и солнце при сушке — полосы','Один толстый слой вместо двух тонких']}},
+};
+
+function render(){
+ const g=GUIDE[work](),W=WORKS[work],rent=RENTAL.filter(r=>r.works.includes(work)),R=p?rentalState(p):null,booked=R?.status==='booked';
+ // купить — только то, чего нет в смете и что не берут в прокат (плиткорез дешевле взять на пару дней)
+ const buy=(KITS[work]||[]).filter(id=>!rent.some(r=>(r.replaces||[]).includes(id))&&!p?.est.lines.some(l=>l.pid===id)).map(P).filter(Boolean);
+ const mats=p?g.roles.map(line).filter(Boolean):[];
+ const sv=SERVICES.filter(s=>s.cat===(work==='floor'?'floor':work)&&s.area&&A[s.area]),wsum=sv.reduce((s,x)=>s+A[x.area]*x.price,0);
+ let h=`<div class="crumbs"><a href="index.html">Главная</a> / ${p?`<a href="smeta.html?project=${p.id}">Смета «${esc(p.title)}»</a> / `:''}Как сделать самому</div>
+ <h1>Как сделать самому</h1><p class="lead">${p?`Пошаговая инструкция по вашему проекту «${esc(p.title)}»: объёмы и товары взяты из сметы.`:'Пошаговые инструкции Омика. Откройте их из сметы — и в шагах будут ваши объёмы и товары.'}</p>
+ <div class="wtabs">${works.map(k=>`<a class="${k===work?'on':''}" href="?work=${k}${p?'&project='+p.id:''}">${WORKS[k].icon} ${WORKS[k].name}</a>`).join('')}</div>
+ <div class="ins"><div>
+  <div class="card"><h2>${W.icon} ${W.name}</h2><div class="meta"><span>⏱ ${g.time}</span><span>🎯 ${g.level}</span></div></div>
+  ${mats.length?`<div class="card"><h3>Материалы по смете</h3><div class="mats">${mats.map(m=>`<a href="product.html?id=${m.pr.id}${p?'&project='+p.id:''}">${esc(m.pr.name)}</a><b>${m.qty} ${m.unit}</b>`).join('')}</div></div>`:''}
+  <div class="card"><h3>Инструмент</h3><div class="tools">
+   ${rent.map(r=>{const d=R?.items[r.id];return`<div class="itl"><i>${r.icon}</i><div><b>${esc(r.name)}</b><small>${esc(r.why)}</small></div><span class="tag ${booked&&d?'gr':''}">${booked&&d?`в прокате, ${d} сут.`:`прокат ${byn(r.day)}/сут.`}</span></div>`}).join('')}
+   ${buy.map(x=>`<div class="itl"><i>🛒</i><div><a href="product.html?id=${x.id}${p?'&project='+p.id:''}"><b>${esc(x.name)}</b></a><small>купить — пригодится и потом</small></div><span class="tag">${byn(x.price)}</span></div>`).join('')}
+  </div></div>
+  <div class="card"><h3>Шаги</h3><ol class="steps">${g.steps.map(s=>`<li>${s}</li>`).join('')}</ol></div>
+  <div class="card"><h3>Частые ошибки</h3><ul class="bad">${g.bad.map(b=>`<li>${b}</li>`).join('')}</ul>
+   <p class="note" style="margin-bottom:0">Инструкция Омика — общие рекомендации. На упаковке материала — точные нормы производителя, сверяйтесь с ними.</p></div>
+ </div>
+ <aside class="side">
+  <div class="card">${omikTip('idea','<b>Не уверены, что справитесь?</b> Мастер ОМА сделает под ключ — вы можете передумать в любой момент.')}
+   ${wsum?`<div class="row"><span>Работа мастера по проекту</span><b>≈ ${byn(wsum)}</b></div>`:''}
+   <a class="btn wide" href="masters.html?service=${sv[0]?.id||''}${p?'&project='+p.id:''}">👷 Выбрать мастера ОМА</a>
+  </div>
+  ${p&&rent.length?`<div class="card"><h3>Прокат инструмента</h3>${booked?`<p style="margin:0 0 8px">✓ Забронирован: <b>${byn(rentalSum(p).sum)}</b>, залог ${byn(rentalSum(p).dep)}.</p>`:`<p class="note" style="margin:0 0 10px">Не покупайте то, что нужно на пару дней.</p>`}<a class="btn g wide" href="smeta.html?project=${p.id}#doer">${booked?'Изменить прокат':'Подобрать прокат'}</a></div>`:''}
+  <div class="card noprint"><button class="btn ghost wide" onclick="print()">🖨 Распечатать инструкцию</button>${p?`<a class="btn ghost wide mt" href="smeta.html?project=${p.id}">← К смете</a>`:''}</div>
+ </aside></div>`;
+ $('#app').innerHTML=h;
+}
+render();
+</script></body></html>

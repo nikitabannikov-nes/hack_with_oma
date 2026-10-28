@@ -131,6 +131,18 @@ if(REAL){
  P.forEach(p=>{const r=REAL.byId[p.id];if(r)Object.assign(p,r,{spec:{...p.spec,...(r.spec||{})}})});
  REAL.extra.forEach(x=>{const b=P.find(p=>p.id===x.like)||{};const{like,...o}=x;P.push({...b,...o,spec:{...(b.spec||{}),...(o.spec||{})}})});
 }
-const DATA={CATS,ROLES,PRODUCTS:P,KITS,SERVICES,SVC_CATS,MASTERS};
+// Прокат инструмента в гипермаркете ОМА: цена за сутки и залог — демо. works — для каких работ проекта предлагать;
+// opt — по желанию: в списке есть, но галочка по умолчанию снята
+const RENTAL=[
+ {id:'r_cutter',name:'Плиткорез ручной 600 мм',icon:'📐',day:12,deposit:100,works:['tile'],why:'ровный прямой рез плитки до 60 см',replaces:['cutter']},
+ {id:'r_mixer',name:'Строительный миксер',icon:'🌀',day:15,deposit:150,works:['tile'],why:'замес клея и затирки без комков'},
+ {id:'r_grinder',name:'Болгарка с алмазным диском',icon:'⚙️',day:12,deposit:120,works:['tile'],why:'вырезы под трубы и розетки',opt:true},
+ {id:'r_laser',name:'Лазерный уровень',icon:'🔴',day:14,deposit:200,works:['tile','floor'],why:'разметка рядов и проверка ровности пола'},
+ {id:'r_jigsaw',name:'Электролобзик',icon:'🪚',day:10,deposit:120,works:['floor'],why:'подрезка доски по длине и вырезы под трубы'},
+ {id:'r_sander',name:'Шлифмашина для стен',icon:'🧽',day:18,deposit:200,works:['paint'],why:'шлифовка шпаклёвки перед покраской'},
+ {id:'r_sprayer',name:'Краскопульт',icon:'💨',day:20,deposit:250,works:['paint'],why:'быстрая покраска больших площадей',opt:true}
+];
+const WORKS={tile:{name:'Укладка плитки',icon:'🧱'},floor:{name:'Укладка ламината',icon:'🪵'},paint:{name:'Покраска стен и потолка',icon:'🎨'}};
+const DATA={CATS,ROLES,PRODUCTS:P,KITS,SERVICES,SVC_CATS,MASTERS,RENTAL,WORKS};
 if(typeof module!=='undefined')module.exports=DATA;else Object.assign(root,DATA);
 })(this);

@@ -1,5 +1,5 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Смета — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610291000"><link rel="stylesheet" href="app.css?v=202610291000"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610291000">
-<style>.flash{animation:fl 2.4s}@keyframes fl{0%,40%{background:#fff1c2}}.rooms{display:flex;gap:14px;flex-wrap:wrap}.rm{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px 14px 10px 10px}.rm .note b{color:var(--ink)}</style></head><body><div id="chrome"></div>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Смета — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610291700"><link rel="stylesheet" href="app.css?v=202610291700"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610291700">
+<style>.who{display:flex;gap:4px;background:#f2f5f9;border-radius:12px;padding:3px}.who button{border:0;background:none;border-radius:9px;padding:8px 12px;font:inherit;font-size:14px;cursor:pointer;color:var(--ink)}.who button.on{background:#fff;color:var(--blue);font-weight:600;box-shadow:0 1px 3px rgba(0,26,52,.15)}#doer .tip{margin:12px 0}.rent{display:grid;gap:8px}.rr{display:grid;grid-template-columns:minmax(0,1fr) auto 90px;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px 10px}.rr.off{opacity:.6}.rr label{display:flex;gap:10px;align-items:center;cursor:pointer;min-width:0}.rr i{font-style:normal;font-size:20px}.rr small{display:block;color:var(--mute);font-size:12px}.rr>b{text-align:right}.rr .qty input{width:44px}.guides{display:flex;gap:8px;flex-wrap:wrap}@media(max-width:600px){.rr{grid-template-columns:1fr auto}.rr>b{grid-column:1/-1;text-align:left}.who{width:100%}.who button{flex:1;padding:8px 6px}}.flash{animation:fl 2.4s}@keyframes fl{0%,40%{background:#fff1c2}}.rooms{display:flex;gap:14px;flex-wrap:wrap}.rm{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px 14px 10px 10px}.rm .note b{color:var(--ink)}</style></head><body><div id="chrome"></div>
 <div class="wrap" id="app"></div>
 <div class="modal-bg" id="mShare" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal">
  <button class="x" onclick="$('#mShare').classList.remove('show')">×</button>
@@ -9,11 +9,12 @@
  <a class="btn o wide" id="openC" href="#" target="_self">Открыть как получатель →</a>
  <p class="note">Демо без сервера: согласование, сделанное в этом браузере, сразу видно в проекте. На другом устройстве получатель увидит смету и сможет оформить заказ, но статус вернётся к вам только с подключённым сервером.</p>
 </div></div>
-<script src="oma-catalog.js?v=202610291000"></script><script src="oma-menu.js?v=202610291000"></script><script src="oma-social.js?v=202610291000"></script><script src="data.js?v=202610291000"></script><script src="geom.js?v=202610291000"></script><script src="calc.js?v=202610291000"></script><script src="oma-crops.js?v=202610291000"></script><script src="core.js?v=202610291000"></script><script src="plan.js?v=202610291000"></script><script src="omik.js?v=202610291000"></script><script>
+<script src="oma-catalog.js?v=202610291700"></script><script src="oma-menu.js?v=202610291700"></script><script src="oma-social.js?v=202610291700"></script><script src="data.js?v=202610291700"></script><script src="geom.js?v=202610291700"></script><script src="calc.js?v=202610291700"></script><script src="oma-crops.js?v=202610291700"></script><script src="core.js?v=202610291700"></script><script src="plan.js?v=202610291700"></script><script src="omik.js?v=202610291700"></script><script>
 let p=activeProject();
 if(!p){location='planner.html?new=1';throw 0}
 setActive(p);
 window.OMIK_CTX={page:'smeta',projectId:p.id};
+if(qp('doer')==='self'&&p.doer!=='self')setDoer(p,'self');
 const ST={draft:['Черновик',''],sent:['Отправлена по ссылке','or'],changes:['Просят изменения','red'],approved:['Согласована','gr'],ordered:['Заказ оформлен','bl']};
 const SEC={tile:'Плитка',mix:'Смеси и гидроизоляция',paint:'Краски',floor:'Напольные покрытия',plumb:'Сантехника',elec:'Электрика',tools:'Инструмент'};
 let focus=qp('focus'),showWork=true;
@@ -71,22 +72,55 @@ function renderSmeta(){
  const svcs=SERVICES.filter(s=>s.area&&a[s.area]>0).map(s=>({s,q:a[s.area],sum:a[s.area]*s.price}));
  E.lines.filter(l=>P(l.pid)?.service&&!P(l.pid).roles.length).forEach(l=>{const s=svc(P(l.pid).service);svcs.push({s,q:l.qty,sum:l.qty*s.price,pid:l.pid})});
  const wsum=svcs.reduce((x,y)=>x+y.sum,0);
- h+=`<div class="card pad"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Работы мастера <span class="tag demo">ориентировочно, демо</span></h3><a class="btn sm" href="masters.html?project=${p.id}">👷 Найти мастера</a></div>
-  ${svcs.length?`<div class="mt">${svcs.map(x=>`<div class="row" style="font-size:14px"><span>${x.s.name}${x.pid?` — ${esc(P(x.pid).name)}`:''} · ${num(x.q,1)} ${x.s.unit} × ${byn(x.s.price)}</span><b>${byn(x.sum)}</b></div>`).join('')}<div class="row" style="font-size:15px;border-top:1px solid var(--line);margin-top:6px;padding-top:10px"><span><b style="color:var(--ink)">Итого работы (справочно)</b></span><b>${byn(wsum)}</b></div></div>`:'<p class="note">Нет работ по расчёту.</p>'}
-  <p class="note" style="margin-bottom:0">Работы оплачиваются мастеру по договорённости. В прототипе цены и мастера демонстрационные.</p></div>`;
+ h+=doerCard(svcs,wsum);
  // История
  h+=`<div class="card pad"><h3>История проекта</h3><div class="tl">${[...p.history].reverse().slice(0,12).map(x=>`<div><time>${fmtDate(x.at)}</time><span>${esc(x.text)}</span></div>`).join('')}</div></div>`;
  h+=`</div><aside class="card side"><div class="note">Материалы ОМА · ${TIERS[p.tier]}</div><div class="tot">${byn(tot)}</div>
   ${p.budget?`<span class="tag ${tot<=p.budget?'gr':'or'}">${tot<=p.budget?'✓ В рамках бюджета':'Выше бюджета на '+byn(tot-p.budget)}</span>`:''}
-  <div style="margin:12px 0 16px"><div class="row"><span>Позиций</span><b>${E.lines.length}</b></div><div class="row"><span>Площадь помещений</span><b>${num(floorArea(p),1)} м²</b></div><div class="row"><span>Работы (справочно)</span><b>${byn(wsum)}</b></div>${E.lines.some(stale)?`<div class="row" style="color:#c76b00"><span>Требуют решения</span><b style="color:#c76b00">${E.lines.filter(stale).length}</b></div>`:''}</div>
+  <div style="margin:12px 0 16px"><div class="row"><span>Позиций</span><b>${E.lines.length}</b></div><div class="row"><span>Площадь помещений</span><b>${num(floorArea(p),1)} м²</b></div>${p.doer==='self'?(p.rental?.status==='booked'?`<div class="row"><span>Прокат инструмента</span><b>${byn(rentalSum(p).sum)}</b></div>`:`<div class="row"><span>Работы</span><b>сами</b></div>`):`<div class="row"><span>Работы (справочно)</span><b>${byn(wsum)}</b></div>`}${E.lines.some(stale)?`<div class="row" style="color:#c76b00"><span>Требуют решения</span><b style="color:#c76b00">${E.lines.filter(stale).length}</b></div>`:''}</div>
   ${cartStale?`<div class="banner warn" style="font-size:13px;padding:10px 12px">В корзине старая версия этой сметы.</div><button class="btn o wide" onclick="toCart()">Обновить корзину</button>`:inCart?`<a class="btn o wide" href="cart.html">Перейти в корзину →</a>`:`<button class="btn o wide" onclick="toCart()" ${!E.lines.length?'disabled':''}>🛒 Всё в корзину</button>`}
   <button class="btn ghost wide mt" onclick="share()">🔗 ${E.status==='draft'?'Отправить смету по ссылке':'Ссылка на смету'}</button>
   <button class="btn ghost wide mt" onclick="copyP()">⧉ Повторить для другого объекта</button>
   <p class="note">Количества считает калькулятор по плану и нормам товаров. Если вы меняете количество вручную, пересчёт его не перезапишет.</p></aside></div>
  <div class="mbar"><div><small>Материалы · ${E.lines.length} поз.${p.budget?(tot<=p.budget?' · ✓ в бюджете':' · выше бюджета'):''}</small><b>${byn(tot)}</b></div>${inCart&&!cartStale?`<a class="btn o" href="cart.html">В корзину →</a>`:`<button class="btn o" onclick="toCart()" ${!E.lines.length?'disabled':''}>🛒 ${cartStale?'Обновить корзину':'Всё в корзину'}</button>`}</div>`;
  $('#app').innerHTML=h;
+ if(location.hash==='#doer'&&!renderSmeta.done){renderSmeta.done=1;setTimeout(()=>$('#doer')?.scrollIntoView({block:'start'}),50)}
  if(focus){const el=document.querySelector(`[data-pid="${focus}"]`);if(el){el.classList.add('flash');el.scrollIntoView({block:'center'})}focus=null}
 }
+// Кто делает работу: мастер ОМА → если нет, прокат инструмента → инструкция. На каждом шаге можно отказаться
+function doerCard(svcs,wsum){
+ const who=p.doer,works=projectWorks(p),rent=rentalFor(p),R=rentalState(p),{sum,dep}=rentalSum(p),booked=R.status==='booked';
+ const seg=`<div class="who">${[['master','👷 Мастер ОМА'],['self','🛠 Сделаю сам'],['later','Решу потом']].map(([k,t])=>`<button class="${who===k?'on':''}" onclick="doer('${k}')">${t}</button>`).join('')}</div>`;
+ const workList=svcs.length?`<div class="mt">${svcs.map(x=>`<div class="row" style="font-size:14px"><span>${x.s.name}${x.pid?` — ${esc(P(x.pid).name)}`:''} · ${num(x.q,1)} ${x.s.unit} × ${byn(x.s.price)}</span><b>${byn(x.sum)}</b></div>`).join('')}<div class="row" style="font-size:15px;border-top:1px solid var(--line);margin-top:6px;padding-top:10px"><span><b style="color:var(--ink)">Итого работы (справочно)</b></span><b>${byn(wsum)}</b></div></div>`:'<p class="note">Нет работ по расчёту.</p>';
+ const guides=works.length?`<div class="guides">${works.map(w=>`<a class="btn sm g" href="instrukcii.html?project=${p.id}&work=${w}">📖 ${WORKS[w].name}: инструкция</a>`).join('')}</div>`:'';
+ let h=`<div class="card pad" id="doer"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Кто будет делать работу?</h3>${seg}</div>`;
+ if(!who||who==='master'){
+  if(!who)h+=`<p class="note" style="margin:10px 0 0">Мастер ОМА сделает под ключ. Хотите сами — подберём прокат инструмента и дадим пошаговую инструкцию по вашему проекту.</p>`;
+  h+=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px"><b>Работы мастера <span class="tag demo">ориентировочно, демо</span></b><a class="btn sm" href="masters.html?project=${p.id}">👷 Выбрать мастера</a></div>${workList}
+   <p class="note" style="margin-bottom:0">Работы оплачиваются мастеру по договорённости. В прототипе цены и мастера демонстрационные.</p>`;
+ }else if(who==='self'){
+  if(!rent.length)h+=`<p class="mt" style="margin-bottom:8px">Для этих работ специальный инструмент не нужен.</p>${guides}`;
+  else if(booked)h+=omikTip('happy',`<b>Прокат забронирован: ${byn(sum)}</b>, залог ${byn(dep)} вернём при сдаче. Заберите инструмент на кассе проката в любом гипермаркете ОМА — назовите номер проекта <b>${p.id}</b>.<div class="mt"><button class="btn sm g" onclick="unbook()">Изменить прокат</button></div>`,'ok')+`<p style="margin:12px 0 8px"><b>Дальше — пошаговая инструкция по вашему проекту:</b></p>${guides}`;
+  else if(R.skip)h+=`<p class="mt" style="margin-bottom:8px">Инструмент у вас свой — отлично. <button class="btn ghost sm" onclick="R_skip(false)">Всё-таки нужен прокат</button></p>${guides}`;
+  else{
+   h+=omikTip('ok','<b>Не покупайте то, что нужно на пару дней.</b> Возьмите инструмент в прокат ОМА — я отметил нужный под ваши работы и прикинул срок. Не нужно — просто пропустите.')
+   +`<div class="rent">${rent.map(r=>{const d=R.items[r.id]||0;return`<div class="rr ${d?'':'off'}"><label><input type="checkbox" ${d?'checked':''} onchange="rentOn('${r.id}',this.checked)"><i>${r.icon}</i><span><b>${esc(r.name)}</b><small>${esc(r.why)} · ${byn(r.day)}/сут., залог ${byn(r.deposit)}</small></span></label>
+     <span class="qty"><button onclick="rentDays('${r.id}',-1)" ${d?'':'disabled'} aria-label="Меньше">−</button><input type="number" min="1" max="30" value="${d||rentalDays(p,r)}" ${d?'':'disabled'} onchange="rentDays('${r.id}',0,this.value)"><button onclick="rentDays('${r.id}',1)" ${d?'':'disabled'} aria-label="Больше">+</button></span><b>${d?byn(r.day*d):'—'}</b></div>`}).join('')}</div>
+    <div class="row" style="font-size:15px;border-top:1px solid var(--line);margin-top:8px;padding-top:10px"><span><b style="color:var(--ink)">Прокат</b> · залог ${byn(dep)} возвращается</span><b>${byn(sum)}</b></div>
+    <div class="seg mt"><button class="btn o" onclick="book()" ${sum?'':'disabled'}>Забронировать прокат</button><button class="btn g" onclick="R_skip(true)">У меня есть инструмент</button></div>
+    <p class="note" style="margin:12px 0 6px">Инструкции по вашему проекту доступны и без проката:</p>${guides}`;
+  }
+  if(wsum)h+=`<p class="note" style="margin:12px 0 0">Передумаете — мастер ОМА сделает за ≈ ${byn(wsum)}. <a href="masters.html?project=${p.id}">Выбрать мастера →</a></p>`;
+ }else h+=`<p class="note" style="margin:10px 0 0">Хорошо, вернуться к выбору можно в любой момент. Пока посмотрите инструкции — они бесплатные:</p>${guides}`;
+ return h+'</div>';
+}
+function doer(k){setDoer(p,p.doer===k?null:k);renderSmeta();if(p.doer)document.getElementById('doer').scrollIntoView({block:'nearest'})}
+function rentOn(id,on){const R=rentalState(p),r=RENTAL.find(x=>x.id===id);R.items[id]=on?rentalDays(p,r):0;save();renderSmeta()}
+function rentDays(id,d,v){const R=rentalState(p);R.items[id]=Math.max(1,Math.min(30,v!=null?+v||1:(R.items[id]||1)+d));save();renderSmeta()}
+function R_skip(on){rentalState(p).skip=on;log(p,on?'Прокат не нужен — инструмент свой':'Решили взять инструмент в прокат');save();renderSmeta()}
+// бронь — это заказ: нужен белорусский номер, пункт проката перезвонит. Регистрация не нужна
+function book(){gate('phone',c=>{if(bookRental(p,c)){toast(`🔧 Прокат забронирован — подтвердим по номеру ${phoneFmt(c.phone)}`);renderSmeta()}},'Пункт проката ОМА перезвонит, чтобы подтвердить бронь.')}
+function unbook(){rentalState(p).status='draft';save();renderSmeta()}
 function lineHTML(l){
  const pr=P(l.pid),st=stale(l),pinned=l.role&&p.pinned[l.role]===l.pid;
  const flags=`${l.role?'<span class="flag b">по расчёту</span>':`<span class="flag">${l.src==='omik'?'от Омика':'добавлено вами'}</span>`}${l.manual?'<span class="flag">изменено вручную</span>':''}${pinned?'<span class="flag g">ваш выбор</span>':''}${l.approx?'<span class="flag" style="background:#eef0f4;color:var(--mute)">ориентировочно</span>':''}`;

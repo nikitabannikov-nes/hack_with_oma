@@ -289,6 +289,65 @@ function quickEst(pid){
  const p=ensureProject(P(pid).cat==='plumb'?'bath':'bath');const r=addLine(p,pid,1);save();
  toast(r.dup?'Этот товар уже есть в смете — количество можно изменить там':r.replaced?`Товар закреплён в смете вместо типового · <a href="smeta.html?project=${p.id}">открыть</a>`:`📋 Добавлено в смету «${esc(p.title)}» · <a href="smeta.html?project=${p.id}">открыть</a>`,!r.dup);
 }
+// ---------- Кто делает работу: мастер ОМА → прокат инструмента → инструкция ----------
+// p.doer: null (не выбрано) | 'master' | 'self' | 'later'; p.rental: {items:{id:сутки}, status:'draft'|'booked', at}
+function projectWorks(p){const a=p?.calc?.areas||{},w=[];if(a.tileWall||a.tileFloor)w.push('tile');if(a.laminate)w.push('floor');if(a.paintWall||a.paintCeil)w.push('paint');return w}
+function rentalFor(p){const w=projectWorks(p);return RENTAL.filter(r=>r.works.some(x=>w.includes(x)))}
+// Сколько суток проката предложить: по площади и виду работ (ориентировочно)
+function rentalDays(p,r){const a=p.calc?.areas||{},tile=(a.tileWall||0)+(a.tileFloor||0),need={tile:Math.ceil(tile/6)+1,floor:Math.ceil((a.laminate||0)/18)+1,paint:Math.ceil(((a.paintWall||0)+(a.paintCeil||0))/60)+1};return Math.min(14,Math.max(...r.works.map(w=>need[w]||1)))}
+function rentalState(p){
+ if(!p.rental||!p.rental.items){const items={};rentalFor(p).forEach(r=>items[r.id]=r.opt?0:rentalDays(p,r));p.rental={items,status:'draft'}}
+ return p.rental;
+}
+function rentalSum(p){const R=rentalState(p);let sum=0,dep=0;Object.entries(R.items).forEach(([id,d])=>{const r=RENTAL.find(x=>x.id===id);if(r&&d>0){sum+=r.day*d;dep+=r.deposit}});return{sum,dep}}
+function setDoer(p,who){if(p.doer===who)return;p.doer=who;log(p,{master:'Работу сделает мастер ОМА',self:'Работу делаю сам',later:'Кто делает работу — решу позже'}[who]||'Выбор исполнителя сброшен');save()}
+function bookRental(p,c){const R=rentalState(p),{sum,dep}=rentalSum(p);if(!sum)return false;R.status='booked';R.at=now();if(c)R.phone=c.phone;log(p,`Прокат инструмента забронирован: ${byn(sum)}, залог ${byn(dep)}`);save();return true}
+// ---------- Телефон и регистрация ----------
+// Расчёт, Омик, план и 3D — без регистрации. Заявка мастеру и бронь проката — нужен белорусский телефон для связи.
+// Оплата заказа — регистрация по номеру с кодом из SMS (в демо код показываем на экране, SMS не отправляется).
+const BY_CODES=['25','29','33','44','17','15','16','21','22','23'];
+// «+375 29 123-45-67», «80291234567», «291234567» → «375291234567»
+function phoneNorm(v){let d=String(v||'').replace(/\D/g,'');if(d.startsWith('80')&&d.length===11)d='375'+d.slice(2);else if(d.length===9)d='375'+d;return d}
+function phoneErr(v){const d=phoneNorm(v);if(!d)return'Укажите номер телефона';if(!d.startsWith('375'))return'Нужен белорусский номер: начинается с +375 или 80';if(d.length!==12)return'В номере должно быть 9 цифр после +375';if(!BY_CODES.includes(d.slice(3,5)))return'Неизвестный код: мобильные 25, 29, 33, 44 или городской (17, 15, 16, 21, 22, 23)';return''}
+function phoneFmt(v){const d=phoneNorm(v);return d.length===12?`+375 (${d.slice(3,5)}) ${d.slice(5,8)}-${d.slice(8,10)}-${d.slice(10)}`:v}
+const currentUser=()=>load().user||null;
+const contact=()=>load().user||load().contact||null;
+// kind: 'phone' — только номер для связи; 'account' — регистрация (имя, номер, код из SMS). cb(контакт) — после успеха;
+// pre — уже введённые на странице имя и телефон, чтобы не просить второй раз
+function gate(kind,cb,why,pre){
+ const known=pre?.phone||pre?.name?{...contact(),...Object.fromEntries(Object.entries(pre).filter(([,v])=>v))}:contact();
+ if(kind==='phone'&&known?.phone&&!phoneErr(known.phone))return cb(known);
+ if(kind==='account'&&currentUser())return cb(currentUser());
+ let m=$('#gate');if(!m){m=document.createElement('div');m.id='gate';m.className='modal-bg';m.onclick=e=>{if(e.target===m)m.classList.remove('show')};document.body.append(m)}
+ let step=1,code='';
+ const draw=err=>{
+  m.innerHTML=`<form class="modal" style="max-width:420px" novalidate><button type="button" class="x" onclick="$('#gate').classList.remove('show')">×</button>
+   <h2 style="margin:0 0 6px">${kind==='account'?(step===1?'Вход по номеру телефона':'Код из SMS'):'Телефон для связи'}</h2>
+   <p class="note" style="margin:0 0 14px">${kind==='account'?(step===1?`${why||'Для оплаты заказа нужен аккаунт ОМА.'} Регистрация — один раз, по номеру. Расчёты, Омик и план работают без неё.`:`Отправили код на ${phoneFmt(m.dataset.phone)}. <b>Демо: код ${code}</b> — SMS не отправляется.`):`${why||'Перезвоним, чтобы подтвердить.'} Регистрация не нужна.`}</p>
+   ${step===1?`<label class="fld">Имя<input name="n" value="${esc(m.dataset.name||known?.name||'')}" placeholder="Как к вам обращаться" autocomplete="name"></label>
+   <label class="fld mt">Телефон<input name="ph" type="tel" inputmode="tel" autocomplete="tel" value="${esc(m.dataset.phone||known?.phone||'+375 ')}" placeholder="+375 29 123-45-67"></label>`
+   :`<label class="fld">Код из SMS<input name="code" inputmode="numeric" maxlength="4" autocomplete="one-time-code" placeholder="4 цифры"></label>`}
+   <div class="gerr" style="color:var(--red);font-size:13px;min-height:18px;margin-top:6px">${err?esc(err):''}</div>
+   <button class="btn o wide mt">${kind==='account'&&step===1?'Получить код':kind==='account'?'Подтвердить':'Продолжить'}</button>
+   ${step===2?`<button type="button" class="btn ghost wide mt" onclick="this.form.dataset.back=1;this.form.requestSubmit()">← Другой номер</button>`:''}</form>`;
+  const f=m.querySelector('form');setTimeout(()=>f.querySelector(step===2?'input[name="code"]':known?.name||m.dataset.name?'input[name="ph"]':'input')?.focus(),30);
+  f.onsubmit=e=>{e.preventDefault();
+   if(f.dataset.back){step=1;return draw()}
+   if(step===1){
+    const name=f.n.value.trim(),ph=f.ph.value;m.dataset.name=name;m.dataset.phone=ph;
+    if(!name)return draw('Укажите, как к вам обращаться');
+    const er=phoneErr(ph);if(er)return draw(er);
+    const c={name,phone:phoneNorm(ph)};
+    if(kind==='phone'){load().contact=c;save();m.classList.remove('show');return cb(c)}
+    code=String(1000+Math.floor(Math.random()*9000));step=2;return draw();
+   }
+   if(f.code.value.trim()!==code)return draw('Неверный код — проверьте цифры');
+   const u={name:m.dataset.name,phone:phoneNorm(m.dataset.phone),at:now()};load().user=u;load().contact={name:u.name,phone:u.phone};save();
+   m.classList.remove('show');toast(`Вы вошли как ${esc(u.name)}`);cb(u);
+  };
+ };
+ draw();m.classList.add('show');
+}
 function omikTip(img,html,cls=''){return`<div class="tip ${cls}"><img src="img/omik-${img}.png" alt="Омик"><div>${html}</div></div>`}
 function searchProducts(q,limit=60){
  const w=String(q||'').toLowerCase().replace(/ё/g,'е').split(/[^a-zа-я0-9]+/).filter(x=>x.length>1).map(x=>x.slice(0,Math.max(3,x.length-2)));
