@@ -10,11 +10,11 @@
 .pe-ttl input:hover{border-color:var(--pe-bd);background:#fff}
 .pe-ttl input:focus{outline:0;border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px #005ead22}
 .pe-ttl p{margin:0;color:var(--mute);max-width:640px;font-size:14px}
-.pe-sum{display:flex;align-items:center;gap:18px;background:#fff;border-radius:var(--pe-r);padding:14px 16px 14px 22px;box-shadow:0 1px 3px rgba(0,26,52,.08)}
+.pe-sum{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;background:#fff;border-radius:var(--pe-r);padding:14px 16px 14px 22px;margin-top:16px;box-shadow:0 1px 3px rgba(0,26,52,.08)}
 .pe-price span{display:block;font-size:12px;color:var(--mute)}
 .pe-price b{display:block;font-size:26px;line-height:1.2;font-weight:700;color:var(--ink)}
 .pe-price small{font-size:12px;color:var(--mute)}
-.pe-acts{display:flex;flex-direction:column;gap:6px}.pe-acts .btn{justify-content:center;padding:9px 16px;font-size:14px}
+.pe-acts{display:flex;flex-wrap:wrap;gap:8px}.pe-acts .btn{justify-content:center;padding:9px 16px;font-size:14px}
 .pe-ban{position:relative;margin-bottom:16px}
 .pe-ban .tip{background:#fff;border-left:4px solid var(--blue);border-radius:14px;padding:12px 44px 12px 14px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,26,52,.08);align-items:center}
 .pe-ban .tip.ok{border-left-color:var(--ok)}
@@ -98,7 +98,7 @@
 }
 @media(max-width:700px){
  .pe-ttl input{font-size:24px}
- .pe-sum{flex-direction:column;align-items:stretch;padding:14px 16px}
+ .pe-sum{flex-direction:column;align-items:stretch;padding:14px 16px}.pe-acts{flex-direction:column}
  .pe .canvas{height:420px}
  .pe .ctool{right:62px;flex-wrap:wrap}
  .pe .ctool button{font-size:0;gap:0}.pe .ctool .sep{display:none}
@@ -146,7 +146,6 @@
    <input id="pTitle" aria-label="Название проекта" title="Нажмите, чтобы переименовать проект">
    <p>Выберите форму или нарисуйте контур по точкам. Площади считаются по координатам вершин, а не по ограничивающему прямоугольнику.</p>
   </div>
-  <div class="pe-sum" id="sum"></div>
  </header>
  <div id="ban"></div>
  <div class="pe-grid">
@@ -166,6 +165,7 @@
     <div class="drawbar"><button id="bDelV" style="display:none">Удалить вершину</button><button id="bUndo" style="display:none">↶ Точка</button><button id="bCancel" style="display:none">Отмена</button><button id="bClose" style="display:none">✔ Замкнуть контур</button></div>
     <div class="legend"><span><i style="background:#0057d6"></i>плитка</span><span><i style="background:#ff9a1a"></i>покраска</span><span><i style="background:#9aa3b5"></i>без отделки</span><span><i style="background:#3aa0e8"></i>окно</span><span>⌒ дверь</span><span><i style="background:repeating-linear-gradient(45deg,#9aa3b5 0 2px,#fff 2px 4px)"></i>вычет</span></div>
    </div>
+   <div class="pe-sum" id="sum"></div>
    <div class="pe-res" id="res"></div>
   </section>
   <aside class="pe-insp" id="panel"></aside>
@@ -482,7 +482,7 @@ function drawResults(){
  const others=p.rooms.filter(x=>x.id!==r.id);
  const pe=p.calc||{},tot=estTotal(p);
  $('#sum').innerHTML=`<div class="pe-price"><span>Материалы${others.length?` · ${p.rooms.length} помещения`:''} · ${TIERS[p.tier]}</span><b>${pe.ok?byn(tot):'—'}</b><small>${pe.ok?`${p.est.lines.length} позиций · ${areaSummary(p)}`:'есть ошибки геометрии'}</small></div>
-  <div class="pe-acts"><a class="btn o ${pe.ok?'':'dis'}" ${pe.ok?`href="smeta.html?project=${p.id}${fromPid?'&focus='+fromPid:''}"`:'onclick="toast(\'Сначала исправьте геометрию\',false)"'}>Подобрать материалы → смета</a><a class="btn g" href="masters.html?project=${p.id}">👷 Нужен мастер</a><button class="btn g" type="button" onclick="setView('3d')">🛋 Расставить мебель в 3D</button></div>`;
+  <div class="pe-acts"><button class="btn g" type="button" onclick="setView('3d')">🛋 Расставить мебель в 3D</button><a class="btn g" href="masters.html?project=${p.id}">👷 Нужен мастер</a><a class="btn o ${pe.ok?'':'dis'}" ${pe.ok?`href="smeta.html?project=${p.id}${fromPid?'&focus='+fromPid:''}"`:'onclick="toast(\'Сначала исправьте геометрию\',false)"'}>Подобрать материалы → смета</a></div>`;
  h+=`<p class="note pe-foot">Проект сохраняется автоматически. Количества считает алгоритм по геометрии и нормам расхода товаров.</p>`;
  $('#res').innerHTML=h;
 }
