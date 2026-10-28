@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Смета — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610280100"><link rel="stylesheet" href="app.css?v=202610280100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610280100">
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Смета — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610291000"><link rel="stylesheet" href="app.css?v=202610291000"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610291000">
 <style>.flash{animation:fl 2.4s}@keyframes fl{0%,40%{background:#fff1c2}}.rooms{display:flex;gap:14px;flex-wrap:wrap}.rm{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px 14px 10px 10px}.rm .note b{color:var(--ink)}</style></head><body><div id="chrome"></div>
 <div class="wrap" id="app"></div>
 <div class="modal-bg" id="mShare" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal">
@@ -9,7 +9,7 @@
  <a class="btn o wide" id="openC" href="#" target="_self">Открыть как получатель →</a>
  <p class="note">Демо без сервера: согласование, сделанное в этом браузере, сразу видно в проекте. На другом устройстве получатель увидит смету и сможет оформить заказ, но статус вернётся к вам только с подключённым сервером.</p>
 </div></div>
-<script src="oma-catalog.js?v=202610280100"></script><script src="oma-menu.js?v=202610280100"></script><script src="oma-social.js?v=202610280100"></script><script src="data.js?v=202610280100"></script><script src="geom.js?v=202610280100"></script><script src="calc.js?v=202610280100"></script><script src="core.js?v=202610280100"></script><script src="plan.js?v=202610280100"></script><script src="omik.js?v=202610280100"></script><script>
+<script src="oma-catalog.js?v=202610291000"></script><script src="oma-menu.js?v=202610291000"></script><script src="oma-social.js?v=202610291000"></script><script src="data.js?v=202610291000"></script><script src="geom.js?v=202610291000"></script><script src="calc.js?v=202610291000"></script><script src="oma-crops.js?v=202610291000"></script><script src="core.js?v=202610291000"></script><script src="plan.js?v=202610291000"></script><script src="omik.js?v=202610291000"></script><script>
 let p=activeProject();
 if(!p){location='planner.html?new=1';throw 0}
 setActive(p);
@@ -39,6 +39,20 @@ function renderSmeta(){
  if(focus&&P(focus)){const fl=E.lines.find(l=>l.pid===focus);if(fl)h+=omikTip('happy',`<b>«${esc(P(focus).name)}»: ${fl.qty} ${P(focus).unit}</b> — посчитано по плану${fl.basis?`: ${esc(fl.basis)}`:''}. Остальные материалы подобраны под этот товар.`,'ok')}
  (c.warn||[]).forEach(w=>{const alt=PRODUCTS.find(x=>x.roles.includes(w.role)&&x.spec.maxTile>=Math.max(...Object.values(p.est.lines).filter(l=>l.role&&l.role.startsWith('tile')).map(l=>Math.max(...P(l.pid).spec.size))));h+=omikTip('warn',`<b>Проверка совместимости:</b> ${esc(w.text)}${alt?` <button class="btn sm mt" onclick="pin('${w.role}','${alt.id}')">Заменить на «${esc(alt.name)}»</button>`:''}`,'warn')});
  h+=`<div class="g2"><div>`;
+ // Позиции
+ const groups={};E.lines.forEach(l=>{const pr=P(l.pid);if(!pr)return;(groups[pr.cat]=groups[pr.cat]||[]).push(l)});
+ const offs=Object.keys(E.off).filter(k=>E.off[k]);
+ h+=`<div class="card pad"><h3>Материалы · ${E.lines.length} позиций</h3><div class="est"><div class="ln h"><span></span><span>Товар и расчёт</span><span class="r">Количество</span><span class="r">Цена</span><span class="r">Сумма</span><span></span></div>`;
+ Object.keys(SEC).filter(k=>groups[k]).forEach(k=>{h+=`<div class="sec">${SEC[k]}</div>`+groups[k].map(lineHTML).join('')});
+ if(!E.lines.length)h+=`<div class="empty"><img src="img/omik-think.png" alt=""><p>В смете пока пусто. Задайте отделку в плане или добавьте товары.</p></div>`;
+ h+=`</div>${offs.length?`<div class="chips mt"><span class="note" style="align-self:center">Убрано из расчёта:</span>${offs.map(k=>`<button onclick="unoff('${esc(k)}')">↺ ${esc(offName(k))}</button>`).join('')}</div>`:''}</div>`;
+ // Комплектации
+ const diffs={eco:'Клей C1, цементная затирка, краска класса 4',opt:'Клей C2TE, влагостойкая затирка, моющаяся краска',prem:'Клей S1, эпоксидная затирка, крупный формат'};
+ h+=`<div class="card pad"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px"><h3 style="margin:0">Комплектация</h3>
+  <label class="fld" style="display:flex;align-items:center;gap:8px">Бюджет на материалы<input type="number" step="50" min="0" style="width:120px;margin:0" value="${p.budget||''}" placeholder="не задан" onchange="p.budget=+this.value||null;log(p,'Изменён бюджет');save();renderSmeta()"> BYN</label></div>
+  <div class="tiers">${['eco','opt','prem'].map(k=>`<button class="${p.tier===k?'on':''} ${fit===k?'fit':''}" onclick="setTier('${k}')">${TIERS[k]}<small>${tt[k]!=null?byn(tt[k]):'—'}${fit===k?' · в бюджете':''}</small><em>${diffs[k]}</em></button>`).join('')}</div>
+  ${Object.keys(p.pinned).length?`<p class="note" style="margin-bottom:0">Ваш выбор сохраняется при смене комплектации: ${Object.entries(p.pinned).map(([r,id])=>`<b>${esc(P(id)?.name)}</b> <button class="btn ghost sm" style="padding:2px 6px" onclick="unpin('${r}')">сбросить</button>`).join(' · ')}</p>`:''}
+  ${p.budget&&!fit?`<p class="note" style="color:var(--red);margin-bottom:0">Ни одна комплектация не помещается в ${byn(p.budget)}. <button class="btn ghost sm" onclick="OmikWidget.open('Как удешевить смету?')">Спросить Омика, как сэкономить</button></p>`:''}</div>`;
  // Помещения
  // Помещения: геометрия и материалы каждого помещения
  h+=`<div class="card pad"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px"><h3 style="margin:0">Помещения и материалы</h3><a class="btn ghost sm" href="planner.html?project=${p.id}&from=smeta">Изменить план →</a></div>
@@ -49,20 +63,6 @@ function renderSmeta(){
    ${roles.length?roles.map(role=>`<div class="surf"><span>${MAT_PLACE[role]}<b>${MAT_N[role]}</b></span>${matPicker(p,r,role)}</div>`).join(''):'<p class="note">Отделка не выбрана — задайте её в плане.</p>'}
    ${p.rooms.length>1&&roles.length?`<button class="btn ghost sm" style="margin-top:6px" onclick="matAll('${r.id}')">Такие же материалы во все помещения</button>`:''}</div></div>`}).join('')}
   ${c.ok?`<p class="note" style="margin-bottom:0">Объёмы: ${areaSummary(p)||'нет отделки'}${c.areas.wp?` · гидроизоляция ${num(c.areas.wp,1)} м²`:''}</p>`:''}</div>`;
- // Комплектации
- const diffs={eco:'Клей C1, цементная затирка, краска класса 4',opt:'Клей C2TE, влагостойкая затирка, моющаяся краска',prem:'Клей S1, эпоксидная затирка, крупный формат'};
- h+=`<div class="card pad"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px"><h3 style="margin:0">Комплектация</h3>
-  <label class="fld" style="display:flex;align-items:center;gap:8px">Бюджет на материалы<input type="number" step="50" min="0" style="width:120px;margin:0" value="${p.budget||''}" placeholder="не задан" onchange="p.budget=+this.value||null;log(p,'Изменён бюджет');save();renderSmeta()"> BYN</label></div>
-  <div class="tiers">${['eco','opt','prem'].map(k=>`<button class="${p.tier===k?'on':''} ${fit===k?'fit':''}" onclick="setTier('${k}')">${TIERS[k]}<small>${tt[k]!=null?byn(tt[k]):'—'}${fit===k?' · в бюджете':''}</small><em>${diffs[k]}</em></button>`).join('')}</div>
-  ${Object.keys(p.pinned).length?`<p class="note" style="margin-bottom:0">Ваш выбор сохраняется при смене комплектации: ${Object.entries(p.pinned).map(([r,id])=>`<b>${esc(P(id)?.name)}</b> <button class="btn ghost sm" style="padding:2px 6px" onclick="unpin('${r}')">сбросить</button>`).join(' · ')}</p>`:''}
-  ${p.budget&&!fit?`<p class="note" style="color:var(--red);margin-bottom:0">Ни одна комплектация не помещается в ${byn(p.budget)}. <button class="btn ghost sm" onclick="OmikWidget.open('Как удешевить смету?')">Спросить Омика, как сэкономить</button></p>`:''}</div>`;
- // Позиции
- const groups={};E.lines.forEach(l=>{const pr=P(l.pid);if(!pr)return;(groups[pr.cat]=groups[pr.cat]||[]).push(l)});
- const offs=Object.keys(E.off).filter(k=>E.off[k]);
- h+=`<div class="card pad"><h3>Материалы · ${E.lines.length} позиций</h3><div class="est"><div class="ln h"><span></span><span>Товар и расчёт</span><span class="r">Количество</span><span class="r">Цена</span><span class="r">Сумма</span><span></span></div>`;
- Object.keys(SEC).filter(k=>groups[k]).forEach(k=>{h+=`<div class="sec">${SEC[k]}</div>`+groups[k].map(lineHTML).join('')});
- if(!E.lines.length)h+=`<div class="empty"><img src="img/omik-think.png" alt=""><p>В смете пока пусто. Задайте отделку в плане или добавьте товары.</p></div>`;
- h+=`</div>${offs.length?`<div class="chips mt"><span class="note" style="align-self:center">Убрано из расчёта:</span>${offs.map(r=>`<button onclick="delete p.est.off['${r}'];recalc(p);touchEst(p,'Возвращено: ${ROLES[r]}');save();renderSmeta()">↺ ${ROLES[r]}</button>`).join('')}</div>`:''}</div>`;
  // Сопутствующие
  const works=new Set();const a=c.areas||{};if(a.tileWall||a.tileFloor)works.add('tile');if(a.paintWall||a.paintCeil)works.add('paint');if(a.laminate)works.add('floor');if(a.wp)works.add('wet');
  const kit=[...works].flatMap(w=>KITS[w]).filter((id,i,arr)=>arr.indexOf(id)===i&&!E.lines.some(l=>l.pid===id)).map(P).filter(Boolean).slice(0,6);
@@ -79,11 +79,11 @@ function renderSmeta(){
  h+=`</div><aside class="card side"><div class="note">Материалы ОМА · ${TIERS[p.tier]}</div><div class="tot">${byn(tot)}</div>
   ${p.budget?`<span class="tag ${tot<=p.budget?'gr':'or'}">${tot<=p.budget?'✓ В рамках бюджета':'Выше бюджета на '+byn(tot-p.budget)}</span>`:''}
   <div style="margin:12px 0 16px"><div class="row"><span>Позиций</span><b>${E.lines.length}</b></div><div class="row"><span>Площадь помещений</span><b>${num(floorArea(p),1)} м²</b></div><div class="row"><span>Работы (справочно)</span><b>${byn(wsum)}</b></div>${E.lines.some(stale)?`<div class="row" style="color:#c76b00"><span>Требуют решения</span><b style="color:#c76b00">${E.lines.filter(stale).length}</b></div>`:''}</div>
-  ${cartStale?`<div class="banner warn" style="font-size:13px;padding:10px 12px">В корзине старая версия этой сметы.</div><button class="btn o wide" onclick="toCart()">Обновить корзину</button>`:inCart?`<a class="btn o wide" href="cart.html">Перейти в корзину →</a>`:`<button class="btn o wide" onclick="toCart()" ${!E.lines.length?'disabled':''}>🛒 Добавить всё в корзину</button>`}
-  <button class="btn wide mt" onclick="share()">🔗 ${E.status==='draft'?'Отправить смету по ссылке':'Ссылка на смету'}</button>
-  <a class="btn g wide mt" href="masters.html?project=${p.id}">👷 Нужен мастер</a>
+  ${cartStale?`<div class="banner warn" style="font-size:13px;padding:10px 12px">В корзине старая версия этой сметы.</div><button class="btn o wide" onclick="toCart()">Обновить корзину</button>`:inCart?`<a class="btn o wide" href="cart.html">Перейти в корзину →</a>`:`<button class="btn o wide" onclick="toCart()" ${!E.lines.length?'disabled':''}>🛒 Всё в корзину</button>`}
+  <button class="btn ghost wide mt" onclick="share()">🔗 ${E.status==='draft'?'Отправить смету по ссылке':'Ссылка на смету'}</button>
   <button class="btn ghost wide mt" onclick="copyP()">⧉ Повторить для другого объекта</button>
-  <p class="note">Количества считает калькулятор по плану и нормам товаров. Если вы меняете количество вручную, пересчёт его не перезапишет.</p></aside></div>`;
+  <p class="note">Количества считает калькулятор по плану и нормам товаров. Если вы меняете количество вручную, пересчёт его не перезапишет.</p></aside></div>
+ <div class="mbar"><div><small>Материалы · ${E.lines.length} поз.${p.budget?(tot<=p.budget?' · ✓ в бюджете':' · выше бюджета'):''}</small><b>${byn(tot)}</b></div>${inCart&&!cartStale?`<a class="btn o" href="cart.html">В корзину →</a>`:`<button class="btn o" onclick="toCart()" ${!E.lines.length?'disabled':''}>🛒 ${cartStale?'Обновить корзину':'Всё в корзину'}</button>`}</div>`;
  $('#app').innerHTML=h;
  if(focus){const el=document.querySelector(`[data-pid="${focus}"]`);if(el){el.classList.add('flash');el.scrollIntoView({block:'center'})}focus=null}
 }
@@ -106,7 +106,9 @@ function setQ(id,v){const l=L(id),q=Math.max(0,Math.round(+v||0));l.qty=q;if(l.r
 function dq(id,d){setQ(id,L(id).qty+d)}
 function accept(id){const l=L(id);l.qty=l.calcQty;l.manual=false;l.ack=null;touchEst(p,`Принят расчёт: ${P(l.pid).name}`);save();renderSmeta()}
 function keep(id){const l=L(id);if(l.gone){l.role=null;l.manual=false;l.gone=false;l.src='catalog'}else l.ack=l.calcQty;touchEst(p);save();renderSmeta()}
-function rm(id){const l=L(id);if(l.role&&!l.gone)p.est.off[l.role]=true;p.est.lines=p.est.lines.filter(x=>x.id!==id);touchEst(p,`Убрано: ${P(l.pid).name}`);save();renderSmeta()}
+const offName=k=>{const[role,pid]=k.split('|');return ROLES[role]+(pid&&P(pid)?': '+P(pid).name.split(/[,(]/)[0].slice(0,40):'')};
+function unoff(k){delete p.est.off[k];recalc(p);touchEst(p,'Возвращено: '+offName(k));save();renderSmeta()}
+function rm(id){const l=L(id);if(l.role&&!l.gone)p.est.off[l.role+'|'+l.pid]=true;p.est.lines=p.est.lines.filter(x=>x.id!==id);touchEst(p,`Убрано: ${P(l.pid).name}`);save();renderSmeta()}
 function onMat(rid,role,pid){const r=p.rooms.find(x=>x.id===rid);setRoomMat(p,[r],role,pid||null);save();renderSmeta();toast(pid?`${esc(r.name)}: ${esc(P(pid).name)}`:`${esc(r.name)}: по комплектации`)}
 function matAll(rid){const r=p.rooms.find(x=>x.id===rid);roomRoles(r).forEach(role=>{const pid=r.mat&&r.mat[role];p.rooms.filter(x=>roomRoles(x).includes(role)).forEach(x=>{x.mat=x.mat||{};if(pid)x.mat[role]=pid;else delete x.mat[role]})});recalc(p);touchEst(p,`Материалы «${r.name}» — во все помещения`);save();renderSmeta();toast('Материалы применены ко всем помещениям')}
 function setTier(k){p.tier=k;recalc(p);touchEst(p,'Комплектация: '+TIERS[k]);save();renderSmeta()}
@@ -123,4 +125,5 @@ function share(){
 function copyUrl(){const v=$('#url').value;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).catch(()=>{$('#url').select();document.execCommand('copy')}).finally(()=>$('#cpb').textContent='✓ Скопировано')}
 function copyP(){const n=copyProject(p);location='planner.html?project='+n.id+'&from=smeta'}
 recalc(p);save();renderSmeta();
+if(qp('share')){history.replaceState(null,'','smeta.html?project='+p.id);share()}
 </script></body></html>

@@ -50,7 +50,7 @@ function volumes(rooms,tier,pinned){
   roomSurfaces(r,m).forEach(x=>{const p=pickFor(x.role,tier,pinned,r);v.surf.push({...x,w,p,room:r.name,rid:r.id});mats[x.role]={pid:p.id,a:x.a,own:!!(r.mat&&r.mat[x.role]===p.id)}});
   per.push({id:r.id,ok:true,m,mats});
   if(r.floor==='laminate'){v.skirt+=Math.max(0,m.perim-m.doorW);v.lamNet+=m.floorNet}
-  if(r.wet??WET.includes(r.type)){v.wp+=m.floorNet+Math.max(0,m.perim-m.doorW)*0.2;v.wpTape+=Math.max(0,m.perim-m.doorW)+m.corners*0.2}
+  if(r.wet??WET.includes(r.type)){v.wp+=m.floor+Math.max(0,m.perim-m.doorW)*0.2;v.wpTape+=Math.max(0,m.perim-m.doorW)+m.corners*0.2}
   v.primer+=(m.byFinish.tile||0)+(m.byFinish.paint||0)+(r.floor==='tile'?m.floorNet:0)+(r.ceil==='paint'?m.ceil:0);
  });
  const A=role=>v.surf.filter(x=>x.role===role).reduce((s,x)=>s+x.a,0);
