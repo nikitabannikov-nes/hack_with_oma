@@ -19,6 +19,14 @@ t('вставка и удаление вершины',()=>{const p=G.fromTemplat
 t('проёмы вычитаются из площади стен',()=>{const p=G.fromTemplate('rect',{L:2,W:1.7});const r=room(p,{openings:[{id:'o',wallId:'w2',kind:'door',w:0.8,h:2,off:0.6}]});const m=G.metrics(r);near(m.wallGross,18.5);near(m.wallNet,16.9);near(m.doorW,0.8)});
 t('проём шире стены — ошибка',()=>{const r=room(G.fromTemplate('rect',{L:2,W:1.7}),{openings:[{id:'o',wallId:'w1',kind:'door',w:1.5,h:2,off:0.5}]});assert.ok(!G.validate(r).ok)});
 t('вычитаемая область вне помещения — ошибка',()=>{const r=room(G.fromTemplate('L',{A:4,B:3,a:1.5,b:1.2}),{excl:[{name:'Шкаф',x:3,y:2.2,w:0.6,h:0.6}]});assert.ok(!G.validate(r).ok);const ok=room(r.pts,{excl:[{name:'Шкаф',x:0.2,y:0.2,w:0.6,h:0.6}]});assert.ok(G.validate(ok).ok);near(G.metrics(ok).floorNet,10.2-0.36)});
+t('ванна вплотную к стенам — не ошибка, за стеной — ошибка',()=>{
+ const pts=G.fromTemplate('rect',{L:2.2,W:1.7});
+ assert.ok(G.validate(room(pts,{excl:[{name:'Ванна',x:0,y:0,w:1.7,h:0.7}]})).ok);
+ assert.ok(G.validate(room(pts,{excl:[{name:'Ванна',x:0.5,y:1,w:1.7,h:0.7}]})).ok);
+ assert.ok(!G.validate(room(pts,{excl:[{name:'Ванна',x:0.6,y:0,w:1.7,h:0.7}]})).ok);
+ const L=G.fromTemplate('L',{A:4,B:3,a:1.5,b:1.2});
+ assert.ok(!G.validate(room(L,{excl:[{name:'Шкаф',x:2,y:1,w:1.8,h:1.6}]})).ok);
+});
 t('разная высота стен',()=>{const p=G.fromTemplate('rect',{L:2,W:2});const r=room(p);r.walls[0].h=3;near(G.metrics(r).wallGross,2*3+2*2.5*3)});
 t('расчёт ванной: плитка округляется до упаковок, клей и затирка из норм товара',()=>{
  const pts=G.fromTemplate('rect',{L:2,W:1.7});

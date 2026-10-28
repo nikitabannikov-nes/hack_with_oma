@@ -3,8 +3,9 @@
 const KEY='omaProject.v2';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const num=(n,d=2)=>(+n).toLocaleString('ru-RU',{maximumFractionDigits:d}).replace(/ /g,' ');
-const byn=n=>(Math.round(n*100)/100).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2}).replace(/ /g,' ')+' BYN';
+// Неразрывные пробелы: «1 500,00 BYN» не переносится посередине
+const num=(n,d=2)=>(+n).toLocaleString('ru-RU',{maximumFractionDigits:d}).replace(/\s/g,'\u00a0');
+const byn=n=>(Math.round(n*100)/100).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2}).replace(/\s/g,'\u00a0')+'\u00a0BYN';
 const qp=k=>new URLSearchParams(location.search).get(k);
 const uid=()=>Math.random().toString(36).slice(2,9);
 const now=()=>Date.now(),DAY=864e5;
@@ -71,6 +72,8 @@ function ensureProject(task='bath',title){let p=activeProject();if(!p){p=addProj
 function log(p,text){p.history.push({at:now(),text});p.updated=now()}
 function room(p,id){return p.rooms.find(r=>r.id===(id||p.activeRoom))||p.rooms[0]}
 
+// Убранная из сметы позиция: вся роль (старые сметы) или конкретный товар роли — «роль|товар»
+const isOff=(E,l)=>!!(E.off[l.role]||E.off[l.role+'|'+l.pid]);
 // Пересчёт сметы из геометрии. Ручные количества не перезаписываются молча.
 function recalc(p){
  const res=Calc.compute(p),E=p.est;
@@ -79,13 +82,13 @@ function recalc(p){
  const seen=new Set();
  // Позиция сметы = роль + товар: у разных помещений могут быть разные плитка, краска, ламинат
  res.lines.forEach(c=>{
-  if(E.off[c.role])return;seen.add(c.role+'|'+c.pid);
+  if(isOff(E,c))return;seen.add(c.role+'|'+c.pid);
   let l=E.lines.find(x=>x.role===c.role&&x.pid===c.pid);
   if(!l){l={id:uid(),role:c.role,pid:c.pid,qty:c.qty,calcQty:c.qty,manual:false,ack:null,src:'calc'};E.lines.push(l)}
   l.pid=c.pid;l.calcQty=c.qty;l.basis=c.basis;l.approx=c.approx;l.gone=false;
   if(!l.manual)l.qty=c.qty;
  });
- E.lines.forEach(l=>{if(l.role&&!seen.has(l.role+'|'+l.pid)&&!E.off[l.role]){l.gone=true;l.calcQty=0}});
+ E.lines.forEach(l=>{if(l.role&&!seen.has(l.role+'|'+l.pid)&&!isOff(E,l)){l.gone=true;l.calcQty=0}});
  E.lines=E.lines.filter(l=>!(l.gone&&!l.manual));
  return res;
 }
@@ -94,7 +97,7 @@ function lineTotal(l){const p=P(l.pid);return p?p.price*l.qty:0}
 function estTotal(p){return p.est.lines.reduce((s,l)=>s+lineTotal(l),0)}
 function tierTotal(p,t){const res=Calc.compute(p,t);if(!res.ok)return null;
  const extra=p.est.lines.filter(l=>!l.role).reduce((s,l)=>s+lineTotal(l),0);
- return res.lines.filter(l=>!p.est.off[l.role]).reduce((s,l)=>s+Calc.lineSum(l),0)+extra}
+ return res.lines.filter(l=>!isOff(p.est,l)).reduce((s,l)=>s+Calc.lineSum(l),0)+extra}
 // Любое изменение сметы после отправки клиенту помечает её как новую неотправленную версию
 function touchEst(p,text){p.est.rev++;if(['sent','approved','changes'].includes(p.est.status))p.est.dirty=true;if(text)log(p,text);p.updated=now()}
 function addLine(p,pid,qty=1,src='catalog'){
@@ -153,7 +156,21 @@ function shareUrl(p){
  const h=btoa(unescape(encodeURIComponent(JSON.stringify(snap))));
  return new URL('share.html',location.href).href+'#d='+h;
 }
-function readShare(){const m=location.hash.match(/#d=(.+)/);if(!m)return null;try{return JSON.parse(decodeURIComponent(escape(atob(m[1]))))}catch(e){return null}}
+function readShare(){const m=location.hash.match(/#d=(.+)/);if(!m)return null;try{return cleanShare(JSON.parse(decodeURIComponent(escape(atob(m[1])))))}catch(e){return null}}
+// Ссылку может собрать кто угодно: оставляем только известные товары, допустимые значения и числа в разумных пределах
+function cleanShare(d){
+ if(!d||typeof d!=='object'||!Array.isArray(d.rooms)||!Array.isArray(d.lines))return null;
+ const n=(v,lo,hi,def)=>{v=+v;return Number.isFinite(v)?Math.min(hi,Math.max(lo,v)):def},str=(v,max)=>String(v??'').slice(0,max),qty=v=>Math.round(n(v,0,9999,0));
+ const one=(v,ok,def)=>ok.includes(v)?v:def;
+ const rooms=d.rooms.slice(0,30).map(r=>{r=r||{};const pts=(Array.isArray(r.pts)?r.pts:[]).slice(0,64).map(q=>[n(q&&q[0],-200,200,0),n(q&&q[1],-200,200,0)]);
+  return{name:str(r.name,40)||'Помещение',type:RT[r.type]?r.type:'living',pts,h:n(r.h,1.5,6,2.7),waste:n(r.waste,0,30,10),
+   walls:pts.map((_,i)=>{const w=(r.walls||[])[i]||{};return{id:str(w.id,24)||'w'+i,finish:one(w.finish,['tile','paint','none'],'paint'),h:w.h==null||w.h===''?null:n(w.h,1.5,6,null)}}),
+   openings:(Array.isArray(r.openings)?r.openings:[]).slice(0,40).map(o=>({id:str(o&&o.id,24)||uid(),kind:o&&o.kind==='window'?'window':'door',wallId:str(o&&o.wallId,24),w:n(o&&o.w,0.1,10,0.8),h:n(o&&o.h,0.1,4,2),off:n(o&&o.off,0,100,0),sill:n(o&&o.sill,0,3,0)})),
+   excl:(Array.isArray(r.excl)?r.excl:[]).slice(0,20).map(x=>({id:str(x&&x.id,24)||uid(),name:str(x&&x.name,40),x:n(x&&x.x,-200,200,0),y:n(x&&x.y,-200,200,0),w:n(x&&x.w,0.05,20,0.5),h:n(x&&x.h,0.05,20,0.5)})),
+   floor:one(r.floor,['tile','laminate','none'],'none'),ceil:one(r.ceil,['paint','none'],'none')}});
+ const lines=d.lines.slice(0,300).filter(l=>l&&P(String(l.pid))).map(l=>({pid:String(l.pid),qty:qty(l.qty),calcQty:qty(l.calcQty??l.qty),role:ROLES[l.role]?l.role:null,basis:str(l.basis,300),manual:!!l.manual}));
+ return{id:str(d.id,24),title:str(d.title,80)||'Смета',v:Math.round(n(d.v,1,999,1)),tier:TIERS[d.tier]?d.tier:'opt',rooms,lines,areas:null,author:null};
+}
 
 // ---------- Общие элементы интерфейса ----------
 // Шапка, меню каталога и подвал — копия oma.by (дерево разделов: oma-menu.js, иконки: img/oma-icons.svg)
@@ -166,7 +183,7 @@ const HICO={search:'<svg viewBox="0 0 24 24"><path d="M10.5 3a7.5 7.5 0 0 1 5.96
  cart:'<svg viewBox="0 0 24 24"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM1 2v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7.42a.25.25 0 0 1-.22-.37L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 20 4H5.21l-.94-2z"/></svg>'};
 // Быстрые ссылки ОМА + наши модули (выделены фиолетовым)
 const QUICK=[['red','Все акции','/sales/',1],['darkblue2','Супер цены','/sales/super-tseny/'],['red','Топ продаж','/sales/top-prodazh/'],['darkorange','Оплата частями','/buyers/payment/#credit']];
-const NAV=[['omik','Омик','omik.html'],['planner','Калькулятор','planner.html'],['masters','Мастера','masters.html'],['projects','Мои проекты','projects.html']];
+const NAV=[['omik','Омик','omik.html'],['planner','Калькулятор','planner.html'],['projects','Мои проекты','projects.html']];
 // Подкатегория ОМА есть в нашем демо-каталоге → ведём в каталог, иначе — на oma.by
 function inCatalog(name){
  const stem=String(name).toLowerCase().replace(/ё/g,'е').split(/[^a-zа-я0-9]+/).find(w=>w.length>3);
@@ -198,7 +215,6 @@ function chrome(active,o={}){
    <form class="oma-search" onsubmit="event.preventDefault();location='catalog.html?q='+encodeURIComponent(this.q.value)"><input name="q" placeholder="Ламинат" value="${esc(active==='catalog'?qp('q')||'':'')}"><button aria-label="Найти">${HICO.search}</button></form>
    <div class="oma-acts">
     <a class="oma-act" href="projects.html">${HICO.user}<span class="t"><small>Мои</small><b>Проекты</b></span><span class="cnt" data-b="proj"></span></a>
-    <a class="oma-act" href="masters.html#requests">${HICO.heart}<span class="t"><b>Заявки</b></span><span class="cnt" data-b="req"></span></a>
     <a class="oma-act" href="cart.html">${HICO.cart}<span class="t"><b>Корзина</b></span><span class="cnt" data-b="cart"></span></a>
    </div>
   </div></div>
@@ -209,7 +225,7 @@ function chrome(active,o={}){
  </header>
  ${p?`<div class="ctx"><div class="wrap"><span class="ctx-l">Текущий проект:</span><a class="ctx-p" href="projects.html">${RT[p.task]?.icon||'📁'} <b>${esc(p.title)}</b></a>
   <span class="ctx-s">${num(floorArea(p),1)} м² · ${p.est.lines.length} поз. · ${byn(estTotal(p))}</span><span class="sp"></span>
-  <a href="planner.html?project=${p.id}" class="${active==='planner'?'on':''}">📐 План</a><a href="smeta.html?project=${p.id}" class="${active==='smeta'?'on':''}">📋 Смета</a><a href="masters.html?project=${p.id}" class="${active==='masters'?'on':''}">👷 Мастер</a><button class="ctx-x" onclick="closeProject()" title="Закрыть проект" aria-label="Закрыть проект">×</button></div></div>`:''}`;
+  <a href="planner.html?project=${p.id}" class="${active==='planner'?'on':''}">📐 План</a><a href="smeta.html?project=${p.id}" class="${active==='smeta'?'on':''}">📋 Смета</a><button class="ctx-x" onclick="closeProject()" title="Закрыть проект" aria-label="Закрыть проект">×</button></div></div>`:''}`;
  if(!$('footer'))document.body.insertAdjacentHTML('beforeend',footerHtml());
  updateBadges();
  if(active!=='omik'&&typeof OmikWidget!=='undefined')OmikWidget.mount();
@@ -313,7 +329,10 @@ function matLook(prod){
  let size=prod.spec&&prod.spec.size?prod.spec.size.map(x=>x/100):null;
  // размер доски из названия: «1285х192х8мм» или «195x1380x8мм» — длина и ширина = два больших числа
  if(!size&&prod.roles.includes('laminate')){const m=n.match(/(\d+)\s*[хx×*]\s*(\d+)\s*[хx×*]\s*(\d+)/);const d=m?[+m[1],+m[2],+m[3]].sort((a,b)=>b-a):null;size=d&&d[1]>=50?[d[0]/1000,d[1]/1000]:[1.2,0.19]}
- return{color,size:size||[0.3,0.3],kind:prod.roles.includes('laminate')||prod.pattern==='wood'?'plank':'tile'};
+ // Дерево (ламинат и плитка «под дерево» — у её фото есть направление волокон) кладём доской: длинной стороной вдоль, рядами со сдвигом
+ const crop=typeof OMA_CROPS!=='undefined'&&OMA_CROPS[prod.id]||null,plank=prod.roles.includes('laminate')||prod.pattern==='wood'||!!(crop&&crop[4]);
+ size=size||[0.3,0.3];if(plank&&size[0]<size[1])size=[size[1],size[0]];
+ return{color,img:prod.img||null,crop,size,kind:plank?'plank':'tile'};
 }
 // Выбор материала для поверхности помещения: лента мини-карточек (видно 2–3), страница определяет onMat(roomId, role, pid)
 function matPicker(p,r,role){

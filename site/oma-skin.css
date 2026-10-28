@@ -180,7 +180,7 @@ h2{font-size:24px;font-weight:600}
 .omik-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .omik-chips a{border:1px solid #e5e5e5;border-radius:20px;padding:6px 14px;font-size:13px;color:#001a34;background:#fff}
 .omik-chips a:hover{border-color:var(--blue);color:var(--blue)}
-.tools4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:30px}
+.tools4{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:30px}
 .tl{background:#fff;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:8px;border:1px solid #fff;transition:.15s}
 .tl:hover{border-color:#e5e5e5;box-shadow:0 4px 20px rgba(0,0,0,.08)}
 .tl .ic{width:54px;height:54px;border-radius:14px;background:var(--blue-l);display:grid;place-items:center;font-size:28px}
@@ -231,8 +231,21 @@ footer.oma-f .wrap{display:grid;grid-template-columns:24% 48.6% 27.4%;gap:0}
  footer.oma-f .wrap,.f-cols{grid-template-columns:minmax(0,1fr);padding-left:0}
  .ssm{width:calc(100vw - 20px);left:0;top:auto}
 }
+/* Поле Омика в первом экране: задача одной строкой → сразу расчёт */
+.ask1{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;margin-top:12px;background:#fff;border:2px solid var(--blue);border-radius:14px;padding:8px 8px 8px 10px;box-shadow:0 6px 20px #005ead1a}
+.ask1>img{width:40px;height:40px;border-radius:50%;object-fit:cover;background:#eef4fb}
+.ask1 input{border:0;outline:0;font:inherit;font-size:16px;min-width:0;padding:10px 4px;background:none;color:#001a34}
+.ask1 .btn{padding:12px 22px;font-size:15px}
+.ask1-ch{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;padding:2px 2px 2px 0}
+.ask1-ch a{border:1px solid #e5e5e5;border-radius:20px;padding:5px 12px;font-size:13px;color:#001a34;background:#fff}
+.ask1-ch a:hover{border-color:var(--blue);color:var(--blue)}
+@media(max-width:800px){.ask1{grid-template-columns:minmax(0,1fr) auto}.ask1>img{display:none}.ask1 input{font-size:15px}.ask1 .btn{padding:11px 14px}.ask1-ch{flex-wrap:nowrap;overflow-x:auto}.ask1-ch a{white-space:nowrap}.slider{height:340px}.bnr p{font-size:15px;margin-bottom:14px}.tools4{grid-template-columns:1fr}}
 /* полоса преимуществ — белая во всю ширину, как на oma.by */
 .promo6{background:#fff;box-shadow:0 0 0 100vmax #fff;clip-path:inset(0 -100vmax);margin-top:10px}
 body:has(.promo6) footer.oma-f{margin-top:0}
 .doors.cont2{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:30px}
 @media(max-width:800px){.doors.cont2{grid-template-columns:minmax(0,1fr)}}
+/* Финиш-ревью 390 px: текст баннера не уходит под бобра, фокус поля Омика виден, подвал с отступами */
+.ask1:focus-within{box-shadow:0 0 0 4px #005ead33}
+@media(max-width:800px){.bnr p{max-width:60%}.bnr img.pers{height:160px}.ask1-ch a{padding:8px 12px}footer.oma-f .wrap{padding:0 16px}}
+@media(max-width:800px){.slider .dots{bottom:auto;top:16px;left:auto;right:16px}}

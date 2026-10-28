@@ -29,7 +29,17 @@ const Plan=(()=>{
   // Пол выбранным материалом: формат плитки или доски в масштабе плана
   const fm=o.floorMat;let fmFill=null;
   if(fm&&room.floor!=='none'){const id='fm'+(o.id||''),pw=fm.size[0]*v.s,ph=fm.size[1]*v.s,line=/^#(f|e|d)/i.test(fm.color)?'#00000026':'#ffffff55';
+   // Фото товара на полу: из снимка 600×600 берём кусок из oma-crops.js — у дерева это одна целая доска без стыков —
+   // и нарезаем на доски или плитки в масштабе плана. Волокна (C[4]: «h»/«v») поворачиваем вдоль длинной стороны доски;
+   // без волокон поворачиваем, только если плитка на фото стоит поперёк. sh: −1/0/1 — какой участок доски по длине взять
+   const C=fm.crop||[90,90,420,420,''],vb=C.slice(0,4).join(' '),
+    turn=(w,h)=>C[4]?(C[4]==='h')!==(w>=h):Math.abs(C[2]-C[3])>Math.min(C[2],C[3])*.2&&(C[2]>C[3])!==(w>h),
+    cut=(x,y,w,h,sh=0)=>{const rot=turn(w,h),k=['Min','Mid','Max'][sh+1],al=rot?`xMidY${k}`:`x${k}YMid`,
+     img=(W,H)=>`<svg width="${W}" height="${H}" viewBox="${vb}" preserveAspectRatio="${al} slice"><image href="${esc(fm.img)}" width="600" height="600"/></svg>`;
+     return rot?`<g transform="translate(${x+w} ${y}) rotate(90)">${img(h,w)}</g>`:`<g transform="translate(${x} ${y})">${img(w,h)}</g>`};
    if(Math.min(pw,ph)<3)fmFill=fm.color;
+   else if(fm.img&&Math.min(pw,ph)>=5&&fm.kind==='plank'){s+=`<defs><pattern id="${id}" width="${pw}" height="${2*ph}" patternUnits="userSpaceOnUse" x="${v.ox}" y="${v.oy}"><rect width="${pw}" height="${2*ph}" fill="${fm.color}"/>${cut(0,0,pw,ph)}${cut(-pw/2,ph,pw,ph,-1)}${cut(pw/2,ph,pw,ph,1)}<path d="M0 0H${pw}M0 ${ph}H${pw}M0 0V${ph}M${pw/2} ${ph}V${2*ph}" stroke="#00000033" stroke-width="1" fill="none"/></pattern></defs>`;fmFill=`url(#${id})`}
+   else if(fm.img&&Math.min(pw,ph)>=5){s+=`<defs><pattern id="${id}" width="${pw}" height="${ph}" patternUnits="userSpaceOnUse" x="${v.ox}" y="${v.oy}"><rect width="${pw}" height="${ph}" fill="${fm.color}"/>${cut(0,0,pw,ph)}<path d="M0 0H${pw}M0 0V${ph}" stroke="${line}" stroke-width="1.2" fill="none"/></pattern></defs>`;fmFill=`url(#${id})`}
    else if(fm.kind==='plank'){s+=`<defs><pattern id="${id}" width="${pw}" height="${2*ph}" patternUnits="userSpaceOnUse" x="${v.ox}" y="${v.oy}"><rect width="${pw}" height="${2*ph}" fill="${fm.color}"/><rect y="${ph}" width="${pw}" height="${ph}" fill="#0000000d"/><path d="M0 0H${pw}M0 ${ph}H${pw}M0 0V${ph}M${pw/2} ${ph}V${2*ph}" stroke="${line}" stroke-width="1" fill="none"/></pattern></defs>`;fmFill=`url(#${id})`}
    else{s+=`<defs><pattern id="${id}" width="${pw}" height="${ph}" patternUnits="userSpaceOnUse" x="${v.ox}" y="${v.oy}"><rect width="${pw}" height="${ph}" fill="${fm.color}"/><path d="M0 0H${pw}M0 0V${ph}" stroke="${line}" stroke-width="1.2" fill="none"/></pattern></defs>`;fmFill=`url(#${id})`}}
   if(o.grid!==false)s+=grid(v,W,H);
