@@ -8,7 +8,8 @@ const CATS={
  floor:{name:'Напольные покрытия',icon:'🪵'},
  plumb:{name:'Сантехника',icon:'🚿'},
  tools:{name:'Инструмент',icon:'🔧'},
- elec:{name:'Электрика и вентиляция',icon:'💡'}
+ elec:{name:'Электрика и вентиляция',icon:'💡'},
+ furn:{name:'Мебель, сантехника и техника',icon:'🛋'}
 };
 // Роли — что товар делает в расчёте. Для каждой роли есть товар на каждую комплектацию.
 const ROLES={
@@ -143,6 +144,10 @@ const RENTAL=[
  {id:'r_sprayer',img:'https://www.oma.by/upload/images/resize/products/fe/97/1703575/350x350_in.jpg',model:'Вихрь ЭКП-700В',name:'Краскопульт',icon:'💨',day:20,deposit:250,works:['paint'],why:'быстрая покраска больших площадей',opt:true}
 ];
 const WORKS={tile:{name:'Укладка плитки',icon:'🧱'},floor:{name:'Укладка ламината',icon:'🪵'},paint:{name:'Покраска стен и потолка',icon:'🎨'}};
+// Мебель, сантехника и техника из 3D-вида (oma-furniture.js): в общий список товаров — для сметы, корзины и карточки
+const FURN=typeof module!=='undefined'?null:root.OMA_FURN;
+if(FURN)FURN.forEach(f=>P.push({id:f.id,name:f.name,cat:'furn',roles:[],tier:'all',price:f.price,unit:'шт.',img:f.photo||null,url:f.url||null,brand:f.brand||null,real:!!f.real,furn:true,
+ props:[['Габариты, мм',`${f.dimensions.width} × ${f.dimensions.depth} × ${f.dimensions.height}`]]}));
 const DATA={CATS,ROLES,PRODUCTS:P,KITS,SERVICES,SVC_CATS,MASTERS,RENTAL,WORKS};
 if(typeof module!=='undefined')module.exports=DATA;else Object.assign(root,DATA);
 })(this);

@@ -126,9 +126,15 @@ function cartAdd(pid,qty=1,projectId=null){
  const s=load(),ex=s.cart.find(i=>i.pid===pid&&i.projectId===projectId);
  if(ex)ex.qty+=qty;else s.cart.push({pid,qty,projectId});save();
 }
+// Мебель и сантехника, расставленные в 3D: по товару и количеству
+function furnLines(p){const m={};(p.furniture||[]).forEach(i=>{if(P(i.id))m[i.id]=(m[i.id]||0)+1});return Object.entries(m).map(([pid,qty])=>({pid,qty,sum:P(pid).price*qty}))}
+const furnTotal=p=>furnLines(p).reduce((s,l)=>s+l.sum,0);
+// Только мебель проекта в корзину: прежние позиции мебели этого проекта заменяем, материалы не трогаем
+function cartSyncFurniture(p){const s=load(),L=furnLines(p);s.cart=s.cart.filter(i=>!(i.projectId===p.id&&P(i.pid)?.furn));L.forEach(l=>s.cart.push({pid:l.pid,qty:l.qty,projectId:p.id}));log(p,'Мебель из 3D добавлена в корзину');save();return L.length}
 function cartSyncProject(p){
  const s=load();s.cart=s.cart.filter(i=>i.projectId!==p.id);
  p.est.lines.filter(l=>l.qty>0).forEach(l=>s.cart.push({pid:l.pid,qty:l.qty,projectId:p.id}));
+ furnLines(p).forEach(l=>s.cart.push({pid:l.pid,qty:l.qty,projectId:p.id}));
  p.cartRev=p.est.rev;log(p,'Смета добавлена в корзину');save();
 }
 const cartCount=()=>load().cart.length;
@@ -228,6 +234,7 @@ function chrome(active,o={}){
   <a href="planner.html?project=${p.id}" class="${active==='planner'?'on':''}">📐 План</a><a href="smeta.html?project=${p.id}" class="${active==='smeta'?'on':''}">📋 Смета</a><button class="ctx-x" onclick="closeProject()" title="Закрыть проект" aria-label="Закрыть проект">×</button></div></div>`:''}`;
  if(!$('footer'))document.body.insertAdjacentHTML('beforeend',footerHtml());
  updateBadges();
+ demoGuide();
  if(active!=='omik'&&typeof OmikWidget!=='undefined')OmikWidget.mount();
 }
 function footerHtml(){
@@ -239,7 +246,7 @@ function footerHtml(){
    <div class="f-pay">${['pay-visa','pay-mastercard','pay-belcart','pay-google-pay','pay-apple-pay','pay-halva'].map(x=>ico(x)).join('')}</div></div>
   <div class="f-cols">
    <div><span class="f-h">Покупателям</span>${ext('Форма обратной связи','/buyers/')}${ext('Доставка','/buyers/delivery/')}${ext('Самовывоз','/buyers/samovyvoz/')}${ext('Способы оплаты','/buyers/payment/')}${ext('Оплата частями','/buyers/payment/#credit')}${ext('Полезные статьи','/buyers/helpful/')}${ext('Возврат и гарантия','/buyers/warranty/')}${ext('Программа лояльности','/buyers/discount/balans/#card-info')}</div>
-   <div><span class="f-h">Ремонт с ОМА</span><a class="ours" href="omik.html">Омик — помощник по ремонту</a><a class="ours" href="planner.html">Калькулятор ремонта 2D и 3D</a><a class="ours" href="planner.html?view=3d">3D-планировка с мебелью</a><a class="ours" href="import.html">Планировка по фото</a><a class="ours" href="catalog.html">Каталог и смета</a><a class="ours" href="masters.html">Мастера ОМА</a><a class="ours" href="instrukcii.html">Сделать самому: прокат и инструкции</a><a class="ours" href="projects.html">Мои проекты</a>
+   <div><span class="f-h">Ремонт с ОМА</span><a class="ours" href="omik.html">Омик — помощник по ремонту</a><a class="ours" href="planner.html">Калькулятор ремонта 2D и 3D</a><a class="ours" href="planner.html?view=3d">3D-планировка с мебелью</a><a class="ours" href="import.html">Планировка по фото</a><a class="ours" href="catalog.html">Каталог и смета</a><a class="ours" href="masters.html">Мастера ОМА</a><a class="ours" href="instrukcii.html">Сделать самому: прокат и инструкции</a><a class="ours" href="projects.html">Мои проекты</a><a class="ours" href="demo.html">▶ Демо для питча</a>
     <span class="f-h" style="margin-top:22px">Компания ОМА</span>${ext('О компании','/about/')}${ext('Новости','/news/')}${ext('Работа в ОМА','/about/rabota-v-oma/')}${ext('Отзывы об ОМА','/reviews/')}</div>
   </div>
   <div><div class="f-awards">${medals.map(([m,y])=>`<div><img src="${OMA}/local/images/awards/${m}.png" alt="" loading="lazy">${y}</div>`).join('')}</div>
@@ -347,6 +354,52 @@ function gate(kind,cb,why,pre){
   };
  };
  draw();m.classList.add('show');
+}
+// ---------- Демо для питча: готовая квартира и маршрут по сайту с подсказками ----------
+// Шаги: страница (pid подставляется), заголовок и что сказать. Плашка внизу слева на каждой странице, пока демо идёт
+const DEMO_STEPS=[
+ ['index.html','Главная ОМА','Обычный сайт ОМА, но с Омиком и калькулятором ремонта. Всё, кроме оплаты, работает без регистрации.'],
+ ['import.html?example=1','Планировка по фото','Клиент загружает фото планировки — Омик сам находит стены, комнаты, двери и окна. Дальше берём готовую квартиру.'],
+ ['planner.html?project={pid}&tab=fin','План в 2D','5 комнат, 52 м². Площади пола и стен считаются по контуру. Во вкладке «Отделка» — пол, стены, потолок и материал ОМА.'],
+ ['planner.html?project={pid}&view=3d','Квартира в 3D','Та же квартира в 3D: плитка и ламинат — фото товаров ОМА. Мебель и сантехника — тоже из каталога ОМА, её можно двигать и менять.'],
+ ['smeta.html?project={pid}','Смета','Материалы посчитаны до упаковки: плитка, клей, затирка, грунт. Три комплектации и бюджет. Ниже — мебель из 3D; кнопка «Всё в корзину» кладёт материалы и мебель одним списком.'],
+ ['smeta.html?project={pid}&doer=self#doer','Мастер или сам','Сначала предлагаем мастера ОМА. Хочет сам — прокат инструмента на нужные дни и бронь по номеру телефона.'],
+ ['instrukcii.html?project={pid}&work=tile','Инструкция','Пошаговая инструкция с цифрами из сметы: сколько клея, какой шпатель, когда затирать. Можно распечатать.'],
+ ['omik.html?project={pid}','Омик','Омик ведёт по той же цепочке в чате: «нужен мастер» → «сделаю сам» → прокат → инструкция. Отказаться можно на каждом шаге.'],
+ ['cart.html','Корзина и оплата','Материалы и мебель одним заказом. Для оплаты — вход по белорусскому номеру с кодом из SMS.']
+];
+const demoState=()=>{try{return JSON.parse(localStorage.getItem('omaDemo'))}catch(e){return null}};
+function demoSet(d){if(d)localStorage.setItem('omaDemo',JSON.stringify(d));else localStorage.removeItem('omaDemo')}
+// Готовая квартира: 5 комнат с отделкой и расставленной мебелью ОМА (координаты в метрах, rot — поворот, задняя сторона к стене)
+function demoProject(){
+ const mk=(type,name,x,y,L,W,mat)=>{const r=makeRoom(type,'rect',{L,W});r.name=name;r.pts=r.pts.map(([a,b])=>[Geom.r2(a+x),Geom.r2(b+y)]);r.shape={kind:'rect',params:{L,W},ox:x,oy:y};r.mat=mat;return r};
+ const R=[mk('living','Гостиная',0,0,4.5,4,{laminate:'lam_prem'}),mk('kitchen','Кухня',4.5,0,3,3,{tileFloor:'x_tf1',tileWall:'tw_opt'}),mk('bath','Ванная',4.5,3,2,1.7,{tileWall:'tw_green',tileFloor:'tf_prem'}),
+  mk('hall','Коридор',0,4,4.5,1.6,{laminate:'lam_opt'}),mk('living','Спальня',0,5.6,4.5,3.4,{laminate:'x_lam3'})];
+ R[1].walls[0].finish='tile';R.forEach(r=>{r.h=2.7});
+ const p=newProject({title:'Квартира на Притыцкого (демо)',task:'living',rooms:R,tier:'opt',logText:'Демо-проект для показа'});
+ const PI=Math.PI,F=(id,ri,x,z,rot=0)=>({uid:uid(),id,room:R[ri].id,x,z,rot,wall:null});
+ p.furniture=[F('sofa-001',0,2.25,0.425),F('armchair-001',0,4.06,1.3,-PI/2),F('coffee-001',0,2.25,1.5),F('tvstand-001',0,2.25,3.785,PI),F('tv-001',0,2.25,3.955,PI),F('shelf-001',0,0.155,1.5,PI/2),
+  F('fridge-001',1,4.785,0.29),F('kitchen-002',1,5.365,0.24),F('stove-001',1,5.925,0.315),F('table-001',1,6.4,2.2),F('chair-001',1,6.1,1.55),F('chair-001',1,6.7,1.55),
+  F('bath-002',2,5.265,3.365),F('toilet-001',2,6.155,4.2,-PI/2),F('sink-001',2,4.95,4.455,PI),F('cabinet-002',2,4.95,4.6,PI),
+  F('shoe-001',3,0.6,4.17),F('wardrobe-001',3,2.6,5.285,PI),
+  F('bed-001',4,2.25,7.91,PI),F('nightstand-001',4,1.2,8.787,PI),F('nightstand-001',4,3.3,8.787,PI),F('dresser-001',4,2.25,5.813),F('desk-001',4,0.315,7.0,PI/2),F('chair-001',4,0.915,7.0,-PI/2)].filter(f=>P(f.id));
+ recalc(p);return addProject(p);
+}
+// Начать демо: свежая квартира, пустая корзина, без входа — чтобы показать регистрацию при оплате
+function demoStart(){
+ const s=load();s.cart=[];delete s.user;delete s.contact;
+ const p=demoProject();demoSet({step:0,pid:p.id});location=demoUrl(0);
+}
+const demoUrl=i=>DEMO_STEPS[i][0].replace('{pid}',demoState()?.pid||'');
+function demoGo(i){const d=demoState();if(!d)return;if(i<0)return;if(i>=DEMO_STEPS.length){demoSet(null);toast('Демо пройдено 🎉');$('#demoG')?.remove();return}d.step=i;demoSet(d);
+ // к шагу с корзиной кладём в неё смету и мебель, если выступающий не успел нажать «Всё в корзину»
+ const p=getProject(d.pid);if(p&&DEMO_STEPS[i][0].startsWith('cart')&&!load().cart.some(x=>x.projectId===p.id))cartSyncProject(p);
+ location=demoUrl(i)}
+function demoGuide(){
+ const d=demoState();$('#demoG')?.remove();if(!d)return;
+ const [,t,say]=DEMO_STEPS[d.step]||[],n=DEMO_STEPS.length;if(!t)return;
+ document.body.insertAdjacentHTML('beforeend',`<div id="demoG" class="demo-g"><div class="demo-h"><b>Демо · ${d.step+1}/${n}</b><span>${esc(t)}</span><button onclick="demoSet(null);$('#demoG').remove()" title="Закончить демо">×</button></div>
+  <p>${esc(say)}</p><div class="demo-a"><button class="btn sm g" onclick="demoGo(${d.step-1})" ${d.step?'':'disabled'}>← Назад</button><a class="btn sm g" href="${demoUrl(d.step)}">↺ Сюда</a><button class="btn sm o" onclick="demoGo(${d.step+1})">${d.step+1<n?'Далее →':'Готово ✓'}</button></div></div>`);
 }
 function omikTip(img,html,cls=''){return`<div class="tip ${cls}"><img src="img/omik-${img}.png" alt="Омик"><div>${html}</div></div>`}
 function searchProducts(q,limit=60){

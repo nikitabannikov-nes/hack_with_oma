@@ -1,0 +1,44 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Демо для питча — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610292000"><link rel="stylesheet" href="app.css?v=202610292000"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610292000">
+<style>
+.dm{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start;margin-bottom:30px}
+.dm .card{padding:20px 22px;margin-bottom:14px}
+.dm ol{counter-reset:s;list-style:none;padding:0;margin:0}
+.dm ol li{counter-increment:s;position:relative;padding:0 0 18px 50px}
+.dm ol li:before{content:counter(s);position:absolute;left:0;top:0;width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:700}
+.dm ol li b{display:block;font-size:16px;color:var(--ink)}.dm ol li p{margin:4px 0 0;color:var(--mute);line-height:1.5}
+.dm ol li a{font-size:13px;color:var(--blue)}
+.dm .side{position:sticky;top:12px}
+.dm .side ul{padding-left:18px;margin:8px 0 0;line-height:1.6;font-size:14px}
+@media(max-width:900px){.dm{grid-template-columns:minmax(0,1fr)}.dm .side{position:static}}
+</style></head>
+<body><div id="chrome"></div>
+<div class="wrap">
+ <div class="crumbs"><a href="index.html">Главная</a> / Демо для питча</div>
+ <h1>Демо для питча</h1>
+ <p class="lead">Маршрут на 5–7 минут: от фото планировки до оплаты. Нажмите «Начать демо» — соберётся готовая квартира из 5 комнат с отделкой и мебелью ОМА, а внизу слева появится подсказка: где вы и что сказать.</p>
+ <div class="dm">
+  <div class="card"><h3 style="margin-top:0">Шаги и что говорить</h3><ol id="steps"></ol></div>
+  <aside class="side">
+   <div class="card">
+    <button class="btn o wide" onclick="if(confirm('Начать демо? Создастся новый демо-проект, корзина и вход по номеру сбросятся.'))demoStart()">▶ Начать демо</button>
+    <p class="note" style="margin:10px 0 0">Ваши проекты не удаляются — демо-квартира добавится к ним. Плашку можно закрыть крестиком в любой момент.</p>
+   </div>
+   <div class="card"><h3 style="margin-top:0">Главные мысли</h3><ul>
+    <li>Клиент считает ремонт сам, без регистрации — до упаковки.</li>
+    <li>Видит квартиру в 3D с материалами и мебелью ОМА.</li>
+    <li>Всё — материалы, мебель, мастер или прокат — в одном заказе ОМА.</li>
+    <li>Омик ведёт за руку: мастер → прокат → инструкция, отказаться можно на любом шаге.</li>
+   </ul></div>
+   <div class="card"><h3 style="margin-top:0">Что показать «вживую»</h3><ul>
+    <li>В 3D перетащить диван — он прилипнет к стене.</li>
+    <li>В «Отделке» сменить плитку — 3D и смета пересчитаются.</li>
+    <li>В корзине ввести номер «+375 29 …» и код с экрана.</li>
+   </ul></div>
+  </aside>
+ </div>
+</div>
+<script src="oma-catalog.js?v=202610292000"></script><script src="oma-menu.js?v=202610292000"></script><script src="oma-social.js?v=202610292000"></script><script src="oma-crops.js?v=202610292000"></script><script src="oma-furniture.js?v=202610292000"></script><script src="data.js?v=202610292000"></script><script src="geom.js?v=202610292000"></script><script src="calc.js?v=202610292000"></script><script src="core.js?v=202610292000"></script><script src="plan.js?v=202610292000"></script><script src="omik.js?v=202610292000"></script>
+<script>
+chrome('demo',{noCtx:true});
+$('#steps').innerHTML=DEMO_STEPS.map(([url,t,say],i)=>`<li><b>${esc(t)}</b><p>${esc(say)}</p>${url.includes('{pid}')?'':`<a href="${url}">${url}</a>`}</li>`).join('');
+</script></body></html>

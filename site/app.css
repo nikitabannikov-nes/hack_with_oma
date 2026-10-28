@@ -323,3 +323,11 @@ nav.sub img{width:24px;height:24px;border-radius:50%;object-fit:cover}
 @media(max-width:800px){.qty button{width:36px;height:36px}.ctx-l{display:none}}
 @media(max-width:800px){.csug button{padding:8px 12px;min-height:36px}#app{padding-bottom:84px}}
 @media(max-width:1000px){body:has(.mbar) .fab{display:none}}
+
+/* Демо для питча: плашка-подсказка внизу слева */
+.demo-g{position:fixed;left:16px;bottom:16px;z-index:70;width:340px;max-width:calc(100% - 32px);background:#001a34;color:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,26,52,.35);font-size:13px}
+.demo-g .demo-h{display:flex;gap:8px;align-items:baseline}.demo-g .demo-h b{color:#ffb35c;white-space:nowrap}.demo-g .demo-h span{flex:1;font-weight:600;font-size:14px}
+.demo-g .demo-h button{border:0;background:none;color:#fff;font-size:18px;cursor:pointer;opacity:.7}
+.demo-g p{margin:6px 0 10px;line-height:1.45;color:#dce6f2}.demo-g .demo-a{display:flex;gap:6px}.demo-g .demo-a .btn{flex:1;justify-content:center;padding:7px 8px;font-size:13px}
+.demo-g .btn.g{background:#fff}
+@media(max-width:700px){.demo-g{left:8px;right:8px;bottom:72px;width:auto}}

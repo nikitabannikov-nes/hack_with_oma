@@ -10,7 +10,8 @@ import { renderThumbs } from './thumbs.js';
 
 const CATS = { bath: 'Ванны', shower: 'Душевые', toilet: 'Унитазы', sink: 'Раковины', cabinet: 'Шкафы для ванной', kitchen: 'Кухни', appliance: 'Техника',
   table: 'Столы и стулья', sofa: 'Диваны и кресла', bed: 'Кровати', storage: 'Хранение' };
-const catalog = await fetch('p3d/catalog.json').then(r => r.json());
+// Каталог — реальные товары ОМА (oma-furniture.js, tools/build-oma-furniture.py); без него — заготовка позиций
+const catalog = window.OMA_FURN || await fetch('p3d/catalog.json').then(r => r.json());
 preloadModels(catalog);
 const byId = id => catalog.find(p => p.id === id);
 const dimsOf = it => { const p = byId(it.id); return { ...p.dimensions, elevation: p.elevation || 0, wallMounted: !!p.wallMounted }; };
@@ -138,7 +139,7 @@ export function mount({ host, tools, panel, project: p, focus = 'all', activeRoo
      <div class="fur-list">${list.map(x => {
        const { width, depth, height } = x.dimensions;
        return `<div class="c3" data-id="${x.id}" title="Нажмите или перетащите в комнату"><img src="${esc(x.photo || thumbs[x.id] || '')}" alt="" draggable="false">
-        <div><b>${esc(x.name)}</b><small>${width}×${depth}×${height} мм${x.wallMounted ? ' · настенный' : ''}</small><span>${byn(x.price)}</span></div><i aria-hidden="true">＋</i></div>`;
+        <div><b>${esc(x.name)}</b><small>${width}×${depth}×${height} мм${x.wallMounted ? ' · настенный' : ''}${x.real === false ? ' · <em class="demo">демо</em>' : ''}</small><span>${byn(x.price)}</span></div><i aria-hidden="true">＋</i></div>`;
      }).join('') || '<p class="note">Для этого помещения пока ничего нет — откройте «Все».</p>'}</div>
      <div class="fur-h fur-h2"><b>Расставлено</b><span>${placed.length}</span></div>
      <div class="fur-placed">${placed.length ? placed.map(i => {
@@ -147,13 +148,15 @@ export function mount({ host, tools, panel, project: p, focus = 'all', activeRoo
         <div><b>${esc(x.name)}</b><small>${bad.has(i.uid) ? '<em>Пересекается с другим товаром</em>' : vr.length > 1 ? esc(rn) : ''}</small></div><span>${byn(x.price)}</span><button class="x" data-del="${i.uid}" title="Убрать">×</button></div>`;
      }).join('') : '<p class="note">Пока пусто. Нажмите на товар в каталоге.</p>'}</div>
      <div class="fur-tot"><span>${vr.length > 1 ? 'Итого по квартире' : 'Итого по помещению'}</span><b>${byn(total)}</b></div>
+     ${s.items.length ? `<div class="fur-acts"><button class="btn o" data-tocart>🛒 Мебель в корзину</button><a class="btn g" href="smeta.html?project=${p.id}">📋 В смете</a></div>` : ''}
      ${vr.length === 1 && all !== total ? `<p class="note">Во всей квартире: ${byn(all)}</p>` : ''}
-     <p class="note">Тащите товар по полу мышью или пальцем, в соседнюю комнату — тоже можно. <kbd>R</kbd> — повернуть, <kbd>Delete</kbd> — удалить. Ближе 15 см к стене товар прилипает к ней. Каталог тестовый: позже подключим товары ОМА.</p>
+     <p class="note">Тащите товар по полу мышью или пальцем, в соседнюю комнату — тоже можно. <kbd>R</kbd> — повернуть, <kbd>Delete</kbd> — удалить. Ближе 15 см к стене товар прилипает к ней. Товары и цены — из каталога ОМА; с пометкой «демо» — примерные, такой позиции в ОМА не нашлось.</p>
     </div>`;
   }
   panel.addEventListener('click', e => {
     if (!active) return;
     const c = e.target.closest('[data-cat]'); if (c) { cat = c.dataset.cat; return renderPanel(); }
+    if (e.target.closest('[data-tocart]')) { const n = cartSyncFurniture(p); return toast(`🛒 В корзине мебель: ${n} поз. · <a href="cart.html">открыть корзину</a>`); }
     const del = e.target.closest('[data-del]'); if (del) return removeItem(del.dataset.del);
     const row = e.target.closest('.s3'); if (row) store.set({ selected: row.dataset.uid });
   });
