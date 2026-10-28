@@ -436,7 +436,7 @@ function drawResults(){
  const others=p.rooms.filter(x=>x.id!==r.id);
  const pe=p.calc||{},tot=estTotal(p);
  $('#sum').innerHTML=`<div class="pe-price"><span>Материалы${others.length?` · ${p.rooms.length} помещения`:''} · ${TIERS[p.tier]}</span><b>${pe.ok?byn(tot):'—'}</b><small>${pe.ok?`${p.est.lines.length} позиций · ${areaSummary(p)}`:'есть ошибки геометрии'}</small></div>
-  <div class="pe-acts"><a class="btn o ${pe.ok?'':'dis'}" ${pe.ok?`href="smeta.html?project=${p.id}${fromPid?'&focus='+fromPid:''}"`:'onclick="toast(\'Сначала исправьте геометрию\',false)"'}>Подобрать материалы → смета</a><a class="btn g" href="masters.html?project=${p.id}">👷 Нужен мастер</a></div>`;
+  <div class="pe-acts"><a class="btn o ${pe.ok?'':'dis'}" ${pe.ok?`href="smeta.html?project=${p.id}${fromPid?'&focus='+fromPid:''}"`:'onclick="toast(\'Сначала исправьте геометрию\',false)"'}>Подобрать материалы → смета</a><a class="btn g" href="masters.html?project=${p.id}">👷 Нужен мастер</a><a class="btn g" href="bath3d.html?project=${p.id}&room=${r.id}">🛁 Расставить в 3D</a></div>`;
  h+=`<p class="note pe-foot">Проект сохраняется автоматически. Количества считает алгоритм по геометрии и нормам расхода товаров.</p>`;
  $('#res').innerHTML=h;
 }

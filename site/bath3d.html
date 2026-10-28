@@ -1,0 +1,104 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>3D-планировка ванной — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610280100"><link rel="stylesheet" href="app.css?v=202610280100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610280100">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<style>
+.p3{display:grid;grid-template-columns:290px minmax(0,1fr) 300px;gap:14px;align-items:start;margin-bottom:30px}
+.p3 aside{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}
+.p3 h3{font-size:16px;margin:0 0 10px}
+#ccat{position:sticky;top:12px;max-height:calc(100vh - 24px);display:flex;flex-direction:column}
+#cchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+#cchips button{border:1px solid var(--line);background:#fff;border-radius:16px;padding:5px 11px;font:inherit;font-size:13px;cursor:pointer}
+#cchips button.on{border-color:var(--blue);background:var(--blue-l);color:var(--blue);font-weight:600}
+#clist{overflow:auto;display:flex;flex-direction:column;gap:8px;margin:0 -4px;padding:0 4px}
+.c3{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-y;background:#fff;transition:border-color .15s}
+.c3:hover{border-color:var(--blue)}
+.c3 img{width:72px;height:54px;object-fit:contain;flex:none;background:#f6f8fa;border-radius:8px;pointer-events:none}
+.c3 div{min-width:0;flex:1}.c3 b{display:block;font-size:13px;font-weight:500;line-height:1.25}
+.c3 small{display:block;color:var(--mute);font-size:11px;margin:2px 0}.c3 span{font-weight:700;font-size:14px}
+.c3 i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--blue-l);color:var(--blue);display:grid;place-items:center;font-weight:700;flex:none}
+.c3-ghost{position:fixed;z-index:50;width:90px;height:68px;object-fit:contain;pointer-events:none;transform:translate(-50%,-60%);background:#fff;border:2px solid var(--blue);border-radius:10px;box-shadow:0 8px 24px rgba(0,30,80,.25)}
+.tb{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.tb .grp{display:flex;gap:4px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px}
+.tb button{border:0;background:none;border-radius:8px;padding:7px 10px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink);white-space:nowrap}
+.tb button:hover:not(:disabled){background:var(--blue-l);color:var(--blue)}
+.tb button.on{background:var(--blue);color:#fff}
+.tb button:disabled{opacity:.4;cursor:default}
+.tb label{font-size:12px;color:var(--mute);display:flex;align-items:center;gap:4px;padding:0 4px}
+.tb input[type=number]{width:62px;border:1px solid var(--line);border-radius:8px;padding:6px;font:inherit;font-size:13px}
+#rsrc{font-size:12px;color:var(--mute);margin:-4px 0 8px}#rsrc a{color:var(--blue)}
+#stage{position:relative;height:min(68vh,640px);min-height:380px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#eef2f6}
+#stage.drop{outline:3px dashed var(--blue);outline-offset:-3px}
+#stage canvas{display:block}
+.hint{font-size:12px;color:var(--mute);margin-top:8px}
+.hint kbd{border:1px solid var(--line);border-radius:4px;padding:0 5px;background:#fff;font:inherit;font-size:11px}
+#slist{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow:auto}
+.s3{display:grid;grid-template-columns:44px 1fr auto 24px;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:6px;cursor:pointer;font-size:13px}
+.s3.on{border-color:var(--blue);background:var(--blue-l)}.s3.bad{border-color:#f3b4ad;background:#fdecea}
+.s3 img{width:44px;height:33px;object-fit:contain}.s3 b{font-weight:500;display:block;line-height:1.2}.s3 span{font-weight:700;white-space:nowrap}
+.s3 .warn{color:var(--red);font-size:11px}
+.s3 .x{border:0;background:none;font-size:18px;color:var(--mute);cursor:pointer;padding:0}.s3 .x:hover{color:var(--red)}
+#stot{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
+#stot b{font-size:22px}#sarea{font-size:12px;color:var(--mute);margin-top:4px}
+#swarn{margin:10px 0 0}#swarn[hidden]{display:none}
+#csheet,#mbar{display:none}
+@media(max-width:1100px){.p3{grid-template-columns:250px minmax(0,1fr)}#csum{grid-column:1/-1}#ccat{position:static;max-height:min(75vh,700px)}}
+@media(max-width:800px){
+ .p3{grid-template-columns:minmax(0,1fr)}
+ #stage{height:58vh;min-height:300px}
+ #ccat{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:40;max-height:none;border-radius:16px 16px 0 0;padding:0 12px 12px;box-shadow:0 -6px 24px rgba(0,30,80,.18);transform:translateY(calc(100% - 52px));transition:transform .25s}
+ body.cat-open #ccat{transform:none}
+ #ccat h3{display:none}
+ #csheet{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;background:none;font:inherit;font-weight:700;font-size:15px;padding:14px 2px;cursor:pointer;color:var(--ink)}
+ #csheet::after{content:'▲';color:var(--blue);font-size:12px;transition:transform .25s}body.cat-open #csheet::after{transform:rotate(180deg)}
+ #ccat{width:100vw;max-width:100%;overflow:hidden}
+ #clist{flex-direction:row;overflow-x:auto;overflow-y:hidden;padding-bottom:6px;min-width:0;max-width:100%}
+ .c3{flex-direction:column;align-items:flex-start;width:150px;flex:none;touch-action:pan-x}
+ .c3 img{width:100%;height:80px}.c3 i{display:none}
+ #mbar{display:inline}
+ body{padding-bottom:60px}
+ .tb label{padding:0}
+ .tb .grp{flex-wrap:wrap;max-width:100%}.tb button{padding:7px 8px}
+}
+</style></head>
+<body><div id="chrome"></div>
+<div class="wrap">
+ <div class="crumbs"><a href="index.html">Главная</a> / 3D-планировка ванной <span id="ctx" style="margin-left:10px"></span></div>
+ <h1>3D-планировка ванной</h1>
+ <p class="lead">Задайте размеры комнаты, расставьте сантехнику и мебель из каталога — товары не выйдут за стены и сами прижмутся к ним. Сумма считается сразу.</p>
+ <div class="p3">
+  <aside id="ccat">
+   <button id="csheet" type="button">Каталог <span id="mbar" class="note" style="font-weight:400"></span></button>
+   <h3>Каталог</h3>
+   <div id="cchips"></div>
+   <div id="clist"></div>
+   <p class="note" style="margin:10px 0 0">Тестовые позиции. Позже подключим товары гипермаркета.</p>
+  </aside>
+  <main>
+   <div class="tb">
+    <div class="grp" title="Размеры комнаты, м">
+     <label>Ш <input id="rw" type="number" step="0.05" min="0.8" max="15"></label>
+     <label>Д <input id="rl" type="number" step="0.05" min="0.8" max="15"></label>
+     <label>В <input id="rh" type="number" step="0.05" min="2" max="4"></label>
+    </div>
+    <div class="grp"><button id="v3d" type="button">3D</button><button id="vtop" type="button">Сверху</button><button id="tcam" type="button" title="Вернуть камеру">⟲</button></div>
+    <div class="grp"><button id="trot" type="button" title="Повернуть на 90° (R)">↻ Повернуть</button><button id="tdel" type="button" title="Удалить (Delete)">🗑 Удалить</button><button id="tgrid" type="button" title="Привязка к сетке 5 см">Сетка 5 см</button></div>
+    <div class="grp"><button id="tpng" type="button">📷 Сохранить картинку</button><button id="texp" type="button" title="Скачать проект JSON">Экспорт</button><button id="timp" type="button" title="Загрузить проект JSON">Импорт</button><button id="tclr" type="button">Очистить</button></div>
+    <input id="fimp" type="file" accept=".json,application/json" hidden>
+   </div>
+   <div id="rsrc"></div>
+   <div id="stage"></div>
+   <p class="hint">Тащите товар по полу мышью или пальцем. <kbd>R</kbd> — повернуть, <kbd>Delete</kbd> — удалить. В 3D: вращение — левая кнопка, сдвиг — правая, масштаб — колёсико. Ближе 15 см к стене товар прилипает к ней задней стороной.</p>
+  </main>
+  <aside id="csum">
+   <h3>В комнате</h3>
+   <div id="slist"></div>
+   <div id="stot"></div>
+   <div id="sarea"></div>
+   <div id="swarn" class="tip bad" hidden><img src="img/omik-warn.png" alt=""><div><b>Товары пересекаются.</b> Раздвиньте те, что подсвечены красным.</div></div>
+   <p class="note" style="margin:12px 0 0">Проект сохраняется в этом браузере автоматически. Экспорт — чтобы перенести на другой компьютер.</p>
+  </aside>
+ </div>
+</div>
+<script src="oma-catalog.js?v=202610280100"></script><script src="oma-menu.js?v=202610280100"></script><script src="oma-social.js?v=202610280100"></script><script src="data.js?v=202610280100"></script><script src="geom.js?v=202610280100"></script><script src="calc.js?v=202610280100"></script><script src="core.js?v=202610280100"></script>
+<script>chrome('bath3d')</script>
+<script type="module" src="bath3d/app.js"></script>
+</body></html>
