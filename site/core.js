@@ -223,7 +223,7 @@ function chrome(active,o={}){
    <a class="oma-logo" href="index.html" aria-label="ОМА"></a>
    <form class="oma-search" onsubmit="event.preventDefault();location='catalog.html?q='+encodeURIComponent(this.q.value)"><input name="q" placeholder="Ламинат" value="${esc(active==='catalog'?qp('q')||'':'')}"><button aria-label="Найти">${HICO.search}</button></form>
    <div class="oma-acts">
-    <a class="oma-act" href="dom.html">${HICO.home}<span class="t"><b>Мой дом</b></span><span class="cnt" data-b="dom" title="Пора обслужить"></span></a>
+    <a class="oma-act" href="projects.html#home">${HICO.home}<span class="t"><b>Мой дом</b></span><span class="cnt" data-b="dom" title="Пора обслужить"></span></a>
     <a class="oma-act" href="projects.html">${HICO.user}<span class="t">${currentUser()?`<small>${esc((currentUser().name||"").split(" ")[0]||"Мой")}</small>`:""}<b>Аккаунт</b></span></a>
     <a class="oma-act" href="cart.html">${HICO.cart}<span class="t"><b>Корзина</b></span><span class="cnt" data-b="cart"></span></a>
    </div>
@@ -250,7 +250,7 @@ function footerHtml(){
    <div class="f-pay">${['pay-visa','pay-mastercard','pay-belcart','pay-google-pay','pay-apple-pay','pay-halva'].map(x=>ico(x)).join('')}</div></div>
   <div class="f-cols">
    <div><span class="f-h">Покупателям</span>${ext('Форма обратной связи','/buyers/')}${ext('Доставка','/buyers/delivery/')}${ext('Самовывоз','/buyers/samovyvoz/')}${ext('Способы оплаты','/buyers/payment/')}${ext('Оплата частями','/buyers/payment/#credit')}${ext('Полезные статьи','/buyers/helpful/')}${ext('Возврат и гарантия','/buyers/warranty/')}${ext('Программа лояльности','/buyers/discount/balans/#card-info')}</div>
-   <div><span class="f-h">Ремонт с ОМА</span><a class="ours" href="omik.html">Омик — помощник по ремонту</a><a class="ours" href="dom.html">Сервисная книжка дома</a><a class="ours" href="planner.html">Калькулятор ремонта 2D и 3D</a><a class="ours" href="planner.html?view=3d">3D-планировка с мебелью</a><a class="ours" href="import.html">Планировка по фото</a><a class="ours" href="catalog.html">Каталог и смета</a><a class="ours" href="masters.html">Мастера ОМА</a><a class="ours" href="instrukcii.html">Сделать самому: прокат и инструкции</a><a class="ours" href="projects.html">Аккаунт</a><a class="ours" href="demo.html">Демо для питча</a>
+   <div><span class="f-h">Ремонт с ОМА</span><a class="ours" href="omik.html">Омик — помощник по ремонту</a><a class="ours" href="projects.html#home">Мой дом</a><a class="ours" href="planner.html">Калькулятор ремонта 2D и 3D</a><a class="ours" href="planner.html?view=3d">3D-планировка с мебелью</a><a class="ours" href="import.html">Планировка по фото</a><a class="ours" href="catalog.html">Каталог и смета</a><a class="ours" href="masters.html">Мастера ОМА</a><a class="ours" href="instrukcii.html">Сделать самому: прокат и инструкции</a><a class="ours" href="projects.html">Аккаунт</a><a class="ours" href="demo.html">Демо для питча</a>
     <span class="f-h" style="margin-top:22px">Компания ОМА</span>${ext('О компании','/about/')}${ext('Новости','/news/')}${ext('Работа в ОМА','/about/rabota-v-oma/')}${ext('Отзывы об ОМА','/reviews/')}</div>
   </div>
   <div><div class="f-awards">${medals.map(([m,y])=>`<div><img src="${OMA}/local/images/awards/${m}.png" alt="" loading="lazy">${y}</div>`).join('')}</div>
@@ -313,7 +313,7 @@ function rentalState(p){
 function rentalSum(p){const R=rentalState(p);let sum=0,dep=0;Object.entries(R.items).forEach(([id,d])=>{const r=RENTAL.find(x=>x.id===id);if(r&&d>0){sum+=r.day*d;dep+=r.deposit}});return{sum,dep}}
 function setDoer(p,who){if(p.doer===who)return;p.doer=who;log(p,{master:'Работу сделает мастер ОМА',self:'Работу делаю сам',later:'Кто делает работу — решу позже'}[who]||'Выбор исполнителя сброшен');save()}
 function bookRental(p,c){const R=rentalState(p),{sum,dep}=rentalSum(p);if(!sum)return false;R.status='booked';R.at=now();if(c)R.phone=c.phone;log(p,`Прокат инструмента забронирован: ${byn(sum)}, залог ${byn(dep)}`);save();return true}
-// ---------- Сервисная книжка дома ----------
+// ---------- Мой дом: история покупок и напоминания об уходе ----------
 // Что куплено и где лежит — из оформленных заказов и их проектов. Когда пора обслуживать — по правилам ухода CARE:
 // first — через сколько месяцев после покупки первый раз, every — потом каждые N месяцев.
 // s.care: {done:{ключ:дата}, snooze:{ключ:дата}, notify:телефон|null, at:сдвиг «посмотреть на дату» в месяцах}
@@ -357,7 +357,7 @@ function careDone(key){const s=load();s.care=s.care||{};s.care.done={...s.care.d
 function careSnooze(key){const s=load();s.care=s.care||{};s.care.snooze={...s.care.snooze,[key]:careNow()+MON};save()}
 // Для показа на питче: история дома «как будто» ремонт был год–четыре назад. Помечено как пример
 function careDemo(){
- const s=load(),mk=(type,kind,params,title,months,tier,patch)=>{const r=makeRoom(type,kind,params);patch&&patch(r);const p=newProject({title,task:type,rooms:[r],tier,logText:'Пример для сервисной книжки'});
+ const s=load(),mk=(type,kind,params,title,months,tier,patch)=>{const r=makeRoom(type,kind,params);patch&&patch(r);const p=newProject({title,task:type,rooms:[r],tier,logText:'Пример для раздела «Мой дом»'});
   const at=now()-months*MON,no='D-'+(20000+Math.floor(Math.random()*7999));p.status='ordered';p.est.status='ordered';p.order=no;p.created=p.updated=at;p.example=true;
   s.orders.push({no,at,total:estTotal(p),items:p.est.lines.length,delivery:'pickup',date:at,projects:[p.id],lines:p.est.lines.map(l=>({pid:l.pid,qty:l.qty,projectId:p.id})),example:true});s.projects.push(p)};
  mk('bath','rect',{L:2.2,W:1.7},'Ванная (пример)',13,'opt');

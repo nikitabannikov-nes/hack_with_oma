@@ -239,12 +239,12 @@ const Omik=(()=>{
   if(!p.calc.ok)return[B('С такими размерами не сходится геометрия — поправьте на плане.',{opts:[{l:'Открыть план',a:'go',arg:'planner.html?project='+p.id,pri:true}]})];
   return[B(`Пересчитал «${esc(r.name)}» на ${num(o.L)} × ${num(o.W)} м:${packCard(p)}${p.budget?budLine(p):''}`,{opts:resultOpts(p)})];
  }
- // Сервисная книжка: что пора сделать по дому
+ // «Мой дом»: что пора сделать по дому
  function homeReply(){
   const L=careList(),due=L.filter(x=>x.status!=='ok');
-  if(!homeProjects().length)return[B('Когда купите материалы по смете, я запишу их в сервисную книжку дома и заранее напомню: когда менять герметик в ванной, пропитать швы, освежить покраску.',{opts:[{l:'Открыть книжку',a:'go',arg:'dom.html',pri:true}]})];
+  if(!homeProjects().length)return[B('Когда купите материалы по смете, я запишу их в раздел «Мой дом» и заранее напомню: когда менять герметик в ванной, пропитать швы, освежить покраску.',{opts:[{l:'Открыть «Мой дом»',a:'go',arg:'projects.html#home',pri:true}]})];
   const top=(due.length?due:L).slice(0,3);
-  return[B(`${due.length?`По дому ${due.length} ${due.length===1?'дело':due.length<5?'дела':'дел'}:`:'Срочных дел нет. Ближайшие:'}<div class="card-in">${top.map(x=>`<div class="row pk"><span>${esc(x.rule.t)}<small>${esc(x.r.name)}</small></span><b>${new Date(x.due).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}</b></div>`).join('')}</div>`,{opts:[{l:'Открыть сервисную книжку',a:'go',arg:'dom.html',pri:true}]})];
+  return[B(`${due.length?`По дому ${due.length} ${due.length===1?'дело':due.length<5?'дела':'дел'}:`:'Срочных дел нет. Ближайшие:'}<div class="card-in">${top.map(x=>`<div class="row pk"><span>${esc(x.rule.t)}<small>${esc(x.r.name)}</small></span><b>${new Date(x.due).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}</b></div>`).join('')}</div>`,{opts:[{l:'Открыть «Мой дом»',a:'go',arg:'projects.html#home',pri:true}]})];
  }
  function cartMsg(p){
   if(!p.calc?.ok)return B('В проекте ошибка геометрии — сначала поправьте план, потом соберу корзину.',{opts:[{l:'Открыть план',a:'go',arg:'planner.html?project='+p.id,pri:true}]});

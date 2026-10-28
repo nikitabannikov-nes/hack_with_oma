@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Калькулятор ремонта 2D и 3D — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610300500"><link rel="stylesheet" href="app.css?v=202610300500"><link rel="stylesheet" href="ui-icons.css?v=202610300500"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300500"><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Калькулятор ремонта 2D и 3D — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610300600"><link rel="stylesheet" href="app.css?v=202610300600"><link rel="stylesheet" href="ui-icons.css?v=202610300600"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300600"><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <style>
 /* ---------- Редактор помещений: три колонки — список, холст, инспектор ---------- */
 .pe{--pe-r:18px;--pe-soft:#f2f5f9;--pe-bd:#e3e8ef;padding-bottom:40px}
@@ -188,7 +188,7 @@
  <div class="fld mt2">Форма</div><div class="tpls mt" id="nrTpl"></div>
  <button class="btn o wide mt2" onclick="addRoom()">Добавить</button>
 </div></div>
-<script src="oma-catalog.js?v=202610300500"></script><script src="oma-menu.js?v=202610300500"></script><script src="oma-social.js?v=202610300500"></script><script src="oma-furniture.js?v=202610300500"></script><script src="data.js?v=202610300500"></script><script src="geom.js?v=202610300500"></script><script src="calc.js?v=202610300500"></script><script src="oma-crops.js?v=202610300500"></script><script src="core.js?v=202610300500"></script><script src="plan.js?v=202610300500"></script><script src="omik.js?v=202610300500"></script><script>
+<script src="oma-catalog.js?v=202610300600"></script><script src="oma-menu.js?v=202610300600"></script><script src="oma-social.js?v=202610300600"></script><script src="oma-furniture.js?v=202610300600"></script><script src="data.js?v=202610300600"></script><script src="geom.js?v=202610300600"></script><script src="calc.js?v=202610300600"></script><script src="oma-crops.js?v=202610300600"></script><script src="core.js?v=202610300600"></script><script src="plan.js?v=202610300600"></script><script src="omik.js?v=202610300600"></script><script>
 // ---------- Проект и помещение ----------
 let p=null;
 // Новый проект: без явного типа помещения — нейтральная «Комната» и название «Новый проект», а не молчаливая «Ванная»
@@ -516,7 +516,7 @@ async function setView(v){
   if(mode==='draw')setMode('edit');
   const focus=allMode||!picked?'all':p.activeRoom;
   if(!P3){
-   try{const m=await import('./p3d/embed.js?v=202610300500');P3=m.mount({host:$('#st3d'),tools:$('#t3x'),panel:$('#panel'),project:p,focus,activeRoom:()=>p.activeRoom})}
+   try{const m=await import('./p3d/embed.js?v=202610300600');P3=m.mount({host:$('#st3d'),tools:$('#t3x'),panel:$('#panel'),project:p,focus,activeRoom:()=>p.activeRoom})}
    catch(e){console.error(e);toast('3D-вид не загрузился — проверьте интернет',false);return setView('2d')}
   }else{P3.refresh();P3.setFocus(focus)}
   P3.setActive(true);mark3dAll();

@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Аккаунт — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610300500"><link rel="stylesheet" href="app.css?v=202610300500"><link rel="stylesheet" href="ui-icons.css?v=202610300500"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300500"></head><body><div id="chrome"></div>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Аккаунт — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610300600"><link rel="stylesheet" href="app.css?v=202610300600"><link rel="stylesheet" href="ui-icons.css?v=202610300600"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610300600"></head><body><div id="chrome"></div>
 <style>
 .acc{display:grid;grid-template-columns:280px minmax(0,1fr);gap:20px;align-items:start;margin-bottom:30px}
 .acc-me{padding:22px;text-align:center;position:sticky;top:84px}
@@ -12,6 +12,27 @@
 .row2{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;align-items:center;padding:16px 18px;margin-bottom:10px}
 .row2 h3{margin:0;font-size:16px}.row2 .meta{font-size:13px;color:var(--mute);display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
 .row2 .r{text-align:right}.row2 .r b{display:block;font-size:17px;white-space:nowrap}
+.kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 14px}
+.kpi div{background:#fff;border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}.kpi span{display:block;font-size:13px;color:var(--mute)}.kpi b{font-size:24px}
+.kpi .late b{color:var(--red)}
+.rm{display:grid;grid-template-columns:110px minmax(0,1fr);gap:16px;padding:14px 0;border-top:1px solid var(--line)}.rm:first-of-type{border-top:0;padding-top:0}
+.task{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;padding:14px 0;border-top:1px solid var(--line)}.task:first-of-type{border-top:0;padding-top:0}
+.task h3{margin:0;font-size:16px}.task .where{font-size:13px;color:var(--mute);margin-top:2px}.task p{margin:6px 0 0;font-size:14px;color:#3c4a5a;max-width:640px}
+.task .when{text-align:right;font-size:13px;color:var(--mute);white-space:nowrap}.task .when b{display:block;font-size:14px;color:var(--ink)}
+.task .acts{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.st.late{background:#fdecea;color:#b42318}.st.soon{background:#fff3e0;color:#b45309}.st.ok{background:#eef2f6;color:var(--mute)}
+.mt-list{display:grid;gap:6px;margin-top:6px}
+.mt-i{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;font-size:14px;align-items:baseline}
+.mt-i small{grid-column:1/-1;color:var(--mute);font-size:12px}.mt-i .lbl{color:var(--mute)}
+.ord{border-top:1px solid var(--line);padding:12px 0}.ord:first-of-type{border-top:0;padding-top:0}
+.ord summary{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;cursor:pointer;list-style:none}.ord summary::-webkit-details-marker{display:none}
+.ord summary b{font-size:15px}.ord summary span{font-size:13px;color:var(--mute)}
+.ord ul{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:6px}.ord li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;font-size:14px}.ord li small{color:var(--mute)}
+.ahead{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.ahead button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 8px;font:inherit;font-size:13px;font-weight:500;cursor:pointer}
+.ahead button.on{border-color:var(--blue);background:var(--blue-l);color:var(--blue)}
+.ex{font-size:11px;font-weight:600;color:var(--mute);background:#eef2f6;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:2px}
+.ahead{grid-template-columns:repeat(4,minmax(0,1fr));margin:0 0 14px}
+@media(max-width:600px){.kpi{gap:8px}.kpi b{font-size:20px}.rm{grid-template-columns:minmax(0,1fr)}.task{grid-template-columns:minmax(0,1fr)}.task .when{text-align:left}.ahead{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:900px){.acc{grid-template-columns:minmax(0,1fr)}.acc-me{position:static}.acc-nav{grid-template-columns:repeat(2,1fr)}}
 </style>
 <div class="wrap">
@@ -19,19 +40,20 @@
  <h1>Аккаунт</h1>
  <div class="acc"><aside class="card acc-me" id="me"></aside><div id="tab"></div></div>
 </div>
-<script src="oma-catalog.js?v=202610300500"></script><script src="oma-menu.js?v=202610300500"></script><script src="oma-social.js?v=202610300500"></script><script src="oma-furniture.js?v=202610300500"></script><script src="data.js?v=202610300500"></script><script src="geom.js?v=202610300500"></script><script src="calc.js?v=202610300500"></script><script src="oma-crops.js?v=202610300500"></script><script src="core.js?v=202610300500"></script><script src="plan.js?v=202610300500"></script><script src="omik.js?v=202610300500"></script><script>
+<script src="oma-catalog.js?v=202610300600"></script><script src="oma-menu.js?v=202610300600"></script><script src="oma-social.js?v=202610300600"></script><script src="oma-furniture.js?v=202610300600"></script><script src="data.js?v=202610300600"></script><script src="geom.js?v=202610300600"></script><script src="calc.js?v=202610300600"></script><script src="oma-crops.js?v=202610300600"></script><script src="core.js?v=202610300600"></script><script src="plan.js?v=202610300600"></script><script src="omik.js?v=202610300600"></script><script>
 const ST={draft:['Черновик',''],sent:['Отправлена по ссылке','or'],changes:['Просят изменения','red'],approved:['Согласована','gr'],ordered:['Заказ оформлен','bl']};
-const TABS={projects:['folder','Проекты'],orders:['box','Заказы'],requests:['worker','Заявки мастерам'],rental:['tool','Прокат']};
+const TABS={projects:['folder','Проекты'],home:['home','Мой дом'],orders:['box','Заказы'],requests:['worker','Заявки мастерам'],rental:['tool','Прокат']};
 const tab=()=>TABS[location.hash.slice(1)]?location.hash.slice(1):'projects';
 const plural=(n,a,b,c)=>n%10===1&&n%100!==11?a:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?b:c;
 function draw(){
  chrome('projects');
  const s=load(),u=currentUser(),rent=s.projects.filter(p=>p.rental?.status==='booked');
- const cnt={projects:s.projects.length,orders:s.orders.length,requests:s.requests.length,rental:rent.length};
+ window.OMIK_CTX={page:tab()==='home'?'dom':'account'};
+ const cnt={home:careDueCount(),projects:s.projects.length,orders:s.orders.length,requests:s.requests.length,rental:rent.length};
  $('#me').innerHTML=`<div class="acc-av">${ui('user','solo')}</div>${u?`<h2>${esc(u.name||'Покупатель ОМА')}</h2><p class="note">${phoneFmt(u.phone)}</p><button class="btn ghost sm" onclick="logout()">Выйти</button>`
   :`<h2>Гость</h2><p class="note">Проекты и сметы сохраняются в этом браузере. Войдите по номеру телефона, чтобы оплачивать заказы.</p><button class="btn o wide" onclick="gate('account',()=>draw(),'Вход в аккаунт ОМА.')">Войти по номеру</button>`}
-  <nav class="acc-nav">${Object.entries(TABS).map(([k,[ic,t]])=>`<a href="#${k}" class="${tab()===k?'on':''}">${ui(ic)}${t}<b>${cnt[k]||''}</b></a>`).join('')}<a href="dom.html">${ui('home')}Сервисная книжка<b>${careDueCount()||''}</b></a></nav>`;
- $('#tab').innerHTML=({projects,orders,requests,rental})[tab()](s,rent);
+  <nav class="acc-nav">${Object.entries(TABS).map(([k,[ic,t]])=>`<a href="#${k}" class="${tab()===k?'on':''}">${ui(ic)}${t}<b>${cnt[k]||''}</b></a>`).join('')}</nav>`;
+ $('#tab').innerHTML=({projects,home,orders,requests,rental})[tab()](s,rent);
 }
 function projects(s){
  const L=[...s.projects].sort((a,b)=>b.updated-a.updated);
@@ -42,6 +64,47 @@ function projects(s){
   <div class="acts"><a class="btn sm" href="smeta.html?project=${p.id}">${ui('list')}Смета</a><a class="btn sm g" href="planner.html?project=${p.id}">${ui('plan')}План</a><button class="btn sm ghost" onclick="dup('${p.id}')">${ui('copy')}Повторить</button><button class="btn sm ghost" style="color:var(--red)" onclick="delP('${p.id}')">Удалить</button></div></div>`}).join('')
   ||empty('Проектов пока нет','Напишите Омику, что ремонтируете, — он посчитает материалы и сохранит проект здесь.','omik.html','Посчитать с Омиком'));
 }
+const longDay=t=>new Date(t).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+const inDays=t=>{const d=Math.round((t-careNow())/DAY);return d<=0?(d===0?'сегодня':`просрочено на ${-d} дн.`):d<45?`через ${d} дн.`:d<365?`через ${Math.round(d/30.44)} мес.`:`через ${num(d/365,1)} г.`};
+const AHEAD=[[0,'Сегодня'],[6,'Через полгода'],[12,'Через год'],[36,'Через 3 года']];
+const ST_N={late:'Пора',soon:'Скоро',ok:'По плану'};
+
+// «Мой дом»: что пора сделать, что где лежит и история покупок. Напоминания включены всегда
+function home(s){
+ const c=s.care||{},H=homeProjects(),L=careList(),due=L.filter(x=>x.status!=='ok'),later=L.filter(x=>x.status==='ok');
+ const orders=[...s.orders].sort((a,b)=>b.at-a.at),spent=orders.reduce((t,o)=>t+(o.total||0),0),u=contact();
+ let h=`<div class="acc-h"><h2>Мой дом</h2>${c.at?`<span class="st soon">Показано на ${longDay(careNow())}</span>`:''}</div>`;
+ if(!H.length)return h+`<div class="card empty"><img src="img/omik-idea.png" alt=""><h2>Здесь появится ваш дом</h2><p class="note" style="max-width:520px;margin:0 auto 16px">Всё, что вы покупаете в ОМА по смете, записывается сюда: какая плитка в ванной, какой краской покрашены стены. Омик заранее напомнит, когда менять герметик, пропитать швы или освежить покраску.</p>
+  <div class="seg" style="justify-content:center"><a class="btn o" href="omik.html">Посчитать ремонт с Омиком</a><button class="btn g" onclick="careDemo();draw()">Показать пример</button></div></div>`;
+ h+=`<div class="kpi"><div class="${due.some(x=>x.status==='late')?'late':''}"><span>Пора и скоро</span><b>${due.length}</b></div><div><span>Помещений</span><b>${H.reduce((n,p)=>n+p.rooms.length,0)}</b></div><div><span>Покупок в ОМА</span><b>${byn(spent)}</b></div></div>
+ <p class="note" style="margin:-4px 0 12px">${ui('bell')}Омик напомнит за 2 недели до срока${u?.phone?` — SMS на ${phoneFmt(u.phone)}`:''}. Посмотреть вперёд:</p>
+ <div class="ahead">${AHEAD.map(([m,t])=>`<button class="${(c.at||0)===m?'on':''}" onclick="ahead(${m})">${t}</button>`).join('')}</div>
+ <div class="card pad"><h3>${due.length?'Пора и скоро':'Ближайшие дела'}</h3>${(due.length?due:later.slice(0,3)).map(task).join('')}
+  ${due.length&&later.length?`<details style="margin-top:10px"><summary class="note" style="cursor:pointer">Дальше по плану: ${later.length}</summary>${later.map(task).join('')}</details>`:''}</div>
+ <div class="card pad"><h3>Что где лежит</h3>${H.flatMap(p=>p.rooms.map(r=>room(p,r))).join('')}</div>
+ <div class="card pad"><h3>История покупок</h3>${orders.map(order).join('')||'<p class="note">Заказов пока нет.</p>'}</div>
+ ${H.some(p=>p.example)?`<p class="note">В разделе есть примеры — помещения с пометкой «пример». <button class="btn ghost sm" onclick="dropDemo()">Убрать примеры</button></p>`:''}`;
+ return h;
+}
+function task(x){
+ const pr=x.pid&&P(x.pid),sv=x.rule.svc&&svc(x.rule.svc);
+ return`<div class="task"><div><span class="st ${x.status}">${ST_N[x.status]}</span><h3 style="margin-top:6px">${esc(x.rule.t)}</h3><div class="where">${ui(RT[x.r.type]?.icon)}${esc(x.r.name)} · ${esc(x.p.title)}${x.p.example?'<span class="ex">пример</span>':''}</div><p>${x.rule.why}</p></div>
+  <div class="when"><b>${longDay(x.due)}</b>${inDays(x.due)}</div>
+  <div class="acts">${pr?`<button class="btn sm o" onclick="buy('${pr.id}')">${ui('cart')}${x.rule.buyL||'Купить ту же'} — ${byn(pr.price)}</button>`:''}${sv?`<a class="btn sm g" href="masters.html?service=${sv.id}&project=${x.p.id}">${ui('worker')}Мастер</a>`:''}<button class="btn sm g" onclick="careDone('${x.key}');draw();toast('Отмечено. Следующий раз — по плану')">${ui('check')}Сделано</button><button class="btn sm ghost" onclick="careSnooze('${x.key}');draw()">Через месяц</button></div></div>`;
+}
+function room(p,r){
+ const at=boughtAt(p),roles=roomRoles(r),m=Geom.validate(r).ok?Geom.metrics(r):null,area={tileFloor:m?.floorNet,laminate:m?.floorNet,tileWall:m?.byFinish.tile,paintWall:m?.byFinish.paint,paintCeil:m?.ceil};
+ return`<div class="rm">${Plan.mini(r,110,82,!!m,floorLook(p,r))}<div><b>${ui(RT[r.type]?.icon)}${esc(r.name)}</b>${p.example?'<span class="ex">пример</span>':''} <span class="note">· куплено ${longDay(at)}</span>
+  <div class="mt-list">${roles.map(role=>{const pr=matOf(p,r,role),l=p.est.lines.find(x=>x.pid===pr?.id);return pr?`<div class="mt-i"><span><span class="lbl">${MAT_N[role]}:</span> <a href="product.html?id=${pr.id}">${esc(pr.name)}</a></span><button class="btn ghost sm" onclick="buy('${pr.id}')">Докупить</button><small>${area[role]?num(area[role],1)+' м²':''}${l?` · куплено ${l.qty} ${esc(pr.unit)}`:''}${pr.sku?` · код ${esc(pr.sku)} — по нему ту же партию найдут в магазине`:''}</small></div>`:''}).join('')||'<span class="note">Отделка не выбрана</span>'}</div></div></div>`;
+}
+function order(o){
+ const lines=o.lines||(o.projects||[]).flatMap(id=>getProject(id)?.est.lines.map(l=>({pid:l.pid,qty:l.qty}))||[]);
+ return`<details class="ord"><summary><span><b>${longDay(o.at)}</b> · заказ ${esc(o.no)}${o.example?'<span class="ex">пример</span>':''}<br>${lines.length} ${plural(lines.length,'позиция','позиции','позиций')} · ${o.delivery==='delivery'?'доставка':'самовывоз'}</span><b>${byn(o.total||0)}</b></summary>
+  <ul>${lines.map(l=>{const pr=P(l.pid);return pr?`<li><span><a href="product.html?id=${pr.id}">${esc(pr.name)}</a>${pr.sku?`<br><small>код ${esc(pr.sku)}</small>`:''}</span><span>${l.qty} ${esc(pr.unit)}</span></li>`:''}).join('')}</ul></details>`;
+}
+function buy(pid){cartAdd(pid,1);toast(`«${esc(P(pid).name)}» в корзине · <a href="cart.html">открыть</a>`)}
+function ahead(m){const s=load();s.care={...s.care,at:m};save();draw()}
+function dropDemo(){const s=load(),ids=new Set(s.projects.filter(p=>p.example).map(p=>p.id));s.projects=s.projects.filter(p=>!ids.has(p.id));s.orders=s.orders.filter(o=>!o.example);if(ids.has(s.active))s.active=null;save();draw()}
 function orders(s){
  return`<div class="acc-h"><h2>Заказы</h2></div>`+(s.orders.map(o=>`<div class="card row2"><div><h3>Заказ ${esc(o.no)}</h3><div class="meta"><span>${fmtDate(o.at)}</span><span>${o.items} ${plural(o.items,'позиция','позиции','позиций')}</span><span>${o.delivery==='delivery'?'доставка':'самовывоз'}${o.date?' · '+fmtDay(o.date):''}</span>${(o.projects||[]).map(getProject).filter(Boolean).map(p=>`<a href="smeta.html?project=${p.id}">${esc(p.title)}</a>`).join('')}</div></div><div class="r"><b>${byn(o.total)}</b><span class="st bl">оформлен · демо</span></div></div>`).join('')
   ||empty('Заказов пока нет','Соберите смету и положите её в корзину — заказ появится здесь.','cart.html','Открыть корзину'));
