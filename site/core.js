@@ -166,7 +166,7 @@ const HICO={search:'<svg viewBox="0 0 24 24"><path d="M10.5 3a7.5 7.5 0 0 1 5.96
  cart:'<svg viewBox="0 0 24 24"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM1 2v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7.42a.25.25 0 0 1-.22-.37L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 20 4H5.21l-.94-2z"/></svg>'};
 // Быстрые ссылки ОМА + наши модули (выделены фиолетовым)
 const QUICK=[['red','Все акции','/sales/',1],['darkblue2','Супер цены','/sales/super-tseny/'],['red','Топ продаж','/sales/top-prodazh/'],['darkorange','Оплата частями','/buyers/payment/#credit']];
-const NAV=[['omik','Омик','omik.html'],['planner','Калькулятор','planner.html'],['bath3d','3D-ванная','bath3d.html'],['masters','Мастера','masters.html'],['projects','Мои проекты','projects.html']];
+const NAV=[['omik','Омик','omik.html'],['planner','Калькулятор','planner.html'],['masters','Мастера','masters.html'],['projects','Мои проекты','projects.html']];
 // Подкатегория ОМА есть в нашем демо-каталоге → ведём в каталог, иначе — на oma.by
 function inCatalog(name){
  const stem=String(name).toLowerCase().replace(/ё/g,'е').split(/[^a-zа-я0-9]+/).find(w=>w.length>3);

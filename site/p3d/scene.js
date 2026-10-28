@@ -1,76 +1,86 @@
-// Сцена: рендер, камеры (3D и вид сверху), свет, синхронизация товаров со store, перетаскивание по полу
+// Сцена: рендер, камеры (3D и вид сверху), свет, квартира, синхронизация товаров со store, перетаскивание по полу
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { buildRoom } from './room.js';
+import { buildApartment } from './room.js';
 import { buildObject } from './normalizeModel.js';
-import { bbox, place } from './snapping.js';
+import { bbox, place, pointInPoly } from './snapping.js';
 import { collisions } from './collision.js';
 
 const BLUE = 0x005ead, RED = 0xef2e23;
 
+// Какие комнаты сейчас на сцене: вся квартира или одна выбранная
+export const visibleRooms = s => {
+  const one = s.focus !== 'all' && s.rooms.find(r => r.id === s.focus);
+  return one ? [one] : s.rooms;
+};
+
 export function createScene(host, store, catalog) {
   const byId = id => catalog.find(p => p.id === id);
   const dimsOf = it => { const p = byId(it.id); return { ...p.dimensions, elevation: p.elevation || 0, wallMounted: !!p.wallMounted }; };
+  const roomOf = it => store.get().rooms.find(r => r.id === it.room);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: false });
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));   // слабым ноутбукам хватит
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   host.append(renderer.domElement);
   const canvas = renderer.domElement;
-  canvas.style.touchAction = 'none';
+  canvas.style.touchAction = 'none'; canvas.style.display = 'block';
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xeef2f6);
   scene.add(new THREE.HemisphereLight(0xffffff, 0xd8d2c6, 1.6));
-  const sun = new THREE.DirectionalLight(0xffffff, 1.5);   // единственный источник теней
-  sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024); sun.shadow.bias = -0.0005;
+  const sun = new THREE.DirectionalLight(0xffffff, 1.4);   // единственный источник теней
+  sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0005;
   scene.add(sun, sun.target);
 
-  const persp = new THREE.PerspectiveCamera(45, 1, 0.05, 100);
-  const ortho = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.05, 100);
+  const persp = new THREE.PerspectiveCamera(45, 1, 0.05, 200);
+  const ortho = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.05, 200);
   ortho.up.set(0, 0, -1);   // сверху: +X вправо, +Z вниз — как на 2D-плане
 
   // свои обработчики указателя вешаем ДО OrbitControls — тогда при захвате товара успеваем выключить вращение камеры
   const drag = { uid: null, off: null, moved: false, start: null };
   canvas.addEventListener('pointerdown', onDown);
   const orbit = new OrbitControls(persp, canvas);
-  orbit.enableDamping = true; orbit.maxPolarAngle = Math.PI / 2 - 0.05; orbit.minDistance = 0.8; orbit.maxDistance = 25;
+  orbit.enableDamping = true; orbit.maxPolarAngle = Math.PI / 2 - 0.05; orbit.minDistance = 0.8; orbit.maxDistance = 60;
   const top = new OrbitControls(ortho, canvas);
   top.enableRotate = false; top.screenSpacePanning = true; top.enabled = false;
   top.touches = { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN };
   top.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN };
 
-  let room = null, roomKey = '', view = '3d', dirty = true;
-  const objs = new Map();   // uid → { group, frame, model, id }
+  let apt = null, roomKey = '', view = '3d', dirty = true;
+  const objs = new Map();   // uid → { group, frame, model, tint }
   const cam = () => view === 'top' ? ortho : persp;
   const controls = () => view === 'top' ? top : orbit;
   const invalidate = () => { dirty = true; };
   orbit.addEventListener('change', invalidate); top.addEventListener('change', invalidate);
 
   function fitCameras(reset) {
-    const b = bbox(store.get().room.polygon), h = store.get().room.height;
+    const vr = visibleRooms(store.get());
+    const b = bbox(vr.flatMap(r => r.polygon).concat(vr.length ? [] : [{ x: 0, z: 0 }, { x: 3, z: 3 }]));
+    const h = Math.max(2.5, ...vr.map(r => r.height));
     const c = new THREE.Vector3((b.x0 + b.x1) / 2, 0, (b.z0 + b.z1) / 2), span = Math.max(b.x1 - b.x0, b.z1 - b.z0, 1.5);
     if (reset) {
-      persp.position.set(c.x + span * 0.55, h + span * 0.95, c.z + span * 1.35);
-      orbit.target.set(c.x, 0.5, c.z);
+      persp.position.set(c.x + span * 0.55 + 0.8, h + span * 0.95 + 1, c.z + span * 1.25 + 1.6);
+      orbit.target.set(c.x, 0.4, c.z);
     }
-    ortho.position.set(c.x, 20, c.z); top.target.set(c.x, 0, c.z); ortho.lookAt(c.x, 0, c.z);
+    ortho.position.set(c.x, 30, c.z); top.target.set(c.x, 0, c.z); ortho.lookAt(c.x, 0, c.z);
     const { width, height } = host.getBoundingClientRect(), a = width / Math.max(height, 1);
-    const half = Math.max((b.z1 - b.z0) / 2, (b.x1 - b.x0) / 2 / a) + 0.35;
-    Object.assign(ortho, { left: -half * a, right: half * a, top: half, bottom: -half });
+    const half = Math.max((b.z1 - b.z0) / 2, (b.x1 - b.x0) / 2 / a) + 0.3;
+    // сверху оставляем место под кнопки на холсте (~90 px), чтобы они не закрывали план
+    const pad = 90 / Math.max(height, 200) * 2 * half;
+    Object.assign(ortho, { left: -(half + pad / 2) * a, right: (half + pad / 2) * a, top: half + pad, bottom: -half });
     if (reset) ortho.zoom = 1;
     ortho.updateProjectionMatrix();
-    sun.position.set(c.x + span, h + 4, c.z + span * 0.6); sun.target.position.copy(c);
-    Object.assign(sun.shadow.camera, { left: -span, right: span, top: span, bottom: -span, near: 0.5, far: 20 });
+    sun.position.set(c.x + span * 0.6, h + 6, c.z + span * 0.4); sun.target.position.copy(c);
+    Object.assign(sun.shadow.camera, { left: -span, right: span, top: span, bottom: -span, near: 0.5, far: 40 });
     sun.shadow.camera.updateProjectionMatrix();
     orbit.update(); top.update(); invalidate();
   }
 
-  function rebuildRoom(r) {
-    if (room) { scene.remove(room.group); room.group.traverse(o => { o.geometry?.dispose(); o.material?.map?.dispose(); o.material?.dispose?.(); }); }
-    room = buildRoom(r); scene.add(room.group);
-    fitCameras(true);
+  function rebuildRooms(s) {
+    if (apt) { scene.remove(apt.group); apt.group.traverse(o => { o.geometry?.dispose(); o.material?.map?.dispose(); o.material?.dispose?.(); }); }
+    apt = buildApartment(visibleRooms(s)); scene.add(apt.group);
   }
 
   // Рамка выделения/пересечения: рёбра габаритного короба
@@ -82,19 +92,23 @@ export function createScene(host, store, catalog) {
   }
 
   function syncItems(s) {
-    const bad = collisions(s.items, dimsOf);
-    const alive = new Set(s.items.map(i => i.uid));
+    const shown = new Set(visibleRooms(s).map(r => r.id));
+    const items = s.items.filter(i => shown.has(i.room));
+    // пересечения ищем внутри одной комнаты
+    const bad = new Set();
+    for (const id of shown) collisions(items.filter(i => i.room === id), dimsOf).forEach(u => bad.add(u));
+    const alive = new Set(items.map(i => i.uid));
     for (const [uid, o] of objs) if (!alive.has(uid)) { scene.remove(o.group); objs.delete(uid); }
-    for (const it of s.items) {
+    for (const it of items) {
       let o = objs.get(it.uid);
       if (!o) {
         const g = new THREE.Group(); g.userData.uid = it.uid;
         o = { group: g, frame: makeFrame(dimsOf(it)), model: null, tint: null };
         g.add(o.frame); scene.add(g); objs.set(it.uid, o);
         buildObject(byId(it.id)).then(m => {
-          if (!objs.has(it.uid)) return;
+          if (objs.get(it.uid) !== o) return;
           m.traverse(x => { if (x.isMesh) { x.material = x.material.clone(); x.castShadow = x.receiveShadow = true; } });
-          o.model = m; g.add(m); o.tint = null; paint(o, bad.has(it.uid)); invalidate();
+          o.model = m; g.add(m); o.tint = null; paint(o, lastBad.has(it.uid)); invalidate();
         });
       }
       o.group.position.set(it.x, dimsOf(it).elevation / 1000, it.z);
@@ -126,6 +140,8 @@ export function createScene(host, store, catalog) {
     const p = new THREE.Vector3();
     return ray.ray.intersectPlane(floorPlane, p) ? { x: p.x, z: p.z } : null;
   }
+  // В какую из показанных комнат попала точка пола
+  const roomAt = p => p && visibleRooms(store.get()).find(r => pointInPoly(p, r.polygon));
   function pickItem(cx, cy) {
     setRay(cx, cy);
     const meshes = [];
@@ -155,8 +171,12 @@ export function createScene(host, store, catalog) {
     if (!drag.uid) return;
     const p = floorPoint(e.clientX, e.clientY); if (!p) return;
     const s = store.get(), it = s.items.find(i => i.uid === drag.uid);
-    const next = place(it, dimsOf(it), { x: p.x + drag.off.x, z: p.z + drag.off.z }, s.room.polygon, { grid: s.grid });
-    if (next.x !== it.x || next.z !== it.z || next.rot !== it.rot)
+    // перетащили в соседнюю комнату — товар переезжает туда
+    const want = { x: p.x + drag.off.x, z: p.z + drag.off.z }, other = roomAt(p);
+    const room = other && other.id !== it.room ? other : roomOf(it);
+    if (!room) return;
+    const next = { ...place(it, dimsOf(it), want, room.polygon, { grid: s.grid }), room: room.id };
+    if (next.x !== it.x || next.z !== it.z || next.rot !== it.rot || next.room !== it.room)
       store.set({ items: s.items.map(i => i.uid === it.uid ? next : i) });
   });
   const up = e => {
@@ -168,11 +188,13 @@ export function createScene(host, store, catalog) {
 
   // --- Подписка на состояние
   let lastBad = new Set();
-  store.subscribe(s => {
-    const key = JSON.stringify([s.room.polygon, s.room.height]);
-    if (key !== roomKey) { roomKey = key; rebuildRoom(s.room); }
+  const keyOf = s => JSON.stringify(visibleRooms(s));
+  store.subscribe((s, prev) => {
+    const key = keyOf(s);
+    if (key !== roomKey) { const refocus = s.focus !== prev.focus || !roomKey; roomKey = key; rebuildRooms(s); fitCameras(refocus); }
     if (s.view !== view) {
       view = s.view; orbit.enabled = view === '3d'; top.enabled = view === 'top';
+      sun.castShadow = view === '3d';   // сверху тени только путают
       if (view === 'top') fitCameras(false);
     }
     lastBad = syncItems(s);
@@ -180,33 +202,36 @@ export function createScene(host, store, catalog) {
 
   function resize() {
     const { width, height } = host.getBoundingClientRect();
+    if (!width || !height) return;
     renderer.setSize(width, height, false);
     canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
-    persp.aspect = width / Math.max(height, 1); persp.updateProjectionMatrix();
+    persp.aspect = width / height; persp.updateProjectionMatrix();
     fitCameras(false);
   }
   new ResizeObserver(resize).observe(host);
 
   function render() {
-    room?.updateWalls(cam(), view === 'top');
+    apt?.updateWalls(cam(), view === 'top');
     renderer.render(scene, cam());
     dirty = false;
   }
   (function loop() {
     requestAnimationFrame(loop);
+    if (!host.offsetParent) return;           // 3D скрыт (включён 2D) — не рисуем
     if (controls().update()) dirty = true;   // инерция вращения
     if (dirty) render();
   })();
 
   const s0 = store.get();
-  roomKey = JSON.stringify([s0.room.polygon, s0.room.height]);
-  rebuildRoom(s0.room); view = s0.view; orbit.enabled = view === '3d'; top.enabled = view === 'top';
-  lastBad = syncItems(s0); resize();
+  roomKey = keyOf(s0); rebuildRooms(s0);
+  view = s0.view; orbit.enabled = view === '3d'; top.enabled = view === 'top';
+  lastBad = syncItems(s0); resize(); fitCameras(true);
 
   return {
-    floorPoint, inCanvas, dimsOf,
+    floorPoint, inCanvas, dimsOf, roomAt,
     collisions: () => lastBad,
     resetView: () => fitCameras(true),
+    resize,
     // PNG сцены без рамок выделения
     screenshot() {
       const frames = [...objs.values()].map(o => [o.frame, o.frame.visible]);

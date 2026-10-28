@@ -1,9 +1,9 @@
 """Второй этап (пока не включён): 3D-модели для товаров 3D-планировщика по фото через fal.ai.
 
-План: для каждой позиции bath3d/catalog.json, у которой "model": null и есть "photo",
+План: для каждой позиции p3d/catalog.json, у которой "model": null и есть "photo",
 отправить фото в fal.ai (image-to-3D: Tripo или Hunyuan3D), скачать GLB в catalog/models/<id>.glb
 и прописать путь в catalog.json. Масштаб не важен — планировщик сам подгоняет модель
-под "dimensions" (bath3d/normalizeModel.js).
+под "dimensions" (p3d/normalizeModel.js).
 
 Запуск: FAL_KEY=… python3 site/tools/generate-models.py
 """
@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 SITE = Path(__file__).resolve().parent.parent
-CATALOG = SITE / "bath3d" / "catalog.json"
+CATALOG = SITE / "p3d" / "catalog.json"
 MODELS = SITE / "catalog" / "models"
 
 

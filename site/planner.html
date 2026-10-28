@@ -1,4 +1,5 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>2D-калькулятор помещения — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610280100"><link rel="stylesheet" href="app.css?v=202610280100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610280100"><style>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>2D-калькулятор помещения — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610280100"><link rel="stylesheet" href="app.css?v=202610280100"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610280100"><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<style>
 /* ---------- Редактор помещений: три колонки — список, холст, инспектор ---------- */
 .pe{--pe-r:18px;--pe-soft:#f2f5f9;--pe-bd:#e3e8ef;padding-bottom:40px}
 .pe .crumbs{margin-top:14px}
@@ -105,6 +106,37 @@
  .pe .metrics{grid-template-columns:1fr 1fr}
  .pe .ptabs{grid-template-columns:1fr 1fr}
 }
+/* ---------- 3D-вид: холст, кнопки, каталог мебели в правой панели ---------- */
+.tset{display:contents}.tset[hidden]{display:none}
+#st3d{position:absolute;inset:0;border-radius:inherit;overflow:hidden;background:#eef2f6}
+#st3d.drop{outline:3px dashed var(--blue);outline-offset:-3px}
+.pe .ctool{z-index:3}
+.v3 #svg,.v3 .zoomer,.v3 .drawbar,.v3 .legend{display:none}
+.pe .ctool button:disabled{opacity:.4;cursor:default}
+.pe .ctool #vSw button,.pe .ctool #t3 button{font-size:13px;gap:6px}
+.v3 .ctool{right:14px;flex-wrap:wrap}
+.fur-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}.fur-h b{font-size:16px;font-weight:600}.fur-h span{font-size:13px;color:var(--mute)}
+.fur-h2{margin-top:18px;padding-top:14px;border-top:1px solid var(--pe-bd)}
+.fur-to{margin:0 0 10px}
+.fur-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.fur-chips button{border:1px solid var(--pe-bd);background:#fff;border-radius:16px;padding:5px 11px;font:inherit;font-size:12px;cursor:pointer}
+.fur-chips button.on{border-color:var(--blue);background:var(--blue-l);color:var(--blue);font-weight:600}
+.fur-list{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;margin:0 -4px;padding:0 4px}
+.c3{display:flex;gap:10px;align-items:center;border:1px solid var(--pe-bd);border-radius:12px;padding:8px;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-y;background:#fff}
+.c3:hover{border-color:var(--blue)}
+.c3 img{width:68px;height:51px;object-fit:contain;flex:none;background:#f6f8fa;border-radius:8px;pointer-events:none}
+.c3 div{min-width:0;flex:1}.c3 b{display:block;font-size:13px;font-weight:500;line-height:1.25}
+.c3 small{display:block;color:var(--mute);font-size:11px;margin:2px 0}.c3 span{font-weight:700;font-size:14px}
+.c3 i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--blue-l);color:var(--blue);display:grid;place-items:center;font-weight:700;flex:none}
+.c3-ghost{position:fixed;z-index:50;width:90px;height:68px;object-fit:contain;pointer-events:none;transform:translate(-50%,-60%);background:#fff;border:2px solid var(--blue);border-radius:10px;box-shadow:0 8px 24px rgba(0,30,80,.25)}
+.fur-placed{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow:auto}
+.s3{display:grid;grid-template-columns:40px 1fr auto 22px;gap:8px;align-items:center;border:1px solid var(--pe-bd);border-radius:10px;padding:6px;cursor:pointer;font-size:13px}
+.s3.on{border-color:var(--blue);background:var(--blue-l)}.s3.bad{border-color:#f3b4ad;background:#fdecea}
+.s3 img{width:40px;height:30px;object-fit:contain}.s3 b{font-weight:500;display:block;line-height:1.2}.s3 small{color:var(--mute);font-size:11px}.s3 em{color:var(--red);font-style:normal}
+.s3 span{font-weight:700;white-space:nowrap}.s3 .x{border:0;background:none;font-size:18px;color:var(--mute);cursor:pointer;padding:0}.s3 .x:hover{color:var(--red)}
+.fur-tot{display:flex;justify-content:space-between;align-items:baseline;margin:12px 0 4px}.fur-tot b{font-size:22px}
+.fur kbd{border:1px solid var(--pe-bd);border-radius:4px;padding:0 5px;background:#fff;font:inherit;font-size:11px}
+@media(max-width:700px){.c3{touch-action:pan-y}.fur-list{max-height:300px}.pe .ctool #t3 .lb{display:none}.pe .ctool #t3 .sep{display:none}}
 </style></head><body><div id="chrome"></div>
 <div class="wrap pe">
  <div class="crumbs"><a href="index.html">Главная</a> / 2D-калькулятор</div>
@@ -122,10 +154,13 @@
   <section class="pe-stage">
    <div class="canvas" id="cv">
     <svg id="svg"></svg>
+    <div id="st3d" hidden></div>
     <div class="ctool">
-     <div class="grp"><button id="mEdit" class="on" title="Двигать вершины, проёмы и вычеты"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l11 5-4.5 1.8L9.7 14.5z"/></svg>Редактировать</button><button id="mDraw" title="Нарисовать новый контур по точкам"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 16.5l1-4 9-9 3 3-9 9z"/><path d="M11.5 5.5l3 3"/></svg>Нарисовать</button></div>
+     <div class="grp" id="vSw"><button data-view="2d" class="on" title="План сверху: форма, стены, проёмы, отделка">2D</button><button data-view="3d" title="Объёмный вид: отделка и расстановка мебели">3D</button></div><span class="sep"></span>
+     <span class="tset" id="t2"><div class="grp"><button id="mEdit" class="on" title="Двигать вершины, проёмы и вычеты"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l11 5-4.5 1.8L9.7 14.5z"/></svg>Редактировать</button><button id="mDraw" title="Нарисовать новый контур по точкам"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 16.5l1-4 9-9 3 3-9 9z"/><path d="M11.5 5.5l3 3"/></svg>Нарисовать</button></div>
      <span class="sep"></span>
-     <button id="bSnap" class="on" title="Привязка к сетке 5 см и к осям"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M3 10h14M10 3v14"/></svg>Привязка</button><button id="bAll" onclick="toggleAll()" title="Показать все помещения с отделкой"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L10 3.5l7 6V17H3z"/><path d="M8 17v-5h4v5"/></svg>Весь план</button><button id="bUnder" onclick="showUnder=!showUnder;drawCanvas()" title="Показать фото планировки под планом"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="15" height="12" rx="2"/><path d="M2.5 13l4-4 4 4 2-2 4.5 4"/><circle cx="13.5" cy="8" r="1.3"/></svg>Подложка</button>
+     <button id="bSnap" class="on" title="Привязка к сетке 5 см и к осям"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M3 10h14M10 3v14"/></svg>Привязка</button><button id="bAll" onclick="toggleAll()" title="Показать все помещения с отделкой"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L10 3.5l7 6V17H3z"/><path d="M8 17v-5h4v5"/></svg>Весь план</button><button id="bUnder" onclick="showUnder=!showUnder;drawCanvas()" title="Показать фото планировки под планом"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="15" height="12" rx="2"/><path d="M2.5 13l4-4 4 4 2-2 4.5 4"/><circle cx="13.5" cy="8" r="1.3"/></svg>Подложка</button></span>
+     <span class="tset" id="t3" hidden><button id="b3All" title="Показать всю квартиру">Вся квартира</button><span class="sep"></span><span class="tset" id="t3x"></span></span>
     </div>
     <div class="zoomer"><button onclick="zoom(1.2)" title="Увеличить"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M4 10h12"/></svg></button><button onclick="zoom(1/1.2)" title="Уменьшить"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12"/></svg></button><button onclick="center()" title="Центрировать помещение"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="5.5"/><path d="M10 1.5v4M10 14.5v4M1.5 10h4M14.5 10h4"/></svg></button></div>
     <div class="drawbar"><button id="bDelV" style="display:none">Удалить вершину</button><button id="bUndo" style="display:none">↶ Точка</button><button id="bCancel" style="display:none">Отмена</button><button id="bClose" style="display:none">✔ Замкнуть контур</button></div>
@@ -195,6 +230,7 @@ function snapPt(pt,ref){
  return[Geom.r2(x),Geom.r2(y)];
 }
 function drawCanvas(){
+ if(view3d)return;
  const[W,H]=size(),r=R(),val=Geom.validate(r);
  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
  const edit=picked&&mode==='edit',extra={under:p.underlay&&showUnder?p.underlay:null,ghosts:p.rooms.filter(x=>!edit||x.id!==r.id),full:allMode||!picked,movable:mode==='edit',lookOf:x=>floorLook(p,x)};
@@ -326,8 +362,9 @@ function renderTabs(){
  $('#rhead').innerHTML=`<b>Помещения</b><span>${p.rooms.length} · ${num(tot,1)} м²</span>`;
  $('#rtabs').innerHTML=p.rooms.map(r=>{const ok=Geom.validate(r).ok;return`<button class="ri ${picked&&r.id===p.activeRoom?'on':''} ${ok?'':'err'}" onclick="selRoom('${r.id}')"><span class="ri-ic">${RT[r.type]?.icon||'▢'}</span><span class="ri-t"><b>${esc(r.name)}</b><small>${ok?num(Geom.area(r.pts),1)+' м² · '+esc(RT[r.type]?.name||''):'ошибка контура'}</small></span></button>`}).join('')+`<button class="ri-add" onclick="openAddRoom(true)">＋ Добавить помещение</button>`;
 }
-function selRoom(id){p.activeRoom=id;picked=true;selV=null;selWall=null;save();renderAll();center()}
+function selRoom(id){p.activeRoom=id;picked=true;selV=null;selWall=null;save();if(view3d){allMode=false;P3?.setFocus(id);mark3dAll()}renderAll();center()}
 function renderPanel(){
+ if(view3d){P3?.renderPanel();return}
  if(!picked){$('#panel').innerHTML=`<div class="pe-empty"><img src="img/omik-think.png" alt=""><h3>Помещение не выбрано</h3><p>Нажмите на комнату на плане или в списке слева, чтобы изменить её форму, стены, проёмы и отделку.</p>
   <ul><li><b>Клик</b> по комнате — выбрать</li><li><b>Перетаскивание</b> комнаты — переместить, соседние комнаты не дадут наложиться</li><li><b>Фон</b> — сдвиг плана, колесо — масштаб</li><li><b>Весь план</b> — показать отделку всех комнат</li></ul>
   <button class="btn g wide" onclick="openAddRoom(true)">＋ Добавить помещение</button></div>`;return}
@@ -436,12 +473,34 @@ function drawResults(){
  const others=p.rooms.filter(x=>x.id!==r.id);
  const pe=p.calc||{},tot=estTotal(p);
  $('#sum').innerHTML=`<div class="pe-price"><span>Материалы${others.length?` · ${p.rooms.length} помещения`:''} · ${TIERS[p.tier]}</span><b>${pe.ok?byn(tot):'—'}</b><small>${pe.ok?`${p.est.lines.length} позиций · ${areaSummary(p)}`:'есть ошибки геометрии'}</small></div>
-  <div class="pe-acts"><a class="btn o ${pe.ok?'':'dis'}" ${pe.ok?`href="smeta.html?project=${p.id}${fromPid?'&focus='+fromPid:''}"`:'onclick="toast(\'Сначала исправьте геометрию\',false)"'}>Подобрать материалы → смета</a><a class="btn g" href="masters.html?project=${p.id}">👷 Нужен мастер</a><a class="btn g" href="bath3d.html?project=${p.id}&room=${r.id}">🛁 Расставить в 3D</a></div>`;
+  <div class="pe-acts"><a class="btn o ${pe.ok?'':'dis'}" ${pe.ok?`href="smeta.html?project=${p.id}${fromPid?'&focus='+fromPid:''}"`:'onclick="toast(\'Сначала исправьте геометрию\',false)"'}>Подобрать материалы → смета</a><a class="btn g" href="masters.html?project=${p.id}">👷 Нужен мастер</a><button class="btn g" type="button" onclick="setView('3d')">🛋 Расставить мебель в 3D</button></div>`;
  h+=`<p class="note pe-foot">Проект сохраняется автоматически. Количества считает алгоритм по геометрии и нормам расхода товаров.</p>`;
  $('#res').innerHTML=h;
 }
 function renderAll(){renderTabs();renderPanel();drawCanvas();drawResults();chrome('planner')}
+// ---------- 3D-вид (модуль p3d грузится при первом включении) ----------
+let view3d=false,P3=null;
+async function setView(v){
+ view3d=v==='3d';
+ cv.classList.toggle('v3',view3d);$('#st3d').hidden=!view3d;$('#t2').hidden=view3d;$('#t3').hidden=!view3d;
+ $$('#vSw button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
+ const u=new URLSearchParams(location.search);if(view3d)u.set('view','3d');else u.delete('view');u.set('project',p.id);history.replaceState(null,'','planner.html?'+u);
+ if(view3d){
+  if(mode==='draw')setMode('edit');
+  const focus=allMode||!picked?'all':p.activeRoom;
+  if(!P3){
+   try{const m=await import('./p3d/embed.js?v=202610282000');P3=m.mount({host:$('#st3d'),tools:$('#t3x'),panel:$('#panel'),project:p,focus,activeRoom:()=>p.activeRoom})}
+   catch(e){console.error(e);toast('3D-вид не загрузился — проверьте интернет',false);return setView('2d')}
+  }else{P3.refresh();P3.setFocus(focus)}
+  P3.setActive(true);mark3dAll();
+ }else{P3?.setActive(false);renderPanel();center()}
+}
+function mark3dAll(){$('#b3All').classList.toggle('on',allMode||!picked)}
+$('#vSw').onclick=e=>{const b=e.target.closest('[data-view]');if(b&&(b.dataset.view==='3d')!==view3d)setView(b.dataset.view)};
+$('#b3All').onclick=()=>{allMode=true;P3?.setFocus('all');mark3dAll();renderTabs()};
+
 banner();renderTabs();renderPanel();center();drawResults();
+if(qp('view')==='3d')setView('3d');
 // после раскладки сетки, иначе ширина холста ещё не итоговая
 if(qp('from')==='photo')requestAnimationFrame(fitAll);
 </script></body></html>

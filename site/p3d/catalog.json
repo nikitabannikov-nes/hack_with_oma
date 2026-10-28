@@ -1,0 +1,33 @@
+[
+ {"id":"bath-001","name":"Ванна акриловая 170x75","category":"bath","rooms":["bath"],"photo":null,"model":null,"dimensions":{"width":1700,"depth":750,"height":600},"price":450.00,"wallMounted":false},
+ {"id":"bath-002","name":"Ванна акриловая 150x70","category":"bath","rooms":["bath"],"photo":null,"model":null,"dimensions":{"width":1500,"depth":700,"height":580},"price":359.00,"wallMounted":false},
+ {"id":"shower-001","name":"Душевой уголок 90x90 с поддоном","category":"shower","rooms":["bath"],"photo":null,"model":null,"dimensions":{"width":900,"depth":900,"height":1950},"price":540.00,"wallMounted":false},
+ {"id":"toilet-001","name":"Унитаз-компакт напольный","category":"toilet","rooms":["bath","wc"],"photo":null,"model":null,"dimensions":{"width":370,"depth":650,"height":780},"price":289.00,"wallMounted":false},
+ {"id":"sink-001","name":"Тумба с раковиной 60 см","category":"sink","rooms":["bath","wc"],"photo":null,"model":null,"dimensions":{"width":600,"depth":460,"height":850},"price":329.00,"wallMounted":false},
+ {"id":"sink-002","name":"Тумба с раковиной 80 см","category":"sink","rooms":["bath"],"photo":null,"model":null,"dimensions":{"width":800,"depth":460,"height":850},"price":415.00,"wallMounted":false},
+ {"id":"cabinet-001","name":"Пенал напольный 35 см","category":"cabinet","rooms":["bath","wc"],"photo":null,"model":null,"dimensions":{"width":350,"depth":300,"height":1700},"price":245.00,"wallMounted":false},
+ {"id":"cabinet-002","name":"Зеркальный шкаф 60 см","category":"cabinet","rooms":["bath","wc"],"photo":null,"model":null,"dimensions":{"width":600,"depth":150,"height":700},"elevation":1150,"price":189.00,"wallMounted":true},
+ {"id":"washer-001","name":"Стиральная машина 6 кг","category":"appliance","shape":"washer","rooms":["bath","kitchen"],"photo":null,"model":null,"dimensions":{"width":600,"depth":450,"height":850},"price":899.00,"wallMounted":false},
+
+ {"id":"kitchen-001","name":"Кухонный гарнитур 2,4 м с мойкой","category":"kitchen","shape":"kitchen","rooms":["kitchen"],"photo":null,"model":null,"dimensions":{"width":2400,"depth":600,"height":2200},"price":1890.00,"wallMounted":false},
+ {"id":"kitchen-002","name":"Кухонный модуль 1,2 м","category":"kitchen","shape":"kitchen","rooms":["kitchen"],"photo":null,"model":null,"dimensions":{"width":1200,"depth":600,"height":860},"price":690.00,"wallMounted":false},
+ {"id":"fridge-001","name":"Холодильник двухкамерный","category":"appliance","shape":"fridge","rooms":["kitchen"],"photo":null,"model":null,"dimensions":{"width":600,"depth":650,"height":1850},"price":1290.00,"wallMounted":false},
+ {"id":"stove-001","name":"Плита электрическая 50 см","category":"appliance","shape":"stove","rooms":["kitchen"],"photo":null,"model":null,"dimensions":{"width":500,"depth":600,"height":850},"price":749.00,"wallMounted":false},
+ {"id":"table-001","name":"Стол обеденный 120x75","category":"table","shape":"table","rooms":["kitchen","living"],"photo":null,"model":null,"dimensions":{"width":1200,"depth":750,"height":750},"price":329.00,"wallMounted":false},
+ {"id":"chair-001","name":"Стул деревянный","category":"table","shape":"chair","rooms":["kitchen","living"],"photo":null,"model":null,"dimensions":{"width":430,"depth":480,"height":900},"price":79.00,"wallMounted":false},
+
+ {"id":"sofa-001","name":"Диван трёхместный","category":"sofa","shape":"sofa","rooms":["living"],"photo":null,"model":null,"dimensions":{"width":2100,"depth":900,"height":850},"price":1490.00,"wallMounted":false},
+ {"id":"armchair-001","name":"Кресло мягкое","category":"sofa","shape":"armchair","rooms":["living"],"photo":null,"model":null,"dimensions":{"width":850,"depth":850,"height":850},"price":559.00,"wallMounted":false},
+ {"id":"coffee-001","name":"Журнальный столик 90x50","category":"table","shape":"table","rooms":["living"],"photo":null,"model":null,"dimensions":{"width":900,"depth":500,"height":450},"price":149.00,"wallMounted":false},
+ {"id":"tvstand-001","name":"ТВ-тумба 160 см","category":"storage","shape":"dresser","rooms":["living"],"photo":null,"model":null,"dimensions":{"width":1600,"depth":400,"height":500},"price":279.00,"wallMounted":false},
+ {"id":"tv-001","name":"Телевизор 55\"","category":"appliance","shape":"tv","rooms":["living"],"photo":null,"model":null,"dimensions":{"width":1230,"depth":60,"height":710},"elevation":900,"price":1599.00,"wallMounted":true},
+ {"id":"desk-001","name":"Письменный стол 120x60","category":"table","shape":"desk","rooms":["living"],"photo":null,"model":null,"dimensions":{"width":1200,"depth":600,"height":750},"price":259.00,"wallMounted":false},
+ {"id":"shelf-001","name":"Стеллаж 80 см","category":"storage","shape":"shelf","rooms":["living","hall"],"photo":null,"model":null,"dimensions":{"width":800,"depth":350,"height":1800},"price":199.00,"wallMounted":false},
+
+ {"id":"bed-001","name":"Кровать двуспальная 160x200","category":"bed","shape":"bed","rooms":["living"],"photo":null,"model":null,"dimensions":{"width":1700,"depth":2150,"height":1000},"price":1190.00,"wallMounted":false},
+ {"id":"bed-002","name":"Кровать односпальная 90x200","category":"bed","shape":"bed","rooms":["living"],"photo":null,"model":null,"dimensions":{"width":1000,"depth":2100,"height":900},"price":549.00,"wallMounted":false},
+ {"id":"nightstand-001","name":"Прикроватная тумба","category":"storage","shape":"dresser","rooms":["living"],"photo":null,"model":null,"dimensions":{"width":450,"depth":400,"height":500},"price":119.00,"wallMounted":false},
+ {"id":"dresser-001","name":"Комод 4 ящика","category":"storage","shape":"dresser","rooms":["living"],"photo":null,"model":null,"dimensions":{"width":900,"depth":450,"height":900},"price":349.00,"wallMounted":false},
+ {"id":"wardrobe-001","name":"Шкаф-купе 180 см","category":"storage","shape":"wardrobe","rooms":["living","hall"],"photo":null,"model":null,"dimensions":{"width":1800,"depth":600,"height":2200},"price":1150.00,"wallMounted":false},
+ {"id":"shoe-001","name":"Обувница 80 см","category":"storage","shape":"dresser","rooms":["hall"],"photo":null,"model":null,"dimensions":{"width":800,"depth":350,"height":900},"price":189.00,"wallMounted":false}
+]
