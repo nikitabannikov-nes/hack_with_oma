@@ -29,7 +29,14 @@ const Plan=(()=>{
   // Пол выбранным материалом: формат плитки или доски в масштабе плана
   const fm=o.floorMat;let fmFill=null;
   if(fm&&room.floor!=='none'){const id='fm'+(o.id||''),pw=fm.size[0]*v.s,ph=fm.size[1]*v.s,line=/^#(f|e|d)/i.test(fm.color)?'#00000026':'#ffffff55';
+   // Фото товара на полу: из снимка 600×600 берём рамку самой плитки (oma-crops.js) и нарезаем на доски или плитки в масштабе плана.
+   // Если плитка на фото стоит вертикально, а на полу лежит горизонтально — поворачиваем
+   const C=fm.crop||[90,90,420,420],cut=(x,y,w,h,al='xMidYMid')=>{const rot=Math.abs(C[2]-C[3])>Math.min(C[2],C[3])*.2&&(C[2]>C[3])!==(w>h),
+    img=(W,H)=>`<svg width="${W}" height="${H}" viewBox="${C.join(' ')}" preserveAspectRatio="${al} slice"><image href="${esc(fm.img)}" width="600" height="600"/></svg>`;
+    return rot?`<g transform="translate(${x+w} ${y}) rotate(90)">${img(h,w)}</g>`:`<g transform="translate(${x} ${y})">${img(w,h)}</g>`};
    if(Math.min(pw,ph)<3)fmFill=fm.color;
+   else if(fm.img&&Math.min(pw,ph)>=5&&fm.kind==='plank'){s+=`<defs><pattern id="${id}" width="${pw}" height="${2*ph}" patternUnits="userSpaceOnUse" x="${v.ox}" y="${v.oy}"><rect width="${pw}" height="${2*ph}" fill="${fm.color}"/>${cut(0,0,pw,ph)}${cut(-pw/2,ph,pw,ph,'xMidYMin')}${cut(pw/2,ph,pw,ph,'xMidYMax')}<path d="M0 0H${pw}M0 ${ph}H${pw}M0 0V${ph}M${pw/2} ${ph}V${2*ph}" stroke="#00000033" stroke-width="1" fill="none"/></pattern></defs>`;fmFill=`url(#${id})`}
+   else if(fm.img&&Math.min(pw,ph)>=5){s+=`<defs><pattern id="${id}" width="${pw}" height="${ph}" patternUnits="userSpaceOnUse" x="${v.ox}" y="${v.oy}"><rect width="${pw}" height="${ph}" fill="${fm.color}"/>${cut(0,0,pw,ph)}<path d="M0 0H${pw}M0 0V${ph}" stroke="${line}" stroke-width="1.2" fill="none"/></pattern></defs>`;fmFill=`url(#${id})`}
    else if(fm.kind==='plank'){s+=`<defs><pattern id="${id}" width="${pw}" height="${2*ph}" patternUnits="userSpaceOnUse" x="${v.ox}" y="${v.oy}"><rect width="${pw}" height="${2*ph}" fill="${fm.color}"/><rect y="${ph}" width="${pw}" height="${ph}" fill="#0000000d"/><path d="M0 0H${pw}M0 ${ph}H${pw}M0 0V${ph}M${pw/2} ${ph}V${2*ph}" stroke="${line}" stroke-width="1" fill="none"/></pattern></defs>`;fmFill=`url(#${id})`}
    else{s+=`<defs><pattern id="${id}" width="${pw}" height="${ph}" patternUnits="userSpaceOnUse" x="${v.ox}" y="${v.oy}"><rect width="${pw}" height="${ph}" fill="${fm.color}"/><path d="M0 0H${pw}M0 0V${ph}" stroke="${line}" stroke-width="1.2" fill="none"/></pattern></defs>`;fmFill=`url(#${id})`}}
   if(o.grid!==false)s+=grid(v,W,H);

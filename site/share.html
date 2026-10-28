@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Смета по ссылке — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610290400"><link rel="stylesheet" href="app.css?v=202610290400"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610290400"></head><body><div id="chrome"></div>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Смета по ссылке — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610290600"><link rel="stylesheet" href="app.css?v=202610290600"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610290600"></head><body><div id="chrome"></div>
 <div class="wrap" id="app"></div>
 <div class="modal-bg" id="mCh" onclick="if(event.target===this)this.classList.remove('show')"><form class="modal" onsubmit="event.preventDefault();askChanges()">
  <button type="button" class="x" onclick="$('#mCh').classList.remove('show')">×</button>
@@ -7,7 +7,7 @@
  <label class="fld">Комментарий<textarea id="cm" rows="4" required placeholder="Напишите, что поменять"></textarea></label>
  <button class="btn wide mt">Отправить</button>
 </form></div>
-<script src="oma-catalog.js?v=202610290400"></script><script src="oma-menu.js?v=202610290400"></script><script src="oma-social.js?v=202610290400"></script><script src="data.js?v=202610290400"></script><script src="geom.js?v=202610290400"></script><script src="calc.js?v=202610290400"></script><script src="core.js?v=202610290400"></script><script src="plan.js?v=202610290400"></script><script src="omik.js?v=202610290400"></script><script>
+<script src="oma-catalog.js?v=202610290600"></script><script src="oma-menu.js?v=202610290600"></script><script src="oma-social.js?v=202610290600"></script><script src="data.js?v=202610290600"></script><script src="geom.js?v=202610290600"></script><script src="calc.js?v=202610290600"></script><script src="oma-crops.js?v=202610290600"></script><script src="core.js?v=202610290600"></script><script src="plan.js?v=202610290600"></script><script src="omik.js?v=202610290600"></script><script>
 const snap=readShare();
 chrome('share',{noCtx:true});
 // В этом браузере проект может уже существовать (демо: автор и получатель на одном устройстве)
