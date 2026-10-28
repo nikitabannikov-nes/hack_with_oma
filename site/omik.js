@@ -362,7 +362,7 @@ const Omik=(()=>{
   if(p&&!asked){setDoer(p,'self')}
   if(p&&!rent.length)return instrReply(false,'Для ваших работ особый инструмент не нужен.');
   const R=p?rentalState(p):null,sum=p?rentalSum(p):null;
-  const list=rent.map(r=>`<li>${r.icon} <b>${esc(r.name)}</b> — ${byn(r.day)}/сут.${R?.items[r.id]?`, ${R.items[r.id]} сут.`:r.opt?' — по желанию':''}<br><span class="note">${esc(r.why)}</span></li>`).join('');
+  const list=rent.map(r=>`<li style="display:flex;gap:8px;align-items:center"><img src="${r.img}" alt="" loading="lazy" style="width:44px;height:44px;object-fit:contain;flex:none;background:#fff;border-radius:6px"><span><b>${esc(r.name)}</b> — ${byn(r.day)}/сут.${R?.items[r.id]?`, ${R.items[r.id]} сут.`:r.opt?' — по желанию':''}<br><span class="note">${esc(r.why)}</span></span></li>`).join('');
   const h=`${asked?'':'Хорошо, делаем сами! '}Чтобы не покупать инструмент на пару дней, возьмите его в <b>прокат ОМА</b>${p?' — подобрал под ваши работы':''}:<ul class="plist">${list}</ul>${sum&&sum.sum?`Прокат ≈ <b>${byn(sum.sum)}</b>, залог ${byn(sum.dep)} вернём при сдаче.`:''}<p class="note" style="margin-top:6px">Цены проката демонстрационные.</p>`;
   return[B(h,{opts:[p?{l:'🔧 Забронировать прокат',a:'go',arg:`smeta.html?project=${p?.id}&doer=self#doer`,pri:true}:{l:'🔧 Посчитать прокат по проекту',a:'say',arg:'Посчитай ремонт'},{l:'У меня есть инструмент',a:'say',arg:'Инструмент есть, прокат не нужен'},{l:'👷 Всё-таки мастер',a:'say',arg:'Нужен мастер'}].filter(Boolean)})];
  }

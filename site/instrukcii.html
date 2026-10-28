@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Как сделать самому — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610291700"><link rel="stylesheet" href="app.css?v=202610291700"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610291700">
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Как сделать самому — ОМА Проект</title><link rel="stylesheet" href="style.css?v=202610291900"><link rel="stylesheet" href="app.css?v=202610291900"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610291900">
 <style>
 .ins{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start;margin-bottom:30px}
 .ins .card{padding:20px 22px;margin-bottom:14px}
@@ -10,7 +10,7 @@
 .mats{display:grid;grid-template-columns:1fr auto;gap:6px 14px;font-size:14px}.mats b{white-space:nowrap}
 .tools{display:grid;gap:8px}
 .itl{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:14px}
-.itl i{font-style:normal;font-size:20px;width:32px;text-align:center}.itl div{flex:1;min-width:0}.itl small{display:block;color:var(--mute);font-size:12px}
+.itl i{font-style:normal;font-size:20px;width:48px;text-align:center}.itl img{width:48px;height:48px;object-fit:contain;flex:none}.itl div{flex:1;min-width:0}.itl small{display:block;color:var(--mute);font-size:12px}
 .itl .tag{white-space:nowrap}
 .steps{counter-reset:s;list-style:none;padding:0;margin:0}
 .steps li{counter-increment:s;position:relative;padding:0 0 16px 46px;line-height:1.5}
@@ -24,7 +24,7 @@
 </style></head>
 <body><div id="chrome"></div>
 <div class="wrap" id="app"></div>
-<script src="oma-catalog.js?v=202610291700"></script><script src="oma-menu.js?v=202610291700"></script><script src="oma-social.js?v=202610291700"></script><script src="oma-crops.js?v=202610291700"></script><script src="data.js?v=202610291700"></script><script src="geom.js?v=202610291700"></script><script src="calc.js?v=202610291700"></script><script src="core.js?v=202610291700"></script><script src="plan.js?v=202610291700"></script><script src="omik.js?v=202610291700"></script>
+<script src="oma-catalog.js?v=202610291900"></script><script src="oma-menu.js?v=202610291900"></script><script src="oma-social.js?v=202610291900"></script><script src="oma-crops.js?v=202610291900"></script><script src="data.js?v=202610291900"></script><script src="geom.js?v=202610291900"></script><script src="calc.js?v=202610291900"></script><script src="core.js?v=202610291900"></script><script src="plan.js?v=202610291900"></script><script src="omik.js?v=202610291900"></script>
 <script>
 const p=qp('project')?getProject(qp('project')):activeProject();
 if(p)setActive(p);
@@ -89,7 +89,7 @@ function render(){
   <div class="card"><h2>${W.icon} ${W.name}</h2><div class="meta"><span>⏱ ${g.time}</span><span>🎯 ${g.level}</span></div></div>
   ${mats.length?`<div class="card"><h3>Материалы по смете</h3><div class="mats">${mats.map(m=>`<a href="product.html?id=${m.pr.id}${p?'&project='+p.id:''}">${esc(m.pr.name)}</a><b>${m.qty} ${m.unit}</b>`).join('')}</div></div>`:''}
   <div class="card"><h3>Инструмент</h3><div class="tools">
-   ${rent.map(r=>{const d=R?.items[r.id];return`<div class="itl"><i>${r.icon}</i><div><b>${esc(r.name)}</b><small>${esc(r.why)}</small></div><span class="tag ${booked&&d?'gr':''}">${booked&&d?`в прокате, ${d} сут.`:`прокат ${byn(r.day)}/сут.`}</span></div>`}).join('')}
+   ${rent.map(r=>{const d=R?.items[r.id];return`<div class="itl"><img src="${r.img}" alt="" loading="lazy"><div><b>${esc(r.name)}</b><small>${esc(r.model)} · ${esc(r.why)}</small></div><span class="tag ${booked&&d?'gr':''}">${booked&&d?`в прокате, ${d} сут.`:`прокат ${byn(r.day)}/сут.`}</span></div>`}).join('')}
    ${buy.map(x=>`<div class="itl"><i>🛒</i><div><a href="product.html?id=${x.id}${p?'&project='+p.id:''}"><b>${esc(x.name)}</b></a><small>купить — пригодится и потом</small></div><span class="tag">${byn(x.price)}</span></div>`).join('')}
   </div></div>
   <div class="card"><h3>Шаги</h3><ol class="steps">${g.steps.map(s=>`<li>${s}</li>`).join('')}</ol></div>

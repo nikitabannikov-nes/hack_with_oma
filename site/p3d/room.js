@@ -44,7 +44,10 @@ function material(look, len, hh, u0, y0) {
  */
 // cut — высота среза стен (вид «кукольный домик» для всей квартиры), null — стены в полную высоту
 export function buildApartment(rooms, { cut = null } = {}) {
-  const group = new THREE.Group(), fading = [];   // fading: { meshes, w } — гасим, если камера снаружи стены
+  const group = new THREE.Group(), fading = [];
+  // срез стены — тёмная полоса сверху, как разрез на чертеже: видно, что это не потолок
+  const capMat = new THREE.MeshBasicMaterial({ color: 0x3c4654, transparent: true, opacity: 1 });
+  const capped = (w, p, thick, inward) => { const m = wallMesh(w, { ...p, y0: p.y1, y1: p.y1 + 0.006 }, thick + 0.002, inward, capMat); m.castShadow = false; return m; };   // fading: { meshes, w } — гасим, если камера снаружи стены
   for (const r of rooms) {
     const poly = r.polygon, H = cut ? Math.min(cut, r.height) : r.height;
     // пол по контуру; UV пола — координаты в метрах, так что рисунок плитки в реальном масштабе
@@ -60,7 +63,10 @@ export function buildApartment(rooms, { cut = null } = {}) {
       const ops = r.openings.filter(o => o.wall === i);
       const meshes = [];
       // облицовка: своя отделка внутри комнаты
-      for (const p of pieces(w.len, wh, ops)) meshes.push(wallMesh(w, p, LINING, true, material(look, p.u1 - p.u0, p.y1 - p.y0, p.u0, p.y0)));
+      for (const p of pieces(w.len, wh, ops)) {
+        meshes.push(wallMesh(w, p, LINING, true, material(look, p.u1 - p.u0, p.y1 - p.y0, p.u0, p.y0)));
+        if (cut && p.y1 >= H - 1e-6) meshes.push(capped(w, p, LINING, true));
+      }
       if (wh < H) meshes.push(wallMesh(w, { u0: 0, u1: w.len, y0: wh, y1: H }, LINING, true, material(BARE_WALL, w.len, H - wh, 0, wh)));
       // несущая часть — только у наружных стен (за стеной нет другой комнаты)
       const mid = { x: w.a.x + w.t.x * w.len / 2 - w.n.x * 0.06, z: w.a.z + w.t.z * w.len / 2 - w.n.z * 0.06 };
@@ -75,6 +81,7 @@ export function buildApartment(rooms, { cut = null } = {}) {
           if (p.u0 < 0.001) q.u0 -= extA;
           if (p.u1 > w.len - 0.001) q.u1 += extB;
           meshes.push(wallMesh(w, q, T, false, body));
+          if (cut && q.y1 >= H - 1e-6) meshes.push(capped(w, q, T, false));
         });
       }
       // окна: стекло в проёме

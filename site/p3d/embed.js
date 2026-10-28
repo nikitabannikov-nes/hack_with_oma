@@ -58,7 +58,8 @@ function refit(rooms, items) {
 
 export function mount({ host, tools, panel, project: p, focus = 'all', activeRoom }) {
   const rooms0 = roomsOf(p);
-  const store = createStore({ rooms: rooms0, items: refit(rooms0, p.furniture || []), focus },
+  // стены срезаем, только когда на сцене несколько комнат: иначе мебель кажется выше стен
+  const store = createStore({ rooms: rooms0, items: refit(rooms0, p.furniture || []), focus, lowWalls: focus === 'all' && rooms0.length > 1 },
     items => { p.furniture = items; p.updated = now(); save(); });
   const ui = createScene(host, store, catalog);
   const thumbs = renderThumbs(catalog);
@@ -192,7 +193,7 @@ export function mount({ host, tools, panel, project: p, focus = 'all', activeRoo
   return {
     renderPanel,
     // вся квартира — стены пониже, чтобы видеть комнаты; одна комната — в полную высоту
-    setFocus: f => store.set(s => s.focus === f ? {} : { focus: f, selected: null, lowWalls: f === 'all' }),
+    setFocus: f => store.set(s => s.focus === f ? {} : { focus: f, selected: null, lowWalls: f === 'all' && s.rooms.length > 1 }),
     // план поменяли в 2D — пересобираем комнаты и подтягиваем товары внутрь стен
     refresh() { const rooms = roomsOf(p); store.set(s => ({ rooms, items: refit(rooms, s.items) })); },
     setActive(on) { active = on; if (on) { ui.resize(); renderPanel(); } },

@@ -132,15 +132,15 @@ if(REAL){
  REAL.extra.forEach(x=>{const b=P.find(p=>p.id===x.like)||{};const{like,...o}=x;P.push({...b,...o,spec:{...(b.spec||{}),...(o.spec||{})}})});
 }
 // Прокат инструмента в гипермаркете ОМА: цена за сутки и залог — демо. works — для каких работ проекта предлагать;
-// opt — по желанию: в списке есть, но галочка по умолчанию снята
+// opt — по желанию: в списке есть, но галочка по умолчанию снята; img и model — фото и модель из каталога oma.by (снимок 28.10.2026)
 const RENTAL=[
- {id:'r_cutter',name:'Плиткорез ручной 600 мм',icon:'📐',day:12,deposit:100,works:['tile'],why:'ровный прямой рез плитки до 60 см',replaces:['cutter']},
- {id:'r_mixer',name:'Строительный миксер',icon:'🌀',day:15,deposit:150,works:['tile'],why:'замес клея и затирки без комков'},
- {id:'r_grinder',name:'Болгарка с алмазным диском',icon:'⚙️',day:12,deposit:120,works:['tile'],why:'вырезы под трубы и розетки',opt:true},
- {id:'r_laser',name:'Лазерный уровень',icon:'🔴',day:14,deposit:200,works:['tile','floor'],why:'разметка рядов и проверка ровности пола'},
- {id:'r_jigsaw',name:'Электролобзик',icon:'🪚',day:10,deposit:120,works:['floor'],why:'подрезка доски по длине и вырезы под трубы'},
- {id:'r_sander',name:'Шлифмашина для стен',icon:'🧽',day:18,deposit:200,works:['paint'],why:'шлифовка шпаклёвки перед покраской'},
- {id:'r_sprayer',name:'Краскопульт',icon:'💨',day:20,deposit:250,works:['paint'],why:'быстрая покраска больших площадей',opt:true}
+ {id:'r_cutter',img:'https://www.oma.by/upload/images/resize/products/e7/c6/2418630/350x350_in.jpg',model:'MTX, монорельсовый 600 мм',name:'Плиткорез ручной 600 мм',icon:'📐',day:12,deposit:100,works:['tile'],why:'ровный прямой рез плитки до 60 см',replaces:['cutter']},
+ {id:'r_mixer',img:'https://www.oma.by/upload/images/resize/products/72/52/2191954/350x350_in.png',model:'WERKER EM 950',name:'Строительный миксер',icon:'🌀',day:15,deposit:150,works:['tile'],why:'замес клея и затирки без комков'},
+ {id:'r_grinder',img:'https://www.oma.by/upload/images/resize/products/a3/f2/2335730/350x350_in.jpg',model:'WERKER AG 750',name:'Болгарка с алмазным диском',icon:'⚙️',day:12,deposit:120,works:['tile'],why:'вырезы под трубы и розетки',opt:true},
+ {id:'r_laser',img:'https://www.oma.by/upload/images/resize/products/b7/ca/2340810/350x350_in.jpg',model:'Halk GreenLine 88202',name:'Лазерный уровень',icon:'🔴',day:14,deposit:200,works:['tile','floor'],why:'разметка рядов и проверка ровности пола'},
+ {id:'r_jigsaw',img:'https://www.oma.by/upload/images/resize/products/20/6a/1777770/350x350_in.png',model:'WERKER JS 850',name:'Электролобзик',icon:'🪚',day:10,deposit:120,works:['floor'],why:'подрезка доски по длине и вырезы под трубы'},
+ {id:'r_sander',img:'https://www.oma.by/upload/images/resize/products/5e/46/2383430/350x350_in.jpg',model:'«Жираф» DLT GrandFlex V32',name:'Шлифмашина для стен',icon:'🧽',day:18,deposit:200,works:['paint'],why:'шлифовка шпаклёвки перед покраской'},
+ {id:'r_sprayer',img:'https://www.oma.by/upload/images/resize/products/fe/97/1703575/350x350_in.jpg',model:'Вихрь ЭКП-700В',name:'Краскопульт',icon:'💨',day:20,deposit:250,works:['paint'],why:'быстрая покраска больших площадей',opt:true}
 ];
 const WORKS={tile:{name:'Укладка плитки',icon:'🧱'},floor:{name:'Укладка ламината',icon:'🪵'},paint:{name:'Покраска стен и потолка',icon:'🎨'}};
 const DATA={CATS,ROLES,PRODUCTS:P,KITS,SERVICES,SVC_CATS,MASTERS,RENTAL,WORKS};

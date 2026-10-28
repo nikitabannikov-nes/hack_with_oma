@@ -1,11 +1,11 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Гипермаркет ОМА — ремонт с Омиком</title><link rel="stylesheet" href="style.css?v=202610291700"><link rel="stylesheet" href="app.css?v=202610291700"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610291700"></head><body><div id="chrome"></div>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Гипермаркет ОМА — ремонт с Омиком</title><link rel="stylesheet" href="style.css?v=202610291900"><link rel="stylesheet" href="app.css?v=202610291900"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="oma-skin.css?v=202610291900"></head><body><div id="chrome"></div>
 <main class="wrap">
  <section class="bb">
   <div id="side"></div>
   <div class="bb-r">
    <div class="slider" id="slider">
     <a class="slide on" href="omik.html"><div class="bnr"><div class="tx"><span class="lbl">Новинка · ИИ-помощник</span><h2>Ремонт<br>с Омиком</h2><p>Скиньте план или фото комнаты — Омик посчитает ламинат, плитку, клей и мешки цемента и соберёт корзину.</p><span class="btn o">Спросить Омика</span></div><img class="pers" src="img/omik-hero.png" alt="Омик"></div></a>
-    <a class="slide" href="planner.html?new=1"><div class="bnr calc"><div class="tx"><span class="lbl">2D-калькулятор</span><h2>Посчитаем<br>до упаковки</h2><p>Г- и П-образные комнаты, ниши, проёмы. Количество — по реальной площади и упаковкам товаров ОМА.</p><span class="btn o">Построить план</span></div><div class="plan" id="bnrPlan"></div></div></a>
+    <a class="slide" href="planner.html?new=1"><div class="bnr calc"><div class="tx"><span class="lbl">Калькулятор ремонта 2D и 3D</span><h2>Посчитаем<br>до упаковки</h2><p>Г- и П-образные комнаты, ниши, проёмы. Количество — по реальной площади и упаковкам товаров ОМА.</p><span class="btn o">Построить план</span></div><div class="plan" id="bnrPlan"></div></div></a>
     <a class="slide" href="https://www.oma.by/news/khalva-12-mesyatsev-na-pokupki-ot-100r-c-23-10-po-01-11/" target="_blank" rel="noopener"><img class="full" src="https://www.oma.by/upload/images/resize/banners/a9/a8/2468264/1365x575_cut_q90.jpg" alt="Халва 12 месяцев"></a>
     <button class="arr l" onclick="event.preventDefault();slide(-1)" aria-label="Назад">‹</button><button class="arr r" onclick="event.preventDefault();slide(1)" aria-label="Вперёд">›</button>
     <div class="dots" id="dots"></div>
@@ -35,7 +35,7 @@
 
  <div class="tools4">
   <a class="tl" href="omik.html"><span class="ic"><img src="img/omik-avatar.png" alt=""></span><b>Омик — AI-прораб</b><span>Уточнит задачу, посчитает материалы до упаковки и соберёт корзину.</span><em>Написать Омику →</em></a>
-  <a class="tl" href="planner.html?new=1"><span class="ic">📐</span><b>2D-калькулятор</b><span>Любая форма комнаты или весь дом по фото планировки.</span><em>Построить план →</em></a>
+  <a class="tl" href="planner.html?new=1"><span class="ic">📐</span><b>Калькулятор ремонта</b><span>План в 2D, квартира с мебелью в 3D. Любая форма комнаты или весь дом по фото.</span><em>Построить план →</em></a>
   <a class="tl" href="catalog.html"><span class="ic">📋</span><b>Материалы и смета</b><span>Три комплектации, аналоги, сравнение — по товарам ОМА.</span><em>Открыть каталог →</em></a>
  </div>
 
@@ -50,7 +50,7 @@
 
  <section class="promo6" id="promo6"></section>
 </main>
-<script src="oma-catalog.js?v=202610291700"></script><script src="oma-menu.js?v=202610291700"></script><script src="oma-social.js?v=202610291700"></script><script src="data.js?v=202610291700"></script><script src="geom.js?v=202610291700"></script><script src="calc.js?v=202610291700"></script><script src="oma-crops.js?v=202610291700"></script><script src="core.js?v=202610291700"></script><script src="plan.js?v=202610291700"></script><script src="omik.js?v=202610291700"></script><script>
+<script src="oma-catalog.js?v=202610291900"></script><script src="oma-menu.js?v=202610291900"></script><script src="oma-social.js?v=202610291900"></script><script src="data.js?v=202610291900"></script><script src="geom.js?v=202610291900"></script><script src="calc.js?v=202610291900"></script><script src="oma-crops.js?v=202610291900"></script><script src="core.js?v=202610291900"></script><script src="plan.js?v=202610291900"></script><script src="omik.js?v=202610291900"></script><script>
 chrome('index',{noCtx:true});
 $('#side').outerHTML=sideMenu();
 // слайдер баннеров
